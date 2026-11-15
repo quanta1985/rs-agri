@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.u16z binary
+*.png binary
+*.webp binary

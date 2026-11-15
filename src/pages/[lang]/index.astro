@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { CHAPTERS, PARTS } from '../../data/chapters';
+import hero from '../../../public/img/hero.json';
+import { LANGS, t, url, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+const vi = lang === 'vi';
+const entries = (await getCollection('chapters')).filter((e) => e.id.startsWith(`${lang}/`));
+const byId = new Map(entries.map((e) => [e.id, e]));
+const nFigures = entries.reduce((s, e) => s + (e.body?.match(/<Figure\b/g)?.length ?? 0), 0);
+const quizzes = Object.values(import.meta.glob<{ default: unknown[] }>('../../data/quiz/*.json', { eager: true }));
+const nQuiz = quizzes.reduce((s, q) => s + q.default.length, 0);
+const first = CHAPTERS.find((c) => byId.has(`${lang}/${c.slug}`));
+const pad = (n: number) => String(n).padStart(2, '0');
+const stats: [string, string][] = [
+  [String(CHAPTERS.length), vi ? 'chương' : 'chapters'],
+  [String(nFigures), vi ? 'mô phỏng & bản đồ' : 'simulations & maps'],
+  [String(nQuiz), vi ? 'câu hỏi ôn tập' : 'review questions'],
+];
+---
+<Base lang={lang} title={t(lang, 'siteTitle')}>
+  <main id="main" class="home">
+    <section class="home-hero">
+      <div>
+        <p class="mono-label">{vi ? 'Sổ tay tương tác · Song ngữ Việt – Anh' : 'Interactive handbook · Vietnamese – English'}</p>
+        <h1>{vi ? <>Viễn thám nông nghiệp <>Viễn thám cho nông nghiệp<br />& môi trường hai châu thổ</> : <>Remote sensing for agriculture<br />& environment in two deltas</> môi trường hai châu thổ</> : <>Remote sensing for agriculture <>Viễn thám cho nông nghiệp<br />& môi trường hai châu thổ</> : <>Remote sensing for agriculture<br />& environment in two deltas</> environment in two deltas</>}</h1>
+        <p class="lead">{t(lang, 'tagline')}</p>
+        <div class="cta">
+          {first && <a class="btn primary" href={url(`${lang}/${first.slug}/`)}>{vi ? 'Bắt đầu đọc' : 'Start reading'}</a>}
+          <a class="btn" href={url(`${lang}/labs/`)}>{vi ? 'Bài thực hành' : 'Labs'}</a>
+          <a class="btn" href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a>
+        </div>
+        <dl class="home-stats">{stats.map(([v, k]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      </div>
+      <figure class="hero-shot">
+        <img src={url('img/hero-mekong.webp')} width={hero.mekong.size[0]} height={hero.mekong.size[1]} alt={vi ? 'Ảnh tổng hợp Sentinel-2 mùa khô 2024 Đồng bằng sông Cửu Long, tổ hợp SWIR–NIR–Đỏ' : 'Sentinel-2 dry-season 2024 composite of the Mekong Delta, SWIR–NIR–Red'} fetchpriority="high" />
+        <img class="inset" src={url('img/hero-red.webp')} width={hero.red.size[0]} height={hero.red.size[1]} alt={vi ? 'Ảnh tổng hợp Sentinel-2 cuối năm 2023 Đồng bằng sông Hồng, cùng tổ hợp' : 'Sentinel-2 late-2023 composite of the Red River Delta, same bands'} loading="lazy" />
+        <div class="hero-hud stat-panel">
+          <p class="stat-title">Sentinel-2 · {vi ? 'trung vị' : 'median'}</p>
+          <dl>
+            <div><dt>{vi ? 'ĐBSCL' : 'Mekong'}</dt><dd>{hero.mekong.scenes} {vi ? 'cảnh' : 'scenes'}</dd></div>
+            <div><dt>{vi ? 'ĐBSH' : 'Red River'}</dt><dd>{hero.red.scenes} {vi ? 'cảnh' : 'scenes'}</dd></div>
+            <div><dt>{vi ? 'Tổ hợp' : 'Bands'}</dt><dd class="tone-accent">B11 · B8 · B4</dd></div>
+          </dl>
+        </div>
+        <figcaption>{vi ? 'ĐBSCL (1–3/2024) và ĐBSH (10–12/2023, ảnh nhỏ): cây trồng màu xanh lục, nước xanh thẫm, đất trống và đô thị màu hồng tím. Đã lọc mây bằng Cloud Score+.' : 'Mekong Delta (Jan–Mar 2024) and Red River Delta (Oct–Dec 2023, inset): crops green, water dark blue, bare soil and built-up pink-purple. Clouds removed with Cloud Score+.'}</figcaption>
+      </figure>
+    </section>
+
+    {PARTS.map(({ p, title, desc }) => (
+      <section class="part" aria-labelledby={`part-${p}`}>
+        <div class="part-head"><h2 id={`part-${p}`}>{title[lang]}</h2><p>{desc[lang]}</p></div>
+        <div class="cards">
+          {CHAPTERS.filter((c) => c.part === p).map((c) => {
+            const e = byId.get(`${lang}/${c.slug}`);
+            return e ? (
+              <a class="card" href={url(`${lang}/${c.slug}/`)}>
+                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)}</span><strong>{c.title[lang]}</strong><p>{e.data.summary}</p>
+              </a>
+            ) : (
+              <div class="card planned" aria-disabled="true">
+                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)} · {t(lang, 'planned')}</span><strong>{c.title[lang]}</strong>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </main>
+</Base>

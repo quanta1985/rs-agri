@@ -1,0 +1,130 @@
+---
+import '../styles/global.css';
+import AppBar from '../components/AppBar.astro';
+import { t, url, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; title: string; description?: string; showDepth?: boolean; current?: string }
+const { lang, title, description = t(lang, 'tagline'), showDepth = false, current } = Astro.props;
+const other: Lang = lang === 'vi' ? 'en' : 'vi';
+const otherAbs = new URL(Astro.url.pathname.replace(`/${lang}/`, `/${other}/`), Astro.site).href;
+const fullTitle = title === t(lang, 'siteTitle') ? title : `${title} · ${t(lang, 'siteTitle')}`;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111a2d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="alternate" hreflang={other} href={otherAbs} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+    <script is:inline>
+      // Apply saved preferences before first paint (no flash).
+      try {
+        const d = document.documentElement;
+        const theme = localStorage.getItem('rs-theme');
+        if (theme) d.dataset.theme = theme;
+        d.dataset.depth = localStorage.getItem('rs-depth') || 'basic';
+      } catch { document.documentElement.dataset.depth = 'basic'; }
+    </script>
+  </head>
+  <body>
+    <a class="sr-only" href="#main">{lang === 'vi' ? 'Bỏ qua tới nội dung' : 'Skip to content'}</a>
+    <AppBar lang={lang} current={current} showDepth={showDepth} />
+    <slot />
+    <footer class="site-footer">
+      <p>© 2026 Trần Anh Quân · <a href="mailto:quantrananh.humg@gmail.com">quantrananh.humg@gmail.com</a> · <a href="http://remosat.usth.edu.vn/~quanta/">{t(lang, 'homepage')}</a></p>
+      <p>{t(lang, 'footer')} · <a href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a></p>
+    </footer>
+    <div class="present-hint" aria-hidden="true">{t(lang, 'presentHint')}</div>
+    <script>
+      const root = document.documentElement;
+      const save = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode: keep in-memory only */ } };
+
+      // theme: cycle explicit light/dark over the OS default
+      document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => {
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        save('rs-theme', root.dataset.theme);
+      }));
+
+      // ribbon: tabs switch panels; while scrolled the panel folds away and a tab click reopens it as an overlay
+      const ribbon = document.querySelector<HTMLElement>('[data-ribbon]');
+      const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-rb-tabs] [role="tab"]')];
+      const select = (tab: HTMLButtonElement, focus = false) => {
+        tabs.forEach((x) => {
+          const on = x === tab;
+          x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1;
+          document.getElementById(x.getAttribute('aria-controls')!)!.hidden = !on;
+        });
+        if (focus) tab.focus();
+      };
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => {
+          const wasOpen = ribbon?.classList.contains('open') && tab.getAttribute('aria-selected') === 'true';
+          select(tab);
+          if ('scrolled' in root.dataset) ribbon?.classList.toggle('open', !wasOpen);
+        });
+        tab.addEventListener('keydown', (e) => {
+          const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (d) { e.preventDefault(); select(tabs[(i + d + tabs.length) % tabs.length], true); }
+        });
+      });
+      const onScroll = () => {
+        const s = window.scrollY > (ribbon?.offsetHeight ?? 90) - 4; // ribbon has scrolled under the app bar
+        if (s === 'scrolled' in root.dataset) return;
+        if (s) root.dataset.scrolled = ''; else { delete root.dataset.scrolled; ribbon?.classList.remove('open'); }
+      };
+      addEventListener('scroll', onScroll, { passive: true }); onScroll();
+      document.addEventListener('click', (e) => {
+        if (ribbon?.classList.contains('open') && !(e.target as HTMLElement).closest('.appbar, .ribbon')) ribbon.classList.remove('open');
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') ribbon?.classList.remove('open'); });
+
+      // table of contents: highlight the section being read
+      const tocLinks = new Map([...document.querySelectorAll<HTMLAnchorElement>('.toc a')].map((a) => [decodeURIComponent(a.hash.slice(1)), a]));
+      if (tocLinks.size) {
+        const io = new IntersectionObserver((es) => es.forEach((e) => {
+          if (!e.isIntersecting) return;
+          tocLinks.forEach((a) => a.classList.remove('active'));
+          tocLinks.get(e.target.id)?.classList.add('active');
+        }), { rootMargin: '-80px 0px -70% 0px' });
+        tocLinks.forEach((_, id) => { const h = document.getElementById(id); if (h) io.observe(h); });
+      }
+
+      // depth level
+      const depthBtns = document.querySelectorAll<HTMLButtonElement>('[data-depth-group] button');
+      const syncDepth = () => depthBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.depth === root.dataset.depth)));
+      depthBtns.forEach((b) => b.addEventListener('click', () => { root.dataset.depth = b.dataset.depth!; save('rs-depth', b.dataset.depth!); syncDepth(); }));
+      syncDepth();
+
+      // presentation mode: bigger type, no side panels, arrow keys jump between h2 sections
+      const presentBtn = document.querySelector<HTMLButtonElement>('[data-present-toggle]');
+      const setPresent = (on: boolean) => {
+        if (on) root.dataset.present = ''; else delete root.dataset.present;
+        presentBtn?.setAttribute('aria-pressed', String(on));
+      };
+      presentBtn?.addEventListener('click', () => setPresent(!('present' in root.dataset)));
+      document.addEventListener('keydown', (e) => {
+        if (!('present' in root.dataset)) return;
+        if (e.key === 'Escape') { setPresent(false); return; }
+        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        const el = e.target as HTMLElement;
+        if (el.closest('input, select, textarea, canvas, [role="application"], [role="tab"]')) return;
+        const next = ['ArrowRight', 'PageDown'].includes(e.key);
+        const prev = ['ArrowLeft', 'PageUp'].includes(e.key);
+        if (!next && !prev) return;
+        e.preventDefault();
+        const heads = [...document.querySelectorAll<HTMLElement>('.prose > h1, .prose > h2')];
+        const y = window.scrollY + 80;
+        const target = next ? heads.find((h) => h.offsetTop > y + 4) : [...heads].reverse().find((h) => h.offsetTop < y - 4);
+        target?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-*/
+.astro/
+__pycache__/
+.ipynb_checkpoints/
+scripts/data/*.npy
+# source book (FAO 2017, not redistributable as-is): kept locally for writing only
+ca6394en.md
+ca6394en.pdf
+ca6394en_images/
+convert_pdf.py
