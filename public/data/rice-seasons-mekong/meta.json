@@ -1,0 +1,94 @@
+{
+ "id": "rice-seasons-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Số vụ cây trồng mỗi năm (chủ yếu lúa)",
+  "en": "Crop seasons per year (mostly rice)"
+ },
+ "units": {
+  "vi": "vụ",
+  "en": "seasons"
+ },
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 0,
+   "color": "#bbbbbb",
+   "label": {
+    "vi": "Không phát hiện vụ",
+    "en": "No season detected"
+   }
+  },
+  {
+   "v": 1,
+   "color": "#e69f00",
+   "label": {
+    "vi": "1 vụ",
+    "en": "1 season"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#009e73",
+   "label": {
+    "vi": "2 vụ",
+    "en": "2 seasons"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#0072b2",
+   "label": {
+    "vi": "3 vụ trở lên",
+    "en": "3 or more seasons"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2016",
+  "2024"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 298539,
+   "mean": 1.7845,
+   "p2": 0.0,
+   "p50": 2.0,
+   "p98": 3.0,
+   "min": 0.0,
+   "max": 3.0
+  },
+  {
+   "valid": 298573,
+   "mean": 1.9941,
+   "p2": 0.0,
+   "p50": 2.0,
+   "p98": 3.0,
+   "min": 0.0,
+   "max": 3.0
+  }
+ ],
+ "provenance": {
+  "source": "MODIS/061/MOD13Q1 + MODIS/061/MYD13Q1 band EVI x 0.0001, SummaryQA <= 1; ESA/WorldCover/v200 class 40",
+  "processing": "8-day EVI series, gap-filled, Savitzky-Golay 5/2, peaks >= 0.35 EVI rising >= 0.15 above the neighbouring troughs, counted per calendar year; cropland >= 50 % of the cell; >= 40 % good observations in the year",
+  "attribution": "MODIS MOD13Q1/MYD13Q1 v061, NASA LP DAAC; ESA WorldCover 10 m 2021 v200",
+  "exported": "2026-11-16T02:46:42+00:00",
+  "script": "scripts/data/export_rice.py"
+ }
+}

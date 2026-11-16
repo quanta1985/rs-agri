@@ -1,0 +1,54 @@
+{
+ "id": "rice-dvh-namdinh",
+ "region": "namdinh",
+ "title": {
+  "vi": "Biên độ VH trong vụ (Sentinel-1)",
+  "en": "Seasonal VH range (Sentinel-1)"
+ },
+ "units": {
+  "vi": "dB",
+  "en": "dB"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  15
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11841161.995,
+  2304575.371
+ ],
+ "res": 10.65675,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2024-01/2024-07"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1048576,
+   "mean": 7.1052,
+   "p2": 2.3,
+   "p50": 6.7,
+   "p98": 14.7,
+   "min": 0.6,
+   "max": 25.1
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VH, relative orbit 91, 14 acquisitions 2024-01-15 .. 2024-07-01 (Xuân 2024 / spring 2024)",
+  "processing": "3x3 focal mean in linear power, p90 - p10 over the season, in dB",
+  "attribution": "Contains modified Copernicus Sentinel data 2023-2024",
+  "exported": "2026-11-16T01:35:43+00:00",
+  "script": "scripts/data/export_rice_site.py"
+ }
+}

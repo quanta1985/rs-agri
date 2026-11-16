@@ -1,0 +1,54 @@
+{
+ "id": "sal-si-bentre-2024",
+ "region": "bentre",
+ "title": {
+  "vi": "Chỉ số mặn SI = √(B·R), mùa khô 2024",
+  "en": "Salinity index SI = √(B·R), dry season 2024"
+ },
+ "units": {
+  "vi": "phản xạ",
+  "en": "reflectance"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  0.15
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11850322.312,
+  1135405.17
+ ],
+ "res": 10.157408,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.001,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2024-02/04"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1048576,
+   "mean": 0.055,
+   "p2": 0.025,
+   "p50": 0.043,
+   "p98": 0.163,
+   "min": 0.016,
+   "max": 0.254
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S2_SR_HARMONIZED, Cloud Score+ cs_cdf >= 0.6, median of Feb-Apr 2024",
+  "attribution": "Contains modified Copernicus Sentinel data 2024",
+  "processing": "SI = sqrt(B2 x B4) on surface reflectance (Khan et al. 2001)",
+  "exported": "2026-11-16T01:32:49+00:00",
+  "script": "scripts/data/export_salinity.py"
+ }
+}

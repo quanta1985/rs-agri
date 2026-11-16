@@ -73,7 +73,7 @@ export default function ThresholdLab({ lang, label, layer: id, below = true, ran
     );
   }
 
-  const digits = digitsFor(step);
+  const digits = Math.max(digitsFor(step), (String(step).split('.')[1] ?? '').length); // 0.25 -> 2, not 1
   const units = meta.units?.[lang] ?? '';
   const n = (v: number, d = digits) => fmtNum(lang, v, d);
   const hv = (() => {

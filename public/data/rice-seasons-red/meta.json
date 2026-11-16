@@ -1,0 +1,94 @@
+{
+ "id": "rice-seasons-red",
+ "region": "red",
+ "title": {
+  "vi": "Số vụ lúa mỗi năm (radar Sentinel-1)",
+  "en": "Rice seasons per year (Sentinel-1 radar)"
+ },
+ "units": {
+  "vi": "vụ",
+  "en": "seasons"
+ },
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 0,
+   "color": "#bbbbbb",
+   "label": {
+    "vi": "Không thấy vụ lúa",
+    "en": "No rice season detected"
+   }
+  },
+  {
+   "v": 1,
+   "color": "#e69f00",
+   "label": {
+    "vi": "1 vụ lúa",
+    "en": "1 rice season"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#009e73",
+   "label": {
+    "vi": "2 vụ lúa",
+    "en": "2 rice seasons"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#0072b2",
+   "label": {
+    "vi": "3 vụ lúa trở lên",
+    "en": "3 or more rice seasons"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2016",
+  "2024"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 105114,
+   "mean": 1.4611,
+   "p2": 0.0,
+   "p50": 2.0,
+   "p98": 3.0,
+   "min": 0.0,
+   "max": 3.0
+  },
+  {
+   "valid": 105114,
+   "mean": 1.2141,
+   "p2": 0.0,
+   "p50": 1.0,
+   "p98": 2.0,
+   "min": 0.0,
+   "max": 3.0
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VH, relative orbit 91 (12-day repeat); ESA/WorldCover/v200 class 40",
+  "processing": "3-date mean of the VH series; a season = a VH minimum (lowest within +-24 days) <= -17.0 dB followed by a rise >= 2.5 dB within 96 days (flooded transplanting -> canopy), counted per calendar year; cropland >= 50 % of the cell; >= 80 % of the dates with data",
+  "attribution": "Contains modified Copernicus Sentinel data; ESA WorldCover 10 m 2021 v200",
+  "exported": "2026-11-16T02:46:32+00:00",
+  "script": "scripts/data/export_rice.py"
+ }
+}

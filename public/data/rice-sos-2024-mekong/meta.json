@@ -1,0 +1,74 @@
+{
+ "id": "rice-sos-2024-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Ngày bắt đầu vụ Đông Xuân 2023–24 (EVI)",
+  "en": "Start of the 2023-24 winter-spring season (EVI)"
+ },
+ "units": {
+  "vi": "ngày so với 1/1/2024",
+  "en": "days from 1 Jan 2024"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  -80,
+  20
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": -128,
+ "nodata": 255,
+ "times": [
+  "0%",
+  "20%",
+  "50%"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 243012,
+   "mean": -42.3585,
+   "p2": -101.0,
+   "p50": -45.0,
+   "p98": 24.0,
+   "min": -109.0,
+   "max": 56.0
+  },
+  {
+   "valid": 243012,
+   "mean": -21.3634,
+   "p2": -73.0,
+   "p50": -23.0,
+   "p98": 31.0,
+   "min": -105.0,
+   "max": 64.0
+  },
+  {
+   "valid": 243012,
+   "mean": -9.1307,
+   "p2": -61.0,
+   "p50": -9.0,
+   "p98": 42.0,
+   "min": -99.0,
+   "max": 67.0
+  }
+ ],
+ "provenance": {
+  "source": "MODIS/061/MOD13Q1 + MODIS/061/MYD13Q1 band EVI x 0.0001, SummaryQA <= 1; ESA/WorldCover/v200 class 40",
+  "processing": "highest EVI peak in the winter-spring window, trough = minimum of the 12 samples before it, SOS = first crossing of trough + f x amplitude (f = 0, 20, 50 %)",
+  "attribution": "MODIS MOD13Q1/MYD13Q1 v061, NASA LP DAAC; ESA WorldCover 10 m 2021 v200",
+  "exported": "2026-11-16T02:46:48+00:00",
+  "script": "scripts/data/export_rice.py"
+ }
+}

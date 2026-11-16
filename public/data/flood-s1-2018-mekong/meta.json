@@ -1,0 +1,104 @@
+{
+ "id": "flood-s1-2018-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Nước mặt theo tháng 2018 (radar)",
+  "en": "Monthly surface water 2018 (radar)"
+ },
+ "units": {
+  "vi": "% diện tích ô",
+  "en": "% of cell"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2018-07",
+  "2018-08",
+  "2018-09",
+  "2018-10",
+  "2018-11",
+  "2018-12"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 634830,
+   "mean": 1.8267,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 32.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 634830,
+   "mean": 5.2977,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 99.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 634830,
+   "mean": 8.8804,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 634830,
+   "mean": 14.3057,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 634830,
+   "mean": 9.7389,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 634830,
+   "mean": 2.8699,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 70.5,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VV, all orbits; USGS/SRTMGL1_003 slope",
+  "processing": "monthly median VV < -18.0 dB and slope < 5 deg at ~100 m, share of water in each ~250 m cell; flooded paddies count as water",
+  "attribution": "Contains modified Copernicus Sentinel data 2018",
+  "exported": "2026-11-16T02:31:06+00:00",
+  "script": "scripts/data/export_flood.py"
+ }
+}

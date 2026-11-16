@@ -1,6 +1,6 @@
 """Surface-water occurrence 1984-2021 (JRC Global Surface Water v1.4) for both deltas at ~250 m (mean of 30 m pixels).
 
-    python -I scripts/data/export_flood_gsw.py
+    python scripts/data/export_flood_gsw.py
 """
 import ee
 

@@ -130,10 +130,13 @@ export const colorize = (m: LayerMeta, raw: Raw, o: ColorOpts = {}): Uint8Clampe
   return out;
 };
 
+/** Column where a swipe compare switches from the left image to the right one (shared by image and HUD). */
+export const swipeCut = (width: number, split: number): number => Math.round(Math.min(1, Math.max(0, split)) * width);
+
 /** Swipe compare: columns left of `split` (0..1 of the width) from a, the rest from b. Both RGBA, same size. */
 export const swipe = (a: Uint8ClampedArray, b: Uint8ClampedArray, width: number, split: number): Uint8ClampedArray => {
   const out = new Uint8ClampedArray(b);
-  const cut = Math.round(Math.min(1, Math.max(0, split)) * width);
+  const cut = swipeCut(width, split);
   const rows = a.length / 4 / width;
   for (let r = 0; r < rows; r++) out.set(a.subarray(r * width * 4, (r * width + cut) * 4), r * width * 4);
   return out;

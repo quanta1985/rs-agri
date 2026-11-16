@@ -1,0 +1,54 @@
+{
+ "id": "flood-gswseason-red",
+ "region": "red",
+ "title": {
+  "vi": "Số tháng có nước mặt (2021)",
+  "en": "Months with surface water (2021)"
+ },
+ "units": {
+  "vi": "tháng",
+  "en": "months"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  12
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 0.05,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2021"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 268871,
+   "mean": 0.8025,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 12.0,
+   "min": 0.0,
+   "max": 12.0
+  }
+ ],
+ "provenance": {
+  "source": "JRC/GSW1_4/GlobalSurfaceWater band seasonality (Landsat, year 2021)",
+  "processing": "no water = 0; mean of the 30 m cells in each ~250 m cell",
+  "attribution": "EC JRC / Google, Pekel et al. (2016) Nature 540",
+  "exported": "2026-11-16T01:30:15+00:00",
+  "script": "scripts/data/export_flood.py"
+ }
+}

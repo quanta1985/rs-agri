@@ -8,19 +8,51 @@ import { LANGS, type Lang } from '../../i18n/ui';
 
 export const getStaticPaths = () => (import.meta.env.DEV ? LANGS.map((lang) => ({ params: { lang } })) : []);
 const lang = Astro.params.lang as Lang;
+const L = (vi: string, en = vi) => ({ vi, en });
 ---
 <Base lang={lang} title="Dev · figures">
   <main id="main" class="prose" style="max-width: 1100px; margin: 0 auto; padding: 24px 16px" data-pagefind-ignore>
     <h1>Dev · figures</h1>
     <Figure title="Hình 0.1 — DeltaMap: tần suất nước & EVI tháng" source="JRC GSW v1.4; MODIS MOD13Q1 v061">
       <DeltaMap client:visible lang={lang} label="DeltaMap demo" compare choices={[
-        { key: 'gsw', label: { vi: 'Tần suất nước', en: 'Water occurrence' }, ids: { mekong: 'flood-gsw-mekong', red: 'flood-gsw-red' }, clearBelow: 1 },
-        { key: 'evi', label: { vi: 'EVI 2024', en: 'EVI 2024' }, ids: { mekong: 'evi-2024-mekong', red: 'evi-2024-red' } },
+        { key: 'gsw', label: L('Tần suất nước', 'Water occurrence'), ids: { mekong: 'flood-gsw-mekong', red: 'flood-gsw-red' }, clearBelow: 1 },
+        { key: 'evi', label: L('EVI 2024'), ids: { mekong: 'evi-2024-mekong', red: 'evi-2024-red' } },
       ]} />
     </Figure>
     <Figure title="Hình 0.2 — ThresholdLab: nước trên ảnh radar An Giang" source="Contains modified Copernicus Sentinel data 2024">
       <ThresholdLab client:visible lang={lang} label="ThresholdLab demo" layer="s1-angiang-2024" time={1} speckle
-        maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-30, 0]} />
+        maskLabel={L('Nước', 'Water')} range={[-30, 0]} />
+    </Figure>
+    <Figure title="Hình 0.3 — Bước 3 · Lúa: số vụ, ngày bắt đầu vụ" source="MODIS MOD13Q1/MYD13Q1; Sentinel-1; ESA WorldCover">
+      <DeltaMap client:visible lang={lang} label="Rice layers" compare choices={[
+        { key: 'seasons', label: L('Số vụ', 'Seasons'), ids: { red: 'rice-seasons-red', mekong: 'rice-seasons-mekong' } },
+        { key: 'sos', label: L('Ngày bắt đầu vụ', 'Start of season'), ids: { red: 'rice-sos-2024-red', mekong: 'rice-sos-2024-mekong' } },
+      ]} />
+    </Figure>
+    <Figure title="Hình 0.4 — Bước 3 · Lũ: tính mùa GSW, S1 theo tháng, Yagi" source="JRC GSW; Contains modified Copernicus Sentinel data">
+      <DeltaMap client:visible lang={lang} label="Flood layers" compare choices={[
+        { key: 'season', label: L('Số tháng có nước', 'Months with water'), ids: { red: 'flood-gswseason-red', mekong: 'flood-gswseason-mekong' }, clearBelow: 0.05 },
+        { key: 's1-2018', label: L('S1 2018'), ids: { mekong: 'flood-s1-2018-mekong' }, clearBelow: 1 },
+        { key: 's1-2024', label: L('S1 2024'), ids: { mekong: 'flood-s1-2024-mekong' }, clearBelow: 1 },
+        { key: 'yagi', label: L('Yagi'), ids: { red: 'flood-yagi-red' }, clearBelow: 1 },
+      ]} />
+    </Figure>
+    <Figure title="Hình 0.5 — Bước 3 · Mặn: dị thường EVI mùa khô" source="MODIS MOD13Q1/MYD13Q1">
+      <DeltaMap client:visible lang={lang} label="Salinity anomaly" choices={[
+        { key: 'anom', label: L('Dị thường EVI', 'EVI anomaly'), ids: { mekong: 'sal-evianom-mekong' } },
+      ]} />
+    </Figure>
+    <Figure title="Hình 0.6 — Bước 3 · Lớp 10 m tại các điểm" source="Contains modified Copernicus Sentinel data; Dynamic World">
+      <DeltaMap client:visible lang={lang} label="Site layers" compare choices={[
+        { key: 'dw', label: L('Dynamic World'), ids: { bentre: 'dw-bentre', camau: 'dw-camau' } },
+        { key: 'ndvi', label: L('NDVI'), ids: { bentre: 'sal-ndvi-bentre-2024' } },
+        { key: 'si', label: L('SI'), ids: { bentre: 'sal-si-bentre-2024' } },
+        { key: 'dvh', label: L('Biên độ VH', 'VH range'), ids: { angiang: 'rice-dvh-angiang', namdinh: 'rice-dvh-namdinh' } },
+      ]} />
+    </Figure>
+    <Figure title="Hình 0.7 — ThresholdLab: MNDWI An Giang 26/10/2024" source="Contains modified Copernicus Sentinel data 2024">
+      <ThresholdLab client:visible lang={lang} label="MNDWI threshold" layer="s2mndwi-angiang-2024" below={false} step={0.02}
+        maskLabel={L('Nước', 'Water')} range={[-0.8, 0.8]} />
     </Figure>
   </main>
 </Base>

@@ -8,7 +8,7 @@ Format (read by src/lib/layer.ts):
   Content-Encoding, and the loader checks the gzip magic bytes anyway.)
 - meta.json also carries per-step statistics in physical units, for prose numbers and default colour ranges.
 
-Used by the scripts in scripts/data/ (run with python -I from the repo root).
+Used by the scripts in scripts/data/ (run them WITHOUT -I, from the repo root, so `import layerkit` works).
 """
 import gzip
 import json
@@ -25,7 +25,7 @@ DATA = ROOT / "public" / "data"
 REGIONS = json.loads((ROOT / "src" / "data" / "regions.json").read_text("utf-8"))["regions"]
 PROJECT = "claudev1-503808"
 R = 6378137.0
-MAX_BYTES = 32 * 2**20  # per computePixels request (EE limit 48 MB)
+MAX_BYTES = 16 * 2**20  # per computePixels request: EE limit 48 MB, and it counts uint8 bands as 2 bytes or more
 MAX_ROWS = 512  # also bounds reduceResolution input per request ("Reprojection output too large")
 DTYPES = {"uint8": (np.uint8, 0, 255), "uint16": (np.uint16, 0, 65535), "int16": (np.int16, -32768, 32767)}
 
@@ -83,11 +83,13 @@ def _encode(img: ee.Image, dtype: str, scale: float, offset: float, nodata: int)
     return {"uint8": raw.toUint8, "uint16": raw.toUint16, "int16": raw.toInt16}[dtype]()
 
 
-def _fetch(img: ee.Image, g: dict, names: list[str], np_dtype) -> np.ndarray:
-    """Band-sequential array (bands, h, w), fetched in row chunks under the request size limit."""
+def _fetch(img: ee.Image, g: dict, names: list[str], np_dtype, max_rows: int = MAX_ROWS) -> np.ndarray:
+    """Band-sequential array (bands, h, w), fetched in row chunks under the request size limit.
+
+    max_rows: smaller for reduceResolution from 10 m sources (EE caps the reprojected input at roughly 50-80 M pixels)."""
     w, h, res = g["width"], g["height"], g["res"]
     x0, y1 = g["origin"]
-    rows = max(1, min(h, MAX_ROWS, MAX_BYTES // (w * len(names) * np.dtype(np_dtype).itemsize)))
+    rows = max(1, min(h, max_rows, MAX_BYTES // (w * len(names) * np.dtype(np_dtype).itemsize)))
     out = np.empty((len(names), h, w), np_dtype)
     for r0 in range(0, h, rows):
         n = min(rows, h - r0)
@@ -115,22 +117,43 @@ def _stats(raw: np.ndarray, scale: float, offset: float, nodata: int) -> list[di
     return out
 
 
-def export_layer(layer_id: str, img: ee.Image, region: str, ground_res: float, *, times: list[str],
-                 dtype: str, scale: float, offset: float = 0.0, nodata: int, title: dict, units: dict | None,
-                 kind: str = "continuous", palette: str | None = None, range_: list[float] | None = None,
-                 classes: list[dict] | None = None, provenance: dict, clip: bool = True) -> dict:
-    """Export img (len(times) bands) for a region/site and write public/data/<layer_id>/.
-
-    clip: for deltas, mask everything outside the region outline (provinces of the GSO statistical region)."""
-    if img.bandNames().size().getInfo() != len(times):
-        raise ValueError(f"{layer_id}: band count != len(times)")
-    g = grid(region, ground_res)
-    names = [f"t{i}" for i in range(len(times))]
+def fetch_raw(img: ee.Image, region: str, ground_res: float, *, dtype: str, scale: float, offset: float = 0.0,
+              nodata: int, clip: bool = True, max_rows: int = MAX_ROWS) -> tuple[np.ndarray, bool]:
+    """Encoded raw values (bands, h, w) of img on the region/site grid; clip: deltas masked to the region outline."""
+    n = img.bandNames().size().getInfo()
+    names = [f"t{i}" for i in range(n)]
     outline = region_outline(region) if clip else None
     if outline is not None:  # deltas: nodata outside the region's provinces (sea, Cambodia, hills)
         img = img.clip(outline)
     enc = _encode(img.rename(names), dtype, scale, offset, nodata)
-    raw = _fetch(enc, g, names, DTYPES[dtype][0])
+    return _fetch(enc, grid(region, ground_res), names, DTYPES[dtype][0], max_rows), outline is not None
+
+
+def to_values(raw: np.ndarray, scale: float, offset: float, nodata: int) -> np.ndarray:
+    """Raw codes -> float32 physical values, NaN where nodata."""
+    v = raw.astype(np.float32) * np.float32(scale) + np.float32(offset)
+    v[raw == nodata] = np.nan
+    return v
+
+
+def to_raw(values: np.ndarray, dtype: str, scale: float, offset: float, nodata: int) -> np.ndarray:
+    """Float values (NaN = no data) -> raw codes, clamped to the dtype range minus the nodata code."""
+    np_t, lo, hi = DTYPES[dtype]
+    lo, hi = (lo + 1 if nodata == lo else lo), (hi - 1 if nodata == hi else hi)
+    nan = np.isnan(values)
+    raw = np.clip(np.round((np.where(nan, offset, values) - offset) / scale), lo, hi).astype(np_t)
+    raw[nan] = nodata
+    return raw
+
+
+def write_layer(layer_id: str, raw: np.ndarray, region: str, ground_res: float, *, times: list[str], dtype: str,
+                scale: float, offset: float = 0.0, nodata: int, title: dict, units: dict | None,
+                kind: str = "continuous", palette: str | None = None, range_: list[float] | None = None,
+                classes: list[dict] | None = None, provenance: dict, clipped: bool) -> dict:
+    """Write raw (len(times), h, w) codes on the region/site grid to public/data/<layer_id>/."""
+    g = grid(region, ground_res)
+    if raw.shape != (len(times), g["height"], g["width"]) or raw.dtype != DTYPES[dtype][0]:
+        raise ValueError(f"{layer_id}: raw {raw.shape} {raw.dtype} does not match the grid / times / dtype")
     out = DATA / layer_id
     out.mkdir(parents=True, exist_ok=True)
     (out / "values.binz").write_bytes(gzip.compress(raw.astype(raw.dtype.newbyteorder("<")).tobytes(), 9, mtime=0))
@@ -140,7 +163,7 @@ def export_layer(layer_id: str, img: ee.Image, region: str, ground_res: float, *
         "crs": "EPSG:3857", "origin": [round(v, 3) for v in g["origin"]], "res": round(g["res"], 6),
         "ground_res_m": ground_res, "width": g["width"], "height": g["height"],
         "dtype": dtype, "scale": scale, "offset": offset, "nodata": nodata, "times": times,
-        "clipped_to": "region outline (geoBoundaries ADM1 provinces)" if outline is not None else None,
+        "clipped_to": "region outline (geoBoundaries ADM1 provinces)" if clipped else None,
         "stats": _stats(raw, scale, offset, nodata),
         "provenance": {**provenance, "exported": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                        "script": f"scripts/data/{Path(sys.argv[0]).name}"},
@@ -149,6 +172,18 @@ def export_layer(layer_id: str, img: ee.Image, region: str, ground_res: float, *
     kb = (out / "values.binz").stat().st_size // 1024
     print(f"{layer_id}: {g['width']}x{g['height']}x{len(times)} {dtype}, {kb} KB")
     return meta
+
+
+def export_layer(layer_id: str, img: ee.Image, region: str, ground_res: float, *, times: list[str],
+                 dtype: str, scale: float, offset: float = 0.0, nodata: int, clip: bool = True,
+                 max_rows: int = MAX_ROWS, **kw) -> dict:
+    """Export img (len(times) bands) for a region/site and write public/data/<layer_id>/ (kw: see write_layer)."""
+    raw, clipped = fetch_raw(img, region, ground_res, dtype=dtype, scale=scale, offset=offset, nodata=nodata, clip=clip,
+                              max_rows=max_rows)
+    if raw.shape[0] != len(times):
+        raise ValueError(f"{layer_id}: band count != len(times)")
+    return write_layer(layer_id, raw, region, ground_res, times=times, dtype=dtype, scale=scale, offset=offset,
+                       nodata=nodata, clipped=clipped, **kw)
 
 
 if __name__ == "__main__":
@@ -160,4 +195,9 @@ if __name__ == "__main__":
     assert abs(g["res"] * math.cos(math.radians(10.45)) - 10) < 1e-9
     gm = grid("mekong", 250)
     assert 1000 < gm["width"] < 1200 and 1000 < gm["height"] < 1200, gm
+    v = np.array([[[np.nan, -0.25, 0.1, 2.0]]], np.float32)
+    raw = to_raw(v, "uint8", 0.005, -0.25, 255)
+    assert raw.tolist() == [[[255, 0, 70, 254]]], raw
+    back = to_values(raw, 0.005, -0.25, 255)
+    assert np.isnan(back[0, 0, 0]) and abs(back[0, 0, 2] - 0.1) < 1e-6
     print("layerkit grid OK", gm["width"], gm["height"], grid("red", 250)["width"], grid("red", 250)["height"])

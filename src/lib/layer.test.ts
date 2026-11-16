@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { areaWhere, colorize, colorizeValues, decode, decodeFrame, frameOf, layerQuad, lonLatToMerc, mercToLonLat, pixelAreaHa, pixelAt, ramp, swipe, type LayerMeta } from './layer.ts';
+import { areaWhere, colorize, colorizeValues, decode, decodeFrame, frameOf, layerQuad, lonLatToMerc, mercToLonLat, pixelAreaHa, pixelAt, ramp, swipe, swipeCut, type LayerMeta } from './layer.ts';
 
 const near = (a: number, b: number, tol: number) => assert.ok(Math.abs(a - b) < tol, `${a} vs ${b}`);
 
@@ -95,4 +95,11 @@ test('colorizeValues: ramp via lookup table, NaN transparent, mask mode', () => 
   const k = colorizeValues([1, 9], { mask: (v) => v > 5, color: [9, 8, 7] });
   assert.equal(k[3], 0);
   assert.deepEqual([...k.slice(4, 8)], [9, 8, 7, 255]);
+});
+
+test('swipeCut rounds and clamps, so the HUD and the image agree on the divider column', () => {
+  assert.equal(swipeCut(1024, 0.5), 512);
+  assert.equal(swipeCut(1024, 0.3004), 308); // 307.6 -> 308
+  assert.equal(swipeCut(10, -1), 0);
+  assert.equal(swipeCut(10, 2), 10);
 });

@@ -1,0 +1,74 @@
+{
+ "id": "sal-evianom-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Dị thường EVI mùa khô (tháng 2–4)",
+  "en": "Dry-season EVI anomaly (Feb–Apr)"
+ },
+ "units": {
+  "vi": "EVI",
+  "en": "EVI"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  -0.2,
+  0.2
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.002,
+ "offset": -0.254,
+ "nodata": 255,
+ "times": [
+  "2016",
+  "2020",
+  "2024"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 628320,
+   "mean": -0.0242,
+   "p2": -0.166,
+   "p50": -0.014,
+   "p98": 0.072,
+   "min": -0.254,
+   "max": 0.254
+  },
+  {
+   "valid": 626179,
+   "mean": -0.037,
+   "p2": -0.19,
+   "p50": -0.024,
+   "p98": 0.052,
+   "min": -0.254,
+   "max": 0.254
+  },
+  {
+   "valid": 627433,
+   "mean": -0.0108,
+   "p2": -0.154,
+   "p50": -0.002,
+   "p98": 0.096,
+   "min": -0.254,
+   "max": 0.254
+  }
+ ],
+ "provenance": {
+  "source": "MODIS/061/MOD13Q1 + MODIS/061/MYD13Q1 band EVI x 0.0001, SummaryQA <= 1",
+  "processing": "mean of the Feb-Apr composites of the year minus the median of the 2010-2024 Feb-Apr means; MODIS 250 m nearest-resampled to the ~250 m Web Mercator grid",
+  "attribution": "MODIS MOD13Q1/MYD13Q1 v061, NASA LP DAAC",
+  "exported": "2026-11-16T01:35:09+00:00",
+  "script": "scripts/data/export_salinity.py"
+ }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GeoJSONSource, Map as MlMap } from 'maplibre-gl';
 import type { Lang } from '../i18n/ui';
-import { colorize, frameOf, layerBounds, layerQuad, mercToLonLat, pixelAt, rampCss, swipe, decode, type PaletteName } from '../lib/layer';
+import { colorize, frameOf, layerBounds, layerQuad, mercToLonLat, pixelAt, rampCss, swipe, swipeCut, decode, type PaletteName } from '../lib/layer';
 import { digitsFor, fmtNum, fmtTime } from '../lib/format';
 import { REGIONS, loadProvinces, useLayer } from './layers';
 import MapStage from './MapStage';
@@ -76,7 +76,7 @@ export default function DeltaMap({ lang, label, choices, region: region0, time: 
   const divider = (): GeoJSON.Feature => {
     if (!meta) return { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } };
     const q = layerQuad(meta);
-    const x = meta.origin[0] + split * meta.width * meta.res;
+    const x = meta.origin[0] + swipeCut(meta.width, split) * meta.res;
     const lon = mercToLonLat(x, 0)[0];
     return { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [[lon, q[0][1]], [lon, q[3][1]]] } };
   };
@@ -115,10 +115,12 @@ export default function DeltaMap({ lang, label, choices, region: region0, time: 
   const hoverRows = (() => {
     if (!hover || !meta || !layer) return [{ k: T.value, v: T.hover, tone: 'muted' as const }];
     const px = pixelAt(meta, hover.lon, hover.lat);
-    const showT = comparing && px && px.col < split * meta.width ? tt2 : tt;
+    const showT = comparing && px && px.col < swipeCut(meta.width, split) ? tt2 : tt;
     const v = px ? decode(meta, frameOf(meta, layer.data, showT)[px.row * meta.width + px.col]) : NaN;
+    const cls = meta.kind === 'classes' ? meta.classes?.find((c) => c.v === v)?.label[lang] : undefined;
+    const text = Number.isNaN(v) ? T.nodata : cls ?? `${fmtNum(lang, v, digits)} ${units}`;
     return [
-      { k: `${T.value}${nT > 1 ? ` · ${fmtTime(lang, meta.times[showT])}` : ''}`, v: Number.isNaN(v) ? T.nodata : `${fmtNum(lang, v, digits)} ${units}`, tone: 'accent' as const },
+      { k: `${T.value}${nT > 1 ? ` · ${fmtTime(lang, meta.times[showT])}` : ''}`, v: text, tone: 'accent' as const },
       ...(hover.prov ? [{ k: T.province, v: hover.prov }] : []),
       { k: T.at, v: `${fmtNum(lang, hover.lat, 3)}° N, ${fmtNum(lang, hover.lon, 3)}° E` },
     ];
@@ -132,7 +134,7 @@ export default function DeltaMap({ lang, label, choices, region: region0, time: 
       <div className="map-legend">
         <div className="ramp" style={{ background: rampCss(pal) }} aria-hidden="true" />
         <div className="ramp-ticks"><span>{fmtNum(lang, lo, tickDigits)}</span><span>{units}</span><span>{fmtNum(lang, hi, tickDigits)}</span></div>
-        {choice.clearBelow !== undefined && <p className="ramp-note">&lt; {fmtNum(lang, choice.clearBelow, 0)} {units}: {T.clear}</p>}
+        {choice.clearBelow !== undefined && <p className="ramp-note">&lt; {fmtNum(lang, choice.clearBelow, Number.isInteger(choice.clearBelow) ? 0 : 2)} {units}: {T.clear}</p>}
       </div>
     ));
   const title = meta ? `${(choice.label ?? meta.title)[lang]}${nT > 1 ? ` · ${comparing ? `${fmtTime(lang, meta.times[tt2])} | ` : ''}${fmtTime(lang, meta.times[tt])}` : ''}` : (error ? T.error : T.loading);
@@ -144,8 +146,8 @@ export default function DeltaMap({ lang, label, choices, region: region0, time: 
 
   const bar = (
     <>
-      {regions.length > 1 && <Pills label={T.region} value={reg} options={regions.map((r) => ({ v: r, label: REGIONS[r]?.name[lang] ?? r }))} onChange={(r) => { setRegion(r); setHover(null); }} />}
-      {choices.length > 1 && <Pills label={T.layer} value={String(ci)} options={choices.map((c, i) => ({ v: String(i), label: (c.label ?? { vi: c.key, en: c.key })[lang] }))} onChange={(v) => setCi(Number(v))} />}
+      {regions.length > 1 && <Pills label={T.region} value={reg} options={regions.map((r) => ({ v: r, label: REGIONS[r]?.name[lang] ?? r }))} onChange={(r) => { setRegion(r); setHover(null); setPlaying(false); }} />}
+      {choices.length > 1 && <Pills label={T.layer} value={String(ci)} options={choices.map((c, i) => ({ v: String(i), label: (c.label ?? { vi: c.key, en: c.key })[lang] }))} onChange={(v) => { setCi(Number(v)); setPlaying(false); }} />}
       {nT > 1 && meta && (
         <div className="ctl-row">
           <Slider label={comparing ? T.right : T.time} value={tt} min={0} max={nT - 1} fmt={(i) => fmtTime(lang, meta.times[i])} onChange={(v) => { setPlaying(false); setT(v); }} />

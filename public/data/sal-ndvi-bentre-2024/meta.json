@@ -1,0 +1,54 @@
+{
+ "id": "sal-ndvi-bentre-2024",
+ "region": "bentre",
+ "title": {
+  "vi": "NDVI mùa khô 2024 (Sentinel-2)",
+  "en": "Dry-season NDVI 2024 (Sentinel-2)"
+ },
+ "units": {
+  "vi": "NDVI",
+  "en": "NDVI"
+ },
+ "kind": "continuous",
+ "palette": "evi",
+ "range": [
+  -0.2,
+  0.9
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11850322.312,
+  1135405.17
+ ],
+ "res": 10.157408,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.008,
+ "offset": -1.0,
+ "nodata": 255,
+ "times": [
+  "2024-02/04"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1048576,
+   "mean": 0.6778,
+   "p2": 0.024,
+   "p50": 0.752,
+   "p98": 0.856,
+   "min": -0.496,
+   "max": 0.904
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S2_SR_HARMONIZED, Cloud Score+ cs_cdf >= 0.6, median of Feb-Apr 2024",
+  "attribution": "Contains modified Copernicus Sentinel data 2024",
+  "processing": "(B8 - B4) / (B8 + B4); NDSI = (B4 - B8) / (B4 + B8) is exactly -NDVI",
+  "exported": "2026-11-16T01:32:30+00:00",
+  "script": "scripts/data/export_salinity.py"
+ }
+}

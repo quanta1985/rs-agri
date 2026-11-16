@@ -3,7 +3,7 @@
 Only good-quality pixels (SummaryQA 0 = good, 1 = marginal) enter the monthly mean; a 16-day composite counts for
 the month of its start date. Months without a good pixel are no-data.
 
-    python -I scripts/data/export_evi_monthly.py
+    python scripts/data/export_evi_monthly.py
 """
 import ee
 

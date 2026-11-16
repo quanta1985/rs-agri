@@ -1,0 +1,123 @@
+{
+ "id": "dw-camau",
+ "region": "camau",
+ "title": {
+  "vi": "Lớp phủ Dynamic World (nhãn thường gặp nhất trong năm)",
+  "en": "Dynamic World land cover (most frequent label of the year)"
+ },
+ "units": null,
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 0,
+   "color": "#419bdf",
+   "label": {
+    "vi": "Nước",
+    "en": "Water"
+   }
+  },
+  {
+   "v": 1,
+   "color": "#397d49",
+   "label": {
+    "vi": "Cây gỗ",
+    "en": "Trees"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#88b053",
+   "label": {
+    "vi": "Cỏ",
+    "en": "Grass"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#7a87c6",
+   "label": {
+    "vi": "Thực vật ngập nước",
+    "en": "Flooded vegetation"
+   }
+  },
+  {
+   "v": 4,
+   "color": "#e49635",
+   "label": {
+    "vi": "Cây trồng",
+    "en": "Crops"
+   }
+  },
+  {
+   "v": 5,
+   "color": "#dfc35a",
+   "label": {
+    "vi": "Cây bụi",
+    "en": "Shrub & scrub"
+   }
+  },
+  {
+   "v": 6,
+   "color": "#c4281b",
+   "label": {
+    "vi": "Xây dựng",
+    "en": "Built area"
+   }
+  },
+  {
+   "v": 7,
+   "color": "#a59b8f",
+   "label": {
+    "vi": "Đất trống",
+    "en": "Bare ground"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11683356.624,
+  983041.114
+ ],
+ "res": 10.117755,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2018",
+  "2024"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1041606,
+   "mean": 1.2982,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 6.0,
+   "min": 0.0,
+   "max": 7.0
+  },
+  {
+   "valid": 1048576,
+   "mean": 1.7183,
+   "p2": 0.0,
+   "p50": 1.0,
+   "p98": 6.0,
+   "min": 0.0,
+   "max": 7.0
+  }
+ ],
+ "provenance": {
+  "source": "GOOGLE/DYNAMICWORLD/V1 band label (Sentinel-2 based, near real time)",
+  "processing": "per-pixel mode of all labels in the calendar year; shrimp ponds appear as water",
+  "attribution": "Dynamic World (Brown et al. 2022, Scientific Data 9:251), CC BY 4.0; contains modified Copernicus Sentinel data",
+  "exported": "2026-11-16T02:04:47+00:00",
+  "script": "scripts/data/export_salinity.py"
+ }
+}

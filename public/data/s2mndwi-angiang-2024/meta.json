@@ -1,0 +1,54 @@
+{
+ "id": "s2mndwi-angiang-2024",
+ "region": "angiang",
+ "title": {
+  "vi": "Chỉ số nước MNDWI (Sentinel-2)",
+  "en": "MNDWI water index (Sentinel-2)"
+ },
+ "units": {
+  "vi": "MNDWI",
+  "en": "MNDWI"
+ },
+ "kind": "continuous",
+ "palette": "gray",
+ "range": [
+  -0.6,
+  0.6
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11692242.638,
+  1174999.047
+ ],
+ "res": 10.168662,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.008,
+ "offset": -1.0,
+ "nodata": 255,
+ "times": [
+  "2024-10-26"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1046737,
+   "mean": 0.1064,
+   "p2": -0.528,
+   "p50": 0.32,
+   "p98": 0.624,
+   "min": -0.72,
+   "max": 0.912
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S2_SR_HARMONIZED 2024-10-26, (B3 - B11) / (B3 + B11); Cloud Score+ cs_cdf >= 0.6",
+  "processing": "B11 (20 m) nearest-resampled to the 10 m Web Mercator grid",
+  "attribution": "Contains modified Copernicus Sentinel data 2024",
+  "exported": "2026-11-16T01:30:47+00:00",
+  "script": "scripts/data/export_flood.py"
+ }
+}

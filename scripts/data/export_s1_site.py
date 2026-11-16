@@ -2,9 +2,10 @@
 
 Single relative orbit (26, as the rs-knowledge An Giang series) so the viewing geometry is fixed. The flood date is the
 orbit-26 acquisition of Sep-Nov 2024 with the lowest median VV over the frame (most open water); the dry date is the
-first March 2024 acquisition.
+first March 2024 acquisition; the third date, 26 Oct 2024, is the day of a cloud-free Sentinel-2 pass (MNDWI layer
+s2mndwi-angiang-2024 in export_flood.py), for an optical vs radar comparison on the same day.
 
-    python -I scripts/data/export_s1_site.py
+    python scripts/data/export_s1_site.py
 """
 import ee
 
@@ -18,7 +19,8 @@ def pick(col: ee.ImageCollection, geom: ee.Geometry) -> list[ee.Image]:
     dry = col.filterDate("2024-03-01", "2024-04-01").sort("system:time_start").first()
     wet = col.filterDate("2024-09-01", "2024-12-01").map(
         lambda im: im.set("med", im.select("VV").reduceRegion(ee.Reducer.median(), geom, 100).get("VV")))
-    return [dry, wet.sort("med").first()]
+    same_day_s2 = col.filterDate("2024-10-26", "2024-10-27").first()
+    return [dry, wet.sort("med").first(), same_day_s2]
 
 
 def main() -> None:

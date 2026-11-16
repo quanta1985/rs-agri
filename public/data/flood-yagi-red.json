@@ -1,0 +1,82 @@
+{
+ "dates": [
+  "2024-08-31",
+  "2024-09-12"
+ ],
+ "provinces": [
+  {
+   "name": "Hà Nội",
+   "new_water": 10574,
+   "new_water_crop": 6432,
+   "cropland": 124934
+  },
+  {
+   "name": "Ninh Bình",
+   "new_water": 5635,
+   "new_water_crop": 4262,
+   "cropland": 55636
+  },
+  {
+   "name": "Nam Định",
+   "new_water": 7124,
+   "new_water_crop": 3148,
+   "cropland": 92660
+  },
+  {
+   "name": "Hải Dương",
+   "new_water": 4510,
+   "new_water_crop": 2673,
+   "cropland": 73764
+  },
+  {
+   "name": "Bắc Ninh",
+   "new_water": 3415,
+   "new_water_crop": 2122,
+   "cropland": 52576
+  },
+  {
+   "name": "Vĩnh Phúc",
+   "new_water": 2636,
+   "new_water_crop": 1831,
+   "cropland": 39762
+  },
+  {
+   "name": "Thái Bình",
+   "new_water": 3639,
+   "new_water_crop": 860,
+   "cropland": 85626
+  },
+  {
+   "name": "Hưng Yên",
+   "new_water": 1071,
+   "new_water_crop": 811,
+   "cropland": 52778
+  },
+  {
+   "name": "Hà Nam",
+   "new_water": 1133,
+   "new_water_crop": 699,
+   "cropland": 45487
+  },
+  {
+   "name": "Hải Phòng",
+   "new_water": 10605,
+   "new_water_crop": 569,
+   "cropland": 34066
+  },
+  {
+   "name": "Quảng Ninh",
+   "new_water": 1159,
+   "new_water_crop": 23,
+   "cropland": 22225
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VV orbit 91; ESA/WorldCover/v200 (2021) class 40 cropland",
+  "unit": "ha",
+  "method": "new water = water on 2024-09-12 and not on 2024-08-31 (VV < -18.0 dB, slope < 5 deg), 10 m, summed at 20 m per province (geoBoundaries ADM1, 2008)",
+  "attribution": "Contains modified Copernicus Sentinel data 2024; ESA WorldCover 2021 v200",
+  "exported": "2026-11-16T01:41:58+00:00",
+  "script": "scripts/data/export_flood.py"
+ }
+}

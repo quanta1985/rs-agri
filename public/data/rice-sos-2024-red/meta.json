@@ -1,0 +1,54 @@
+{
+ "id": "rice-sos-2024-red",
+ "region": "red",
+ "title": {
+  "vi": "Ngày cấy vụ Xuân 2024 (đáy VH)",
+  "en": "Spring 2024 transplanting date (VH minimum)"
+ },
+ "units": {
+  "vi": "ngày so với 1/1/2024",
+  "en": "days from 1 Jan 2024"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  80
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": -128,
+ "nodata": 255,
+ "times": [
+  "S1"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 69873,
+   "mean": 47.5834,
+   "p2": 15.0,
+   "p50": 51.0,
+   "p98": 75.0,
+   "min": 3.0,
+   "max": 87.0
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VH, relative orbit 91 (12-day repeat); ESA/WorldCover/v200 class 40",
+  "processing": "first season trough (see rice-seasons-red) between day 0 and 90 of 2024; date of the S1 acquisition (12-day steps)",
+  "attribution": "Contains modified Copernicus Sentinel data; ESA WorldCover 10 m 2021 v200",
+  "exported": "2026-11-16T02:46:32+00:00",
+  "script": "scripts/data/export_rice.py"
+ }
+}

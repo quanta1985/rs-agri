@@ -1,0 +1,54 @@
+{
+ "id": "rice-dvh-angiang",
+ "region": "angiang",
+ "title": {
+  "vi": "Biên độ VH trong vụ (Sentinel-1)",
+  "en": "Seasonal VH range (Sentinel-1)"
+ },
+ "units": {
+  "vi": "dB",
+  "en": "dB"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  15
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11692242.638,
+  1174999.047
+ ],
+ "res": 10.168662,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2023-11/2024-04"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 1048576,
+   "mean": 9.5498,
+   "p2": 2.5,
+   "p50": 9.8,
+   "p98": 17.5,
+   "min": 0.5,
+   "max": 25.4
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW VH, relative orbit 26, 13 acquisitions 2023-11-01 .. 2024-04-01 (Đông Xuân 2023–24 / winter-spring 2023-24)",
+  "processing": "3x3 focal mean in linear power, p90 - p10 over the season, in dB",
+  "attribution": "Contains modified Copernicus Sentinel data 2023-2024",
+  "exported": "2026-11-16T01:35:22+00:00",
+  "script": "scripts/data/export_rice_site.py"
+ }
+}
