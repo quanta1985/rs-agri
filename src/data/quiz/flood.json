@@ -1,0 +1,112 @@
+[
+ {
+  "q": { "vi": "Lớp 'tần suất có nước' của JRC Global Surface Water cho biết điều gì?", "en": "What does the 'water occurrence' layer of JRC Global Surface Water tell you?" },
+  "options": [
+   { "vi": "Tỉ lệ số lần quan sát Landsat không mây mà pixel có nước, 1984–2021", "en": "The share of cloud-free Landsat observations in which the pixel was water, 1984–2021" },
+   { "vi": "Độ sâu nước trung bình", "en": "The mean water depth" },
+   { "vi": "Số ngày ngập trong năm gần nhất", "en": "The number of flooded days in the latest year" },
+   { "vi": "Xác suất lũ chu kỳ 100 năm", "en": "The probability of a 100-year flood" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Tần suất là tỉ lệ phần trăm trên các lần quan sát hợp lệ. Nó không đo độ sâu và không phải xác suất thủy văn.", "en": "Occurrence is a percentage of the valid observations. It does not measure depth and is not a hydrological return probability." }
+ },
+ {
+  "q": { "vi": "Vì sao nước có MNDWI dương còn đất và cây thường có MNDWI âm?", "en": "Why does water have a positive MNDWI while soil and plants are usually negative?" },
+  "options": [
+   { "vi": "Nước hấp thụ gần hết hồng ngoại sóng ngắn nhưng còn phản xạ một ít ánh sáng lục", "en": "Water absorbs nearly all shortwave infrared but still reflects some green light" },
+   { "vi": "Nước nóng hơn đất", "en": "Water is warmer than soil" },
+   { "vi": "Nước phản xạ mạnh hồng ngoại gần", "en": "Water strongly reflects near infrared" },
+   { "vi": "Vì vệ tinh chụp vào ban đêm", "en": "Because the satellite images at night" }
+  ],
+  "answer": 0,
+  "why": { "vi": "MNDWI = (Lục − SWIR)/(Lục + SWIR). SWIR của nước gần bằng 0 nên tử số dương; đất và cây phản xạ SWIR mạnh hơn lục.", "en": "MNDWI = (Green − SWIR)/(Green + SWIR). Water's SWIR is close to zero, so the numerator is positive; soil and plants reflect more SWIR than green." }
+ },
+ {
+  "q": { "vi": "Ngày 12/03/2024 (mùa khô) Otsu trên ảnh radar An Giang cho ngưỡng −10,25 dB và gọi 49 % khung là 'nước'. Vì sao kết quả này sai?", "en": "On 12/03/2024 (dry season) Otsu on the An Giang radar frame gives −10.25 dB and calls 49 % of the frame 'water'. Why is that wrong?" },
+  "options": [
+   { "vi": "Khung gần như không có nước nên histogram không có hai đỉnh nước / đất; Otsu vẫn luôn chia đôi", "en": "The frame holds almost no water, so the histogram has no water and land peaks; Otsu still always splits it in two" },
+   { "vi": "Radar không chụp được mùa khô", "en": "Radar cannot image in the dry season" },
+   { "vi": "Phải lọc speckle trước thì Otsu mới đúng", "en": "Otsu only works after speckle filtering" },
+   { "vi": "Ngưỡng Otsu luôn bằng −18 dB", "en": "The Otsu threshold is always −18 dB" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Otsu tìm ngưỡng tách histogram thành hai nhóm dù cảnh có hai lớp hay không. Chỉ dùng Otsu khi lớp quan tâm chiếm đủ diện tích để tạo một đỉnh riêng.", "en": "Otsu splits a histogram in two whether or not the scene has two classes. Use it only when the class of interest is large enough to form its own peak." }
+ },
+ {
+  "q": { "vi": "Ngày 26/10/2024 bản đồ nước MNDWI và bản đồ nước radar ở An Giang trùng nhau ở bao nhiêu phần trăm số pixel?", "en": "On 26/10/2024, on what share of the pixels do the MNDWI and radar water maps of An Giang agree?" },
+  "options": [
+   { "vi": "Khoảng 85 %", "en": "About 85 %" },
+   { "vi": "100 %", "en": "100 %" },
+   { "vi": "Khoảng 50 %", "en": "About 50 %" },
+   { "vi": "Dưới 20 %", "en": "Under 20 %" }
+  ],
+  "answer": 0,
+  "why": { "vi": "85,1 % số pixel cho cùng kết quả (49,0 % cùng là nước). Phần còn lại là mép ruộng, cây ngập nước, kênh hẹp và pixel SWIR 20 m.", "en": "85.1 % of the pixels agree (49.0 % are water in both). The rest are field edges, flooded vegetation, narrow canals and 20 m SWIR pixels." }
+ },
+ {
+  "q": { "vi": "Diện tích nước mặt tháng cao nhất trên ảnh radar ĐBSCL thường rơi vào tháng nào (2016–2025)?", "en": "In which month does the radar surface-water area of the Mekong delta usually peak (2016–2025)?" },
+  "options": [
+   { "vi": "Tháng 10 hoặc 11", "en": "October or November" },
+   { "vi": "Tháng 7", "en": "July" },
+   { "vi": "Tháng 8", "en": "August" },
+   { "vi": "Tháng 12", "en": "December" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Cả mười năm, tháng đỉnh là tháng 10 (5 năm) hoặc tháng 11 (5 năm): nước lũ trong đồng rút chậm và ruộng được cho ngập để làm đất vụ Đông Xuân.", "en": "In all ten years the peak is October (5 years) or November (5 years): water drains slowly from the inner fields and paddies are flooded to prepare the winter–spring crop." }
+ },
+ {
+  "q": { "vi": "Bản đồ nước mặt theo tháng từ radar ở ĐBSCL KHÔNG nên được gọi là gì?", "en": "What should the monthly radar surface-water map of the Mekong delta NOT be called?" },
+  "options": [
+   { "vi": "Bản đồ thiệt hại do lũ", "en": "A flood-damage map" },
+   { "vi": "Bản đồ nước mặt", "en": "A surface-water map" },
+   { "vi": "Bản đồ phạm vi có nước theo tháng", "en": "A monthly water-extent map" },
+   { "vi": "Lớp tỉ lệ nước trong ô 250 m", "en": "A layer of water share per 250 m cell" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lớp này gồm sông, kênh, ao tôm, ruộng đang ngập để cấy và nước lũ. Nước lũ trên ruộng sau thu hoạch là chủ ý, không phải thiệt hại.", "en": "The layer includes rivers, canals, shrimp ponds, paddies flooded for planting and floodwater. Floodwater on harvested fields is intended, not damage." }
+ },
+ {
+  "q": { "vi": "Đê bao cao (đê bao khép kín) ở Tứ giác Long Xuyên và Đồng Tháp Mười dùng để làm gì?", "en": "What are the high (full-flood) dykes of the Long Xuyen Quadrangle and the Plain of Reeds for?" },
+  "options": [
+   { "vi": "Giữ ruộng khô trong mùa lũ để trồng vụ lúa thứ ba", "en": "Keep fields dry through the flood season to grow a third rice crop" },
+   { "vi": "Ngăn nước mặn vào mùa khô", "en": "Block saline water in the dry season" },
+   { "vi": "Giữ nước lũ trên ruộng lâu hơn", "en": "Keep floodwater on the fields longer" },
+   { "vi": "Làm đường giao thông", "en": "Serve as roads" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Đê bao cao chặn cả đỉnh lũ để làm vụ Thu Đông. Cái giá: ruộng mất phù sa và nước lũ dồn xuống hạ lưu (Triet và cs., 2017).", "en": "High dykes hold back even the flood peak to allow an autumn–winter crop. The cost: fields lose sediment and floodwater is pushed downstream (Triet et al., 2017)." }
+ },
+ {
+  "q": { "vi": "Vì sao dùng cặp ảnh Sentinel-1 ngày 31/8 và 12/9/2024 để lập bản đồ nước sau bão Yagi?", "en": "Why use the Sentinel-1 pair of 31/8 and 12/9/2024 to map water after typhoon Yagi?" },
+  "options": [
+   { "vi": "Cùng quỹ đạo 91, cùng hình học chụp, cách nhau đúng một chu kỳ 12 ngày, trước và sau bão", "en": "Same orbit 91, same viewing geometry, exactly one 12-day cycle apart, before and after the storm" },
+   { "vi": "Vì hai ngày đó trời quang", "en": "Because both days were cloud-free" },
+   { "vi": "Vì Sentinel-1 chụp mỗi ngày", "en": "Because Sentinel-1 images every day" },
+   { "vi": "Vì đó là ngày bão đổ bộ", "en": "Because those were the landfall days" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Phát hiện thay đổi cần hai ảnh cùng hình học. Năm 2024 chỉ còn Sentinel-1A nên mỗi quỹ đạo lặp lại 12 ngày; mây không ảnh hưởng radar.", "en": "Change detection needs two images with the same geometry. In 2024 only Sentinel-1A flew, so each orbit repeats every 12 days; clouds do not affect radar." }
+ },
+ {
+  "q": { "vi": "Radar chỉ thấy 860 ha nước mới trên đất trồng trọt của Thái Bình ngày 12/9/2024, trong khi báo cáo nhanh ước 55.000 ha lúa thiệt hại. Lý do nào KHÔNG giải thích được khác biệt này?", "en": "Radar sees only 860 ha of new water on Thái Bình cropland on 12/9/2024, while a rapid report estimated 55,000 ha of rice damaged. Which reason does NOT explain the gap?" },
+  "options": [
+   { "vi": "Radar không xuyên được mây", "en": "Radar cannot see through clouds" },
+   { "vi": "Phần lớn thiệt hại là lúa đổ do gió, không có nước đọng", "en": "Most damage was wind lodging, with no standing water" },
+   { "vi": "Nước úng có thể đã được bơm tiêu trước ngày 12/9", "en": "Waterlogging may have been pumped out before 12/9" },
+   { "vi": "Nước nông dưới tán lúa đang trổ không làm ảnh radar tối đi", "en": "Shallow water under a heading rice canopy does not darken the radar image" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Radar băng C chụp xuyên mây. Khác biệt đến từ việc 'thiệt hại' không đồng nghĩa với 'có nước đọng lúc vệ tinh bay qua'.", "en": "C-band radar sees through clouds. The gap comes from 'damage' not meaning 'standing water when the satellite passes'." }
+ },
+ {
+  "q": { "vi": "Muốn ước tính diện tích lúa bị ngập theo tỉnh từ ảnh vệ tinh, bước nào cần thiết nhất sau khi có bản đồ nước mới?", "en": "To estimate flooded rice area by province from satellite images, which step matters most once you have the new-water map?" },
+  "options": [
+   { "vi": "Chồng với bản đồ lúa cùng mùa và kiểm tra thực địa / số liệu địa phương", "en": "Overlay a rice map of the same season and check against field data / local statistics" },
+   { "vi": "Tăng độ tương phản của ảnh", "en": "Increase the image contrast" },
+   { "vi": "Đổi sang ngưỡng −25 dB", "en": "Switch to a −25 dB threshold" },
+   { "vi": "Lấy trung bình toàn châu thổ", "en": "Average over the whole delta" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Nước mới chỉ thành 'lúa bị ngập' khi nằm trên ruộng lúa đang có cây; và con số vệ tinh phải được đối chiếu với kiểm tra thực địa trước khi dùng.", "en": "New water only becomes 'flooded rice' where it lies on rice fields with a crop; and the satellite number must be checked in the field before it is used." }
+ }
+]

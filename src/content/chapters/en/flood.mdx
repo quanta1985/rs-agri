@@ -1,0 +1,337 @@
+---
+title: Surface water & floods
+n: 8
+summary: The Mekong delta lives with the yearly Mekong flood pulse, while the Red River Delta lives behind its dykes and fears waterlogging after typhoons. This chapter uses the 1984–2021 Landsat surface-water record and real Sentinel-2 and Sentinel-1 images to detect water, follow the Mekong flood month by month over ten years (2016–2025), map water after typhoon Yagi in September 2024, and show why a water map is not a damage map.
+objectives:
+  - Contrast the water regimes of the two deltas and read the JRC Global Surface Water occurrence and seasonality layers.
+  - Detect water with MNDWI (Sentinel-2) and VV backscatter (Sentinel-1), pick a threshold with Otsu, and know when Otsu fails.
+  - Read the monthly and yearly surface-water record of the Mekong delta, telling floodwater, paddies flooded for planting and ponds apart.
+  - Explain, with citations, how high dykes and upstream dams change the flood.
+  - Map new water after a storm by change detection, overlay a rice map and compare with published damage figures.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ThresholdLab from '../../../islands/ThresholdLab.tsx';
+import FloodArea from '../../../islands/FloodArea.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/flood.json';
+
+Water sets the farming calendar in both deltas. In the Mekong delta the yearly flood brings sediment and fish, but also limits how many rice crops a field can carry. In the Red River Delta the river runs between dykes, and the main worry is fields waterlogged by typhoon rain. Satellites show where water is and when. They do not directly tell whether a crop was harmed: making that difference clear is the aim of this chapter.
+
+This chapter does not re-teach radar or spectral indices. For a refresher, see the <a href="https://quanta1985.github.io/rs-knowledge/en/ch11-sar/">SAR radar chapter</a> and the <a href="https://quanta1985.github.io/rs-knowledge/en/ch06-spectral/">spectral indices chapter</a> of the *Remote Sensing & GIS* handbook.
+
+<Stats items={[
+  { v: '37', u: '%', l: 'of the Mekong delta held water for at least one month in 2021 (Red River Delta: 14 %)' },
+  { v: '604', u: 'thousand ha', l: 'surface water in the peak month of 2017, the largest in 2016–2025 (radar)' },
+  { v: '395', u: 'thousand ha', l: 'peak month of 2021, the smallest of the ten years' },
+  { v: '23,430', u: 'ha', l: 'new water on Red River Delta cropland after typhoon Yagi, 12 Sep 2024' },
+]} caption="Computed from JRC Global Surface Water and Sentinel-1 by scripts/flood_numbers.ts. 'Surface water' includes paddies flooded for planting and fish or shrimp ponds." />
+
+## 8.1 Two deltas, two water regimes
+
+The **Mekong delta** sits at the end of the Mekong basin. In the wet season, water from upstream rises from about July, spills into the low Plain of Reeds (Đồng Tháp Mười) and Long Xuyen Quadrangle, then drains until December. This yearly cycle is the <Term id="flood-pulse">flood pulse</Term>. The flood is slow and rises gradually. It brings sediment, flushes acidity, carries fish onto the fields, and decides how many rice crops each field can grow.
+
+The **Red River Delta** is different. Upstream reservoirs (Hòa Bình, Sơn La, Lai Châu) regulate the Red River, and the fields lie behind a dyke system. River water outside the dykes only covers the floodplain. Inside the dykes the worry is <Term id="waterlogging">waterlogging</Term>: heavy typhoon rain falls faster than the drainage pumps can remove it.
+
+Figure 8.1 compares the two deltas with <Term id="jrc-gsw">JRC Global Surface Water</Term> (Pekel et al., 2016), built from every Landsat scene since 1984. The first layer is <Term id="water-occurrence">water occurrence</Term> over 1984–2021. The second is the <Term id="water-seasonality">number of months with water</Term> in 2021.
+
+<Predict client:visible lang="en"
+  title="How much of the Mekong delta holds seasonal water?"
+  q="In 2021, what percentage of the Mekong delta held surface water for at least one month (250 m cell mean)?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={37} tol={6}
+  why="About 37 % (1.48 million ha), nearly three times the Red River Delta (14 %). Most of it is seasonal: only about 126 thousand ha held water for 10 months or more. And 2021 was the smallest flood of the last ten years (section 8.4)." />
+
+<Figure
+  title="Figure 8.1 — Surface water in the two deltas: occurrence 1984–2021 and months with water in 2021"
+  try="Switch between the Mekong and Red River deltas: where does blue spread across the fields, and where does water stay along the rivers? Pick 'Months with water 2021' and hover over the Plain of Reeds and the Long Xuyen Quadrangle."
+  source="JRC Global Surface Water v1.4 (Pekel et al., 2016), Landsat 30 m: occurrence 1984–2021 and seasonality of 2021, averaged to ~250 m cells on a Web Mercator grid; never-water pixels = 0. Clipped to the statistical region outline (geoBoundaries ADM1, 2008 boundaries). Source: EC JRC / Google."
+>
+  <DeltaMap client:visible lang="en" label="Surface-water map of the two deltas" choices={[
+    { key: 'occ', label: { vi: 'Tần suất 1984–2021', en: 'Occurrence 1984–2021' }, ids: { mekong: 'flood-gsw-mekong', red: 'flood-gsw-red' }, clearBelow: 1 },
+    { key: 'season', label: { vi: 'Số tháng có nước 2021', en: 'Months with water 2021' }, ids: { mekong: 'flood-gswseason-mekong', red: 'flood-gswseason-red' }, clearBelow: 0.05 },
+  ]} />
+</Figure>
+
+Multiplying occurrence by cell area, "average" surface water covers **15.5 %** of the Mekong delta (615 thousand ha) and **7.4 %** of the Red River Delta (125 thousand ha). The big difference is seasonal water: in 2021, **1.35 million ha** of the Mekong delta held water for 1 to under 10 months, against 180 thousand ha in the Red River Delta.
+
+<Note kind="key">
+
+The Mekong delta has a seasonal flood spread across its fields; the Red River Delta has water concentrated in rivers, floodplains and ponds, with the fields behind dykes. So the remote-sensing question differs: in the Mekong delta it is "how big is this year's flood", in the Red River Delta "which fields went under water after this storm".
+
+</Note>
+
+<Depth level="advanced" title="Reading the JRC layers at 250 m">
+
+JRC classifies every 30 m Landsat scene as water / not water and counts. Occurrence is the share of cloud-free observations that saw water; seasonality is the number of months in the year with at least one water observation. Here each 250 m cell is the **mean** of about 70 Landsat pixels. A cell value of 3 months can be a whole cell flooded for 3 months, or a quarter of the cell covered by a pond all year. Telling them apart needs the 30 m data.
+
+2021 is the last year of version 1.4. Landsat misses many wet-season months under cloud, so months with water can be undercounted where no clear image exists.
+
+</Depth>
+
+## 8.2 Detecting water: MNDWI and radar
+
+There are two common ways. Optical images use the <Term id="mndwi">MNDWI</Term> index (Xu, 2006): water reflects a little green light but absorbs nearly all shortwave infrared (SWIR), so water has a positive MNDWI while soil and plants are usually negative.
+
+<Formula label="MNDWI water index (Sentinel-2)" tex="\mathrm{MNDWI} = \frac{B_3 - B_{11}}{B_3 + B_{11}}" where="
+B_3 :: green reflectance (560 nm, 10 m)
+B_{11} :: shortwave-infrared reflectance (1610 nm, 20 m)
+" />
+
+Radar relies on <Term id="specular-reflection">specular reflection</Term>: calm water sends the wave away from the satellite, so water is very dark. Both need a <Term id="water-threshold">water threshold</Term>. The most common automatic one is the <Term id="otsu">Otsu threshold</Term>: it picks the value that splits the histogram into the two most different groups.
+
+The An Giang frame (10 × 10 km around Thoại Sơn – Tri Tôn) has a cloud-free Sentinel-2 scene right in the flood season, 26 October 2024, and a Sentinel-1 image of the same day. That is a rare chance to compare both methods on the same ground.
+
+<Predict client:visible lang="en"
+  title="The MNDWI water threshold"
+  q="Textbooks often say 'water has MNDWI > 0'. Which threshold will Otsu pick for the An Giang frame on 26 Oct 2024?"
+  options={['Exactly 0', 'About +0.06', 'About +0.4', 'About −0.3']} answer={1}
+  why="Otsu picks 0.06 (0.02 steps). Zero is a convention; the best threshold changes with the scene, because sediment-laden water, flooded young rice and field edges sit close to zero." />
+
+<Figure
+  title="Figure 8.2 — Water from MNDWI, Sentinel-2, An Giang, 26 Oct 2024"
+  try="Press 'Use Otsu', then drag the threshold from 0 up to 0.3: how much water area is lost? Which pixels change class first: the middle of flooded fields, or field edges and canal banks?"
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED), 26 Oct 2024, Cloud Score+ cs_cdf ≥ 0.6; MNDWI = (B3 − B11)/(B3 + B11), B11 20 m nearest-resampled to the 10 m Web Mercator grid. Otsu over 256 bins in −0.8…+0.8, rounded to the 0.02 step. Areas use the ground area of each pixel row. Contains modified Copernicus Sentinel data 2024."
+>
+  <ThresholdLab client:visible lang="en" label="MNDWI threshold, An Giang" layer="s2mndwi-angiang-2024" below={false} step={0.02}
+    maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-0.8, 0.8]} />
+</Figure>
+
+<Figure
+  title="Figure 8.3 — Water from VV radar, Sentinel-1, An Giang, 12 Mar, 14 Oct and 26 Oct 2024"
+  try="Pick 26 Oct 2024 and press Otsu: is the water area close to Figure 8.2? Turn on the Lee filter. Then pick 12 Mar 2024 (dry season) and press Otsu: is 49 % of the frame being 'water' plausible?"
+  source="Sentinel-1A IW GRD, VV, relative orbit 26, 12 Mar, 14 Oct and 26 Oct 2024, σ⁰ (dB) as distributed in Earth Engine; nearest-resampled to the 10 m Web Mercator grid, no speckle filter (optional 5×5 Lee in the browser). Otsu over 256 bins in −30…0 dB, rounded to the 0.25 dB step. Contains modified Copernicus Sentinel data 2024."
+>
+  <ThresholdLab client:visible lang="en" label="Radar threshold, An Giang" layer="s1-angiang-2024" time={2} speckle
+    maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-30, 0]} />
+</Figure>
+
+Results on the 10,467 ha frame:
+
+<div class="table-wrap">
+
+| Image | Otsu threshold | Water area | Share of frame |
+|---|---|---|---|
+| Sentinel-2 MNDWI, 26 Oct 2024 | > 0.06 | 5,855 ha | 55.9 % |
+| Sentinel-1 VV, 26 Oct 2024 | < −15.5 dB | 5,980 ha | 57.0 % |
+| Sentinel-1 VV, 14 Oct 2024 | < −16.5 dB | 6,045 ha | 57.6 % |
+
+</div>
+
+The two sensors on the same day differ by only about 2 % in area. Pixel by pixel, the two maps agree on **85.1 %** of the pixels (49.0 % water in both). 6.9 % is water only for MNDWI, 8.0 % only for radar. Disagreement sits mostly on field edges, narrow canals (a 20 m SWIR pixel is four times larger), flooded young rice and wind-roughened water.
+
+On 12 Mar 2024 the frame holds almost no surface water (only 74 ha below −18 dB), yet Otsu still splits the histogram at −10.25 dB and calls **49 %** of the frame "water". Otsu always returns a threshold, even when the scene has only one class.
+
+<Note kind="key">
+
+MNDWI and radar give very similar water areas when the scene is wet and clear. Radar wins under cloud (most of the wet season); optical images are easier to read at field edges and in flooded vegetation. An Otsu threshold is only trustworthy when the histogram has two clear peaks: look at the histogram before trusting the number.
+
+</Note>
+
+<Depth level="advanced" title="Why not one fixed threshold for every image">
+
+The radar water threshold changes with incidence angle, wind and water type. A shallow flooded paddy with young rice sticking out can be brighter than a river, because the wave bounces between stems and water. Flooded vegetation (melaleuca forest, tall rice) can be **brighter** than dry soil through double bounce, so it does not show as water at all. Automatic chains such as Twele et al. (2016) split the image into tiles, compute Otsu only on tiles with a two-peaked histogram, then refine with terrain. Section 8.3 uses one fixed threshold of −18 dB for the whole delta because the years must be comparable, accepting errors at edges.
+
+</Depth>
+
+## 8.3 The Mekong flood month by month
+
+To follow the whole delta through the flood season we cannot wait for cloud-free optical images. The maps in Figure 8.4 use every Sentinel-1 image of the month: the median VV of each pixel, called water if VV < −18 dB and slope < 5°, computed at 100 m and turned into the **water share** of each 250 m cell. That gives 6 monthly maps (July–December) for every year from 2016 to 2025.
+
+<Predict client:visible lang="en"
+  title="Which month has the most water?"
+  q="In radar images, in which month is the surface-water area of the Mekong delta usually largest?"
+  options={['August', 'September', 'October or November', 'December']} answer={2}
+  why="In all ten years 2016–2025, the peak is October (5 years) or November (5 years). Floodwater drains slowly from the field blocks, and many fields are flooded to prepare the winter–spring crop." />
+
+<Figure
+  title="Figure 8.4 — Mekong delta surface water by month, July–December 2018 and 2024 (radar)"
+  try="Press Play to watch water spread from the Cambodian border into the Plain of Reeds and the Long Xuyen Quadrangle. Turn on Compare: July on the left, October on the right. Switch 2018 ↔ 2024: where is there less water in 2024?"
+  source="Sentinel-1 IW GRD (COPERNICUS/S1_GRD), VV, all orbits; monthly median, water = VV < −18 dB and SRTM slope < 5°, computed at ~100 m, water share in ~250 m cells. Flooded paddies, ponds, rivers and canals all count as water. 2018: Sentinel-1A + 1B; 2024: Sentinel-1A only. Contains modified Copernicus Sentinel data 2018, 2024."
+>
+  <DeltaMap client:visible lang="en" label="Mekong delta surface water by month" compare time={3} compareTime={0} choices={[
+    { key: 's1-2018', label: { vi: '2018', en: '2018' }, ids: { mekong: 'flood-s1-2018-mekong' }, clearBelow: 1 },
+    { key: 's1-2024', label: { vi: '2024', en: '2024' }, ids: { mekong: 'flood-s1-2024-mekong' }, clearBelow: 1 },
+  ]} />
+</Figure>
+
+Summing water share times cell area gives the monthly surface-water area for the region and for each province (Figure 8.5). The 2018 peak was in October with **566 thousand ha**; 2024 also peaked in October but at only **410 thousand ha**. Averaged over the ten peaks, the four wettest provinces are Kiên Giang (121 thousand ha), Long An (80), Đồng Tháp (75) and An Giang (58).
+
+<Figure
+  title="Figure 8.5 — Monthly surface-water area, Mekong delta and each province, 2016–2025"
+  try="Pick Long An, then Year A = 2018 and Year B = 2024: how different are the peaks? Pick Kiên Giang: where does its curve differ from Long An?"
+  source="As Figure 8.4, summed per province (geoBoundaries ADM1, the 63-province boundaries before the 2025 mergers). Every month has radar data for ≥ 99.7 % of the region. Contains modified Copernicus Sentinel data 2016–2025."
+>
+  <FloodArea client:visible lang="en" view="months" />
+</Figure>
+
+<Note kind="key">
+
+"Surface water" here includes rivers, canals, shrimp ponds, paddies flooded for planting and floodwater on the fields. It tells whether a flood is big or small compared with other years; it is **not** a damage area: most Mekong floodwater lies on harvested fields, just as farmers expect.
+
+</Note>
+
+<Depth level="advanced" title="Three processing choices and their consequences">
+
+The **monthly median** removes single windy images (rough, brighter water) but loses floods shorter than about half a month. The **−18 dB threshold** is stricter than the Otsu value of the An Giang frame (−15.5 dB), to avoid calling wet soil water; in exchange, flooded paddies with young rice are undercounted. The **100 m resolution** lets Earth Engine process the whole delta in minutes; narrow canals are lost. From 2022 to March 2025 only Sentinel-1A flew (1B failed at the end of 2021), so each month has fewer images and a noisier median. Comparing years is still valid because every year uses the same procedure.
+
+</Depth>
+
+## 8.4 Big flood years, small flood years and high dykes
+
+Figure 8.6 sums up each year with one number: the surface-water area of its peak month.
+
+<Figure
+  title="Figure 8.6 — Surface-water area in the peak month of each year, Mekong delta 2016–2025 (radar)"
+  try="Hover over the years. Pick An Giang, Đồng Tháp and Long An: in which years are all three low? Is there a year where a province is high while the region is low?"
+  source="As Figures 8.4 and 8.5: maximum of the six months July–December in each year; dashed line = 2016–2025 mean. Contains modified Copernicus Sentinel data 2016–2025."
+>
+  <FloodArea client:visible lang="en" view="years" />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="Which year had the most water?"
+  q="In 2016–2025, which year had the largest peak-month surface-water area?"
+  options={['2016', '2017', '2022', '2025']} answer={1}
+  why="2017: 604 thousand ha (November). Next come 2025 (588), 2018 (566) and 2022 (543). The smallest year is 2021 with 395 thousand ha. The ten-year mean is about 496 thousand ha." />
+
+The year-to-year range is large: the highest year is more than 1.5 times the lowest. In Long An the peak fell from 125 thousand ha (2018) to 55 thousand ha (2024). An Giang ranged from 34 thousand ha (2020) to 81 thousand ha (2018). Ten years are far too short to speak of a trend, but long-term studies point to two human-made changes:
+
+- **High dykes.** After the big flood of 2000, provinces of the Long Xuyen Quadrangle and the Plain of Reeds built many <Term id="high-dyke">high dykes</Term> that keep fields dry all year for an autumn–winter crop, replacing <Term id="low-dyke">low dykes</Term> that only hold back the early flood. Triet et al. (2017) found clear increases in peak water level and flood duration downstream of the high-dyke areas from 2000/2001. Their hydraulic model shows that high dykes alone raised the flood peak in the central delta by 9–13 cm and lengthened it by about 15 days; tides had an even larger effect (19–32 cm).
+- **Upstream dams.** Binh et al. (2020) argue that in 2009–2015 the dams with large reservoirs in the basin together reduced the flood pulse and raised dry-season flow along the Mekong, more than climate change did.
+
+Kondolf et al. (2022) name dykes as one of four causes of a "drowning" delta (with dams, sand mining and groundwater pumping): dykes stop sediment-rich floodwater from spreading over the fields and building land. They propose letting floodwater back onto the fields where possible.
+
+<Predict client:visible lang="en"
+  title="What does a high dyke do to the radar image?"
+  q="A high-dyke block grows an autumn–winter rice crop. How does it look on an October radar image?"
+  options={['Dark like water, because the area around it is flooded', 'Not water: dry fields or growing rice', 'No data', 'The brightest part of the image because of the dyke']} answer={1}
+  why="The dyke keeps the fields dry, and the rice inside scatters the wave (volume scattering), so the image is medium-bright. So peak water area can fall even if the river flood is the same: separating the two causes needs a hydraulic model or gauge data." />
+
+<Note kind="key">
+
+Peak-month water area varies strongly between years (395–604 thousand ha in 2016–2025). Satellite images show where the water is, but cannot by themselves separate the share due to the upstream flood, to dykes and to the cropping calendar. That needs gauge water levels, dyke maps and hydraulic models.
+
+</Note>
+
+## 8.5 Typhoon Yagi and flooding in the Red River Delta
+
+Typhoon Yagi made landfall over Quảng Ninh – Hải Phòng on 7 September 2024. Heavy rain afterwards raised the Red and Thái Bình rivers and waterlogged many fields. Clouds covered the region almost the whole time. Sentinel-1 has two images on the same orbit 91 (descending) covering most of the delta: **31 August** (before) and **12 September** (five days after landfall), exactly one 12-day cycle apart.
+
+The method is <Term id="change-detection">change detection</Term>: new water = pixels with VV < −18 dB on 12 September that were not water on 31 August. Both images share the same geometry, so every difference comes from the ground, not from the viewing angle.
+
+<Figure
+  title="Figure 8.7 — Red River Delta surface water before (31 Aug) and after (12 Sep 2024) typhoon Yagi, radar"
+  try="Turn on Compare and drag the swipe: along the Red River through Hanoi, the Đáy River in Ninh Bình, the coast of Nam Định – Hải Phòng, where does water spread? Hover to read the province name."
+  source="Sentinel-1A IW GRD, VV, relative orbit 91 (descending), 31 Aug and 12 Sep 2024; water = VV < −18 dB and SRTM slope < 5° at 10 m, water share in ~250 m cells. Not checked against field data. Contains modified Copernicus Sentinel data 2024."
+>
+  <DeltaMap client:visible lang="en" label="Water before and after typhoon Yagi" compare time={1} compareTime={0} choices={[
+    { key: 'yagi', label: { vi: 'Yagi 2024', en: 'Yagi 2024' }, ids: { red: 'flood-yagi-red' }, clearBelow: 1 },
+  ]} />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="Which province had the most new water on fields?"
+  q="On 12 Sep 2024, which province had the most new water on cropland (radar)?"
+  options={['Thái Bình', 'Hanoi', 'Hải Phòng', 'Nam Định']} answer={1}
+  why="Hanoi: 6,432 ha. Hải Phòng has a lot of new water (10,605 ha) but nearly all of it off cropland. Thái Bình has only 860 ha, although the reported rice damage there was very large (section 8.6)." />
+
+The orbit-91 pair covers 95.9 % of the Red River Delta region (11 provinces). Over that area radar sees **51,501 ha** of new water, of which **23,430 ha** (45.5 %) lies on cropland according to ESA WorldCover. The rest lies on other WorldCover classes (grassland, wetland, bare ground…).
+
+<Note kind="key">
+
+Two radar images from the same orbit, one cycle apart, give a map of new water after a storm regardless of clouds. But the map only shows water present **when the satellite passed**: flooding before or after that moment, and damage without standing water, do not show up.
+
+</Note>
+
+<Depth level="advanced" title="Threshold or change detection?">
+
+In the <a href="https://quanta1985.github.io/rs-knowledge/en/ch11-sar/">SAR radar chapter of the Remote Sensing & GIS handbook</a> (section 16.5), the same image pair over a Hanoi frame shows that "threshold on the after image" and "VV drop of more than 3 dB" give different results. Here a simple rule (water after, not water before) is used for the whole delta. The new water in the 250 m cells of Figure 8.7 is a share; summing the rise in water share over the region gives about 49 thousand ha, close to the 51,501 ha computed at 10 m.
+
+</Depth>
+
+## 8.6 From water maps to rice damage
+
+The table gives new water by province, computed at 10 m and summed within province outlines (2008 boundaries, before the 2025 mergers).
+
+<div class="table-wrap">
+
+| Province | New water (ha) | On cropland (ha) | % of the province's cropland |
+|---|---|---|---|
+| Hanoi | 10,574 | 6,432 | 5.1 |
+| Ninh Bình | 5,635 | 4,262 | 7.7 |
+| Nam Định | 7,124 | 3,148 | 3.4 |
+| Hải Dương | 4,510 | 2,673 | 3.6 |
+| Bắc Ninh | 3,415 | 2,122 | 4.0 |
+| Vĩnh Phúc | 2,636 | 1,831 | 4.6 |
+| Thái Bình | 3,639 | 860 | 1.0 |
+| Hưng Yên | 1,071 | 811 | 1.5 |
+| Hà Nam | 1,133 | 699 | 1.5 |
+| Hải Phòng | 10,605 | 569 | 1.7 |
+| Quảng Ninh | 1,159 | 23 | 0.1 |
+| **Total** | **51,501** | **23,430** | |
+
+</div>
+
+Cropland (WorldCover 2021) also includes vegetables. Using the 2024 radar rice map of <a href="../rice/">Chapter 4</a> instead: the 250 m cells with at least one rice season cover 469 thousand ha, and the rise of water share on them amounts to **about 19,900 ha** (4.2 %). Both ways give the same order of magnitude, about 20 thousand ha.
+
+Published statistics are much larger:
+
+- Rapid report of the Water Resources Directorate (MARD), 8 Sep 2024: Thái Bình 18,000 ha waterlogged and an estimated 55,000 ha of rice damaged; Hanoi 13,750 ha of rice lodged and 152 ha flooded; Bắc Ninh 8,209 ha of rice lodged or waterlogged; Nam Định 2,340 ha of rice under deep water (reported by Báo Đầu tư, 8 Sep 2024).
+- MARD report to the Prime Minister, figures as of 6:00 on 15 Sep 2024: 190,358 ha waterlogged or damaged, plus 48,727 ha of other crops and 31,745 ha of fruit trees (reported by Báo Nông nghiệp và Môi trường, 15 Sep 2024).
+- General Statistics Office (7 Oct 2024): in the northern provinces, the typhoon and the rain after it waterlogged or damaged nearly 350 thousand ha of rice and other crops, including 75 thousand ha of summer rice with losses of 70 % or more.
+
+These figures differ in scope (all of northern Vietnam versus 11 provinces), date and definition ("damaged" versus "under water"), so they cannot be added to or subtracted from the satellite numbers directly.
+
+<Predict client:visible lang="en"
+  title="Why does radar see so little water in Thái Bình?"
+  q="A rapid report estimated 55,000 ha of rice damaged in Thái Bình; radar sees only 860 ha of new water on cropland. Which reason is least likely?"
+  options={['Radar cannot see through typhoon clouds', 'Most damage was wind lodging, with no standing water', 'Waterlogging was pumped out before 12 Sep', 'Shallow water under heading rice does not darken the image']} answer={0}
+  why="C-band radar sees through clouds. The other three are all plausible: Thái Bình lies right next to the landfall area, so much rice was lodged; five days are enough for drainage pumps to remove water; and in mid-September the summer rice was heading, with a dense canopy over any water beneath." />
+
+Why is the water map about ten times smaller than the damage figures?
+
+1. **Damage without water.** <Term id="storm-lodging">Lodging</Term> by wind, and empty grains from rain at flowering: there is no standing water for a satellite to see.
+2. **Timing.** The 12 September image is five days after landfall. Short waterlogging was drained before then; places flooded later (late river floods) only show on the 24 September image.
+3. **Canopy over water.** On 6 Sep 2024 MARD warned that about 1 million ha of rice in the north were at the flowering stage (Vietnam Agriculture newspaper, 6 Sep 2024), when the canopy is densest. C-band radar mostly "sees" the canopy; shallow water underneath can make the image **brighter** (double bounce between stems and water), not darker. This is the biggest limit of a VV threshold on growing rice.
+4. **Scope.** The statistics include the northern midland and mountain provinces (the 8 September report also North Central); the map only covers the 11 delta provinces.
+
+<Steps title="Estimating flooded rice from satellites" items={[
+  { tag: '1', t: 'Before / after pair', d: 'Same orbit, as close to the storm as possible; add the image 12 days later to catch late floods.' },
+  { tag: '2', t: 'New-water map', d: 'Threshold or change detection; mask steep slopes and permanent water.' },
+  { tag: '3', t: 'Overlay a rice map of the same season', d: 'Chapter 4: 2024 radar rice map. State the crop growth stage.' },
+  { tag: '4', t: 'Sum by province and district', d: 'Use the ground area of each pixel and the administrative boundaries of the right year.' },
+  { tag: '5', t: 'Check and explain', d: 'Field points, drone photos, commune data; state what the satellite cannot see (lodging, water under canopy).' },
+]} />
+
+<Note kind="key">
+
+A post-storm water map is fast, objective evidence of **where there was water** on one day. A damage figure needs a rice map, an image series over several dates and field checks as well. Reporting a satellite number without saying what it measures is the fastest way to lose users' trust.
+
+</Note>
+
+## 8.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Báo Đầu tư (8 Sep 2024). Khắc phục hơn 85.000 ha lúa và rau màu bị ngập úng sau bão Yagi [Over 85,000 ha of rice and vegetables waterlogged after typhoon Yagi], citing the Water Resources Directorate, MARD. https://baodautu.vn/khac-phuc-hon-85000-ha-lua-va-rau-mau-bi-ngap-ung-sau-bao-yagi-d224376.html
+- Báo Nông nghiệp và Môi trường (15 Sep 2024). Bão số 3 khiến 348 người chết và mất tích, thiệt hại kinh tế hơn 31.000 tỷ đồng [Typhoon No. 3 leaves 348 dead and missing, economic losses over 31,000 billion VND]. https://nongnghiepmoitruong.vn/bao-so-3-khien-348-nguoi-chet-va-mat-tich-thiet-hai-kinh-te-hon-31000-ty-dong-d400034.html
+- Vietnam Agriculture (6 Sep 2024). 1 million ha rice in risks of being affected by super typhoon Yagi. https://van.nongnghiepmoitruong.vn/1-million-ha-rice-in-risks-of-being-affected-by-super-typhoon-yagi-d398646.html
+- Binh, D. V., Kantoush, S. A., Sumi, T., et al. (2020). Long-term alterations of flow regimes of the Mekong River and adaptation strategies for the Vietnamese Mekong Delta. *Journal of Hydrology: Regional Studies*, 32, 100742. https://doi.org/10.1016/j.ejrh.2020.100742
+- General Statistics Office of Vietnam (7 Oct 2024). Tăng trưởng nông nghiệp quý III và 9 tháng năm 2024 sụt giảm [Agricultural growth in Q3 and the first nine months of 2024 declines]. https://www.nso.gov.vn/?p=53573
+- Kondolf, G. M., et al. (2022). Save the Mekong Delta from drowning. *Science*, 376(6593), 583–585. https://doi.org/10.1126/science.abm5176
+- Otsu, N. (1979). A threshold selection method from gray-level histograms. *IEEE Transactions on Systems, Man, and Cybernetics*, 9(1), 62–66.
+- Pekel, J.-F., Cottam, A., Gorelick, N., & Belward, A. S. (2016). High-resolution mapping of global surface water and its long-term changes. *Nature*, 540, 418–422.
+- Triet, N. V. K., Dung, N. V., Fujii, H., Kummu, M., Merz, B., & Apel, H. (2017). Has dyke development in the Vietnamese Mekong Delta shifted flood hazard downstream? *Hydrology and Earth System Sciences*, 21, 3991–4010. https://doi.org/10.5194/hess-21-3991-2017
+- Twele, A., Cao, W., Plank, S., & Martinis, S. (2016). Sentinel-1-based flood mapping: a fully automated processing chain. *International Journal of Remote Sensing*, 37(13), 2990–3004.
+- Xu, H. (2006). Modification of normalised difference water index (NDWI) to enhance open water features in remotely sensed imagery. *International Journal of Remote Sensing*, 27(14), 3025–3033.
+- Zanaga, D., et al. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

@@ -1,0 +1,100 @@
+[
+ {
+  "q": { "vi": "Vì sao số vụ lúa ở ĐBSH được đếm bằng Sentinel-1 chứ không bằng EVI của MODIS?", "en": "Why are Red River Delta rice seasons counted with Sentinel-1 rather than MODIS EVI?" },
+  "options": [
+   { "vi": "Mùa mưa có quá ít quan sát MODIS không mây, vụ Xuân và vụ Mùa dính vào nhau", "en": "The rainy season has too few cloud-free MODIS observations, so the spring and main crops merge" },
+   { "vi": "MODIS không có kênh cận hồng ngoại", "en": "MODIS has no near-infrared band" },
+   { "vi": "Ruộng ĐBSH nhỏ hơn 10 m", "en": "Red River Delta fields are smaller than 10 m" },
+   { "vi": "Sentinel-1 đo trực tiếp năng suất", "en": "Sentinel-1 measures yield directly" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Tháng 6–7/2024 chỉ 7–12 % quan sát MODIS ở ĐBSH là tốt. Radar chụp qua mây đều 12 ngày một lần.", "en": "Only 7–12 % of MODIS observations over the delta were good in June–July 2024. Radar images through cloud every 12 days." }
+ },
+ {
+  "q": { "vi": "Lúc ruộng vừa ngập để gieo cấy, ba đại lượng nào cùng xuất hiện?", "en": "When a paddy has just been flooded for planting, which three signs appear together?" },
+  "options": [
+   { "vi": "NDVI thấp hoặc âm, LSWI cao, VH rất thấp", "en": "Low or negative NDVI, high LSWI, very low VH" },
+   { "vi": "NDVI cao, LSWI thấp, VH cao", "en": "High NDVI, low LSWI, high VH" },
+   { "vi": "NDVI cao, LSWI cao, VH cao", "en": "High NDVI, high LSWI, high VH" },
+   { "vi": "NDVI thấp, LSWI thấp, VH cao", "en": "Low NDVI, low LSWI, high VH" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Mặt nước hấp thụ cận hồng ngoại (NDVI thấp), ẩm làm LSWI cao, và phản xạ gương sóng radar đi xa vệ tinh (VH thấp).", "en": "Water absorbs near-infrared (low NDVI), wetness raises LSWI, and specular reflection sends the radar wave away from the satellite (low VH)." }
+ },
+ {
+  "q": { "vi": "Vì sao VH tăng mạnh khi lúa đẻ nhánh?", "en": "Why does VH rise strongly as rice tillers?" },
+  "options": [
+   { "vi": "Tán xạ khối trong thân lá làm đổi phân cực", "en": "Volume scattering in the canopy depolarises the wave" },
+   { "vi": "Nước trong ruộng ấm lên", "en": "The paddy water warms up" },
+   { "vi": "Lúa phát ra sóng vi ba", "en": "Rice emits microwaves" },
+   { "vi": "Mây tan khi lúa lớn", "en": "Clouds clear as the rice grows" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Kênh VH chỉ nhận năng lượng đã bị đổi hướng dao động, chủ yếu do tán xạ nhiều lần trong thân lá.", "en": "The VH channel only receives energy whose polarisation has been changed, mostly by multiple scattering in the canopy." }
+ },
+ {
+  "q": { "vi": "Với vụ Đông Xuân 2023–24 ở ĐBSCL, đổi ngưỡng SOS từ 0 % sang 50 % biên độ làm trung vị ngày bắt đầu vụ thay đổi thế nào?", "en": "For the 2023–24 Mekong winter–spring crop, how does moving the SOS threshold from 0 % to 50 % of the amplitude change the median start date?" },
+  "options": [
+   { "vi": "Lùi khoảng 36 ngày", "en": "It moves about 36 days later" },
+   { "vi": "Không đổi", "en": "It does not change" },
+   { "vi": "Sớm lên khoảng 36 ngày", "en": "It moves about 36 days earlier" },
+   { "vi": "Lùi khoảng 6 tháng", "en": "It moves about 6 months later" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Từ 17/11/2023 (f = 0) sang 23/12/2023 (f = 0,5). Ngưỡng càng cao, mốc càng nằm sâu trong giai đoạn đẻ nhánh.", "en": "From 17 Nov 2023 (f = 0) to 23 Dec 2023 (f = 0.5). The higher the threshold, the deeper into tillering the mark falls." }
+ },
+ {
+  "q": { "vi": "Biên độ VH trong vụ là gì?", "en": "What is the seasonal VH range?" },
+  "options": [
+   { "vi": "Phân vị 90 trừ phân vị 10 của chuỗi VH trong vụ, theo dB", "en": "The 90th minus the 10th percentile of the in-season VH series, in dB" },
+   { "vi": "VH của ngày chụp đầu tiên", "en": "VH on the first acquisition" },
+   { "vi": "VV trừ VH", "en": "VV minus VH" },
+   { "vi": "Số ngày giữa hai đáy VH", "en": "The number of days between two VH troughs" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lúa đi từ đáy ngập lên tán dày nên biên độ lớn; nhà, cây lâu năm và nước thường trực ít thay đổi.", "en": "Rice goes from a flooded trough to a dense canopy, so its range is large; buildings, tree crops and permanent water change little." }
+ },
+ {
+  "q": { "vi": "Thiên lệch của diện tích tính bằng đếm pixel bằng gì?", "en": "What is the bias of a pixel-counting area equal to?" },
+  "options": [
+   { "vi": "Phần đưa nhầm vào trừ phần bỏ sót", "en": "Commission minus omission" },
+   { "vi": "Luôn bằng 0 nếu độ chính xác tổng thể trên 80 %", "en": "Always zero if overall accuracy is above 80 %" },
+   { "vi": "Diện tích pixel nhân số lớp", "en": "Pixel area times the number of classes" },
+   { "vi": "Phần bỏ sót cộng phần đưa nhầm vào", "en": "Omission plus commission" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Phụ lục sách FAO (Gallego): pixel không phải lúa bị gọi là lúa làm tăng diện tích, lúa bị bỏ sót làm giảm; không gì bảo đảm hai phần bằng nhau.", "en": "FAO handbook annex (Gallego): non-rice called rice adds area, missed rice removes it; nothing makes the two equal." }
+ },
+ {
+  "q": { "vi": "Bản đồ ghi 1.692 nghìn ha lúa và 170 nghìn ha không lúa. Mẫu kiểm tra cho 12 % 'lúa' là sai và 9 % 'không lúa' là sai. Đếm pixel thừa hay thiếu?", "en": "A map shows 1,692 thousand ha of rice and 170 thousand ha of non-rice. The check sample finds 12 % of 'rice' and 9 % of 'non-rice' wrong. Does pixel counting over- or underestimate?" },
+  "options": [
+   { "vi": "Thừa, vì 12 % của diện tích lớn hơn nhiều 9 % của diện tích nhỏ", "en": "Over, because 12 % of the large area far exceeds 9 % of the small one" },
+   { "vi": "Thiếu, vì có điểm lúa bị bỏ sót", "en": "Under, because some rice was missed" },
+   { "vi": "Đúng, vì 12 % và 9 % xấp xỉ nhau", "en": "Correct, because 12 % and 9 % are similar" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Khoảng 203 nghìn ha đưa nhầm vào, chỉ khoảng 15 nghìn ha bỏ sót, nên đếm pixel thừa khoảng 188 nghìn ha.", "en": "About 203 thousand ha of commission against about 15 thousand ha of omission, so pixel counting is about 188 thousand ha too high." }
+ },
+ {
+  "q": { "vi": "Điều nào KHÔNG được làm khi chọn mẫu kiểm tra để hiệu chỉnh diện tích?", "en": "Which of these must you NOT do when choosing a check sample for area correction?" },
+  "options": [
+   { "vi": "Dùng lại điểm huấn luyện của bộ phân loại", "en": "Reuse the classifier's training points" },
+   { "vi": "Chọn ngẫu nhiên trong từng lớp bản đồ", "en": "Draw points at random within each map class" },
+   { "vi": "Giữ cả các điểm rơi vào bờ ruộng", "en": "Keep points that fall on field edges" },
+   { "vi": "Ghi lại xác suất chọn của mỗi điểm", "en": "Record each point's selection probability" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Điểm huấn luyện làm ma trận nhầm lẫn lạc quan. Mẫu phải chọn bằng xác suất, độc lập với dữ liệu huấn luyện, và không bỏ pixel bờ ruộng.", "en": "Training points make the confusion matrix optimistic. The sample must be probabilistic, independent of the training data, and must not drop edge pixels." }
+ },
+ {
+  "q": { "vi": "Làm vụ thứ ba sau đê bao cao ở vùng ngập lũ ĐBSCL đánh đổi điều gì?", "en": "What is traded off when a third crop is grown behind high dykes in the Mekong flood zone?" },
+  "options": [
+   { "vi": "Ruộng mất phù sa bồi và không còn là chỗ chứa nước lũ", "en": "Fields lose sediment deposition and no longer store flood water" },
+   { "vi": "Lúa không còn cần nước", "en": "Rice no longer needs water" },
+   { "vi": "Vụ Đông Xuân bị bỏ", "en": "The winter–spring crop is dropped" },
+   { "vi": "Không có đánh đổi nào", "en": "There is no trade-off" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Thêm một vụ nhưng phải bù phù sa bằng phân bón, và nước lũ bị đẩy sang vùng khác (Chương 8).", "en": "One more crop, but sediment has to be replaced by fertiliser and flood water is pushed elsewhere (Chapter 8)." }
+ }
+]

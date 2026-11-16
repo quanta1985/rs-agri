@@ -1,0 +1,326 @@
+---
+title: Rice & crop calendars
+n: 4
+summary: Rice covers most of the farmland in both deltas. This chapter reads the rice plant in real Sentinel-2, Sentinel-1 and MODIS time series, counts the crops per year, finds the start of the season, maps rice with radar and shows why counting pixels does not give the right area.
+objectives:
+  - Tell the Red River Delta rice calendar (spring, main crop) from the Mekong one (winter–spring, summer–autumn, autumn–winter) and read both on a seasons-per-year map.
+  - Read the NDVI, EVI, LSWI and VH series of a paddy and name the flooded, tillering, heading and ripening stages.
+  - Explain why the start-of-season date depends on its definition (0, 20 or 50 % of the amplitude).
+  - Map rice from the seasonal VH range and a threshold, and know where that approach fails.
+  - Compute a bias-corrected area and its confidence interval from the confusion matrix of a stratified sample.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Steps from '../../../components/Steps.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ThresholdLab from '../../../islands/ThresholdLab.tsx';
+import RiceSeries from '../../../islands/RiceSeries.tsx';
+import AreaCorrection from '../../../islands/AreaCorrection.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/rice.json';
+
+## 4.1 Rice in the two deltas
+
+In both deltas most of the farmland grows <Term id="rice">paddy rice</Term>, but the two regions follow different rhythms.
+
+- **The Red River Delta** has a cool winter. Most fields grow two <Term id="rice-season">crops</Term> a year: the **spring** crop, transplanted after Tết (Lunar New Year) and harvested around June, and the **main** (summer) crop, transplanted in June–July and harvested in October. Most farmers <Term id="transplanting">transplant</Term> seedlings.
+- **The Mekong Delta** is warm all year, so water sets the number of crops. The **winter–spring** crop is sown as the flood recedes (November–December), the **summer–autumn** crop in April–May. Where high dykes keep the August flood out, farmers add an **autumn–winter** crop. Most of them use <Term id="direct-seeding">direct seeding</Term>.
+
+<Predict client:visible lang="en"
+  title="More triple-cropped land, or less?"
+  q="Between 2016 and 2024, did the share of Mekong Delta farmland with three or more crops rise or fall?"
+  options={['Rose clearly', 'Stayed about the same', 'Fell clearly']} answer={0}
+  why="It rose from 25 % to 35 % of the farmland (from 470 to 652 thousand ha on the satellite map). High dykes in An Giang, Dong Thap and Kien Giang make an autumn–winter crop possible during the flood season." />
+
+<Figure
+  title="Figure 4.1 — Crops per year on the farmland of the two deltas, 2016 and 2024"
+  try="Turn on 'Compare' and drag the swipe: 2016 on the left, 2024 on the right. In the Mekong Delta, where does the blue (3 crops) spread? Switch to the Red River Delta: does the grey (no rice detected) grow around Hanoi or along the coast?"
+  source="Red River Delta: Sentinel-1 IW VH, relative orbit 91 (12-day), mean of 3 consecutive dates; a season = a VH minimum ≤ −17 dB followed by a rise ≥ 2.5 dB within 96 days, counted per calendar year. Mekong Delta: MODIS MOD13Q1 + MYD13Q1 v061 (EVI, SummaryQA ≤ 1, 8-day series, gap-filled, Savitzky–Golay 5/2), a season = an EVI peak ≥ 0.35 rising ≥ 0.15 above both neighbouring troughs. Only 250 m cells with ≥ 50 % cropland in ESA WorldCover 2021 v200. Not checked in the field. Contains modified Copernicus Sentinel data. Basemap © Esri."
+>
+  <DeltaMap client:visible lang="en" label="Rice crops per year" region="mekong" compare time={1} choices={[
+    { key: 'seasons', label: { vi: 'Số vụ', en: 'Seasons' }, ids: { mekong: 'rice-seasons-mekong', red: 'rice-seasons-red' } },
+  ]} />
+</Figure>
+
+The two maps come from different data. In the Mekong Delta the 250 m MODIS EVI series is dense enough: each EVI peak is one crop. In the Red River Delta only 7–12 % of MODIS observations were cloud-free in June–July 2024, so the spring and main crops merge in the EVI series. The northern map therefore counts crops with Sentinel-1 radar: every time a field is flooded for transplanting (VH drops to a trough) and then greens up (VH rises), that is one crop.
+
+<Stats items={[
+  { v: '25 → 35', u: '%', l: 'Mekong: farmland with ≥ 3 crops, 2016 → 2024' },
+  { v: '56 → 48', u: '%', l: 'Red River: farmland with 2 rice crops, 2016 → 2024' },
+  { v: '15 → 29', u: '%', l: 'Red River: farmland with no rice detected' },
+]} caption="Shares by area of the map's farmland cells: 1,861 thousand ha (Mekong) and 657 thousand ha (Red River). Numbers: scripts/rice_numbers.ts." />
+
+In the Red River Delta, the area with no rice detected grew from 102 to 188 thousand ha. Three things add up here: fields turned into other crops or built land (the cropland mask is from 2021), fields left fallow, and fields the radar rule misses. The map tells you **where** to go and look, not why.
+
+<Predict client:visible lang="en"
+  title="How much winter–spring rice does the satellite see?"
+  q="In 2024 the General Statistics Office reported 1,487.7 thousand ha of winter–spring rice in the Mekong Delta. How many thousand ha of farmland have at least one crop on the satellite map?"
+  slider={{ min: 1000, max: 2200, step: 10 }} answer={1692} tol={60}
+  why="1,692 thousand ha, about 14 % more than the statistics. The map also counts cells growing upland crops or sugarcane, and 250 m cells that include bunds, canals and houses; the statistics count the area actually sown in one season. Section 4.5 deals with this gap." />
+
+<Note kind="key">
+
+The Red River Delta grows two crops, spring and main, following temperature. The Mekong Delta grows two to three, following water. Between 2016 and 2024 the satellite maps show triple cropping spreading fast in the Mekong Delta, while in the Red River Delta the area with no rice detected almost doubled.
+
+</Note>
+
+<Depth level="advanced" title="Comparing the map with statistics: different units">
+
+Rice statistics count the **sown area** of each crop, so a hectare cropped three times counts three times in the annual total. The seasons map counts **land area**. To compare with an annual figure, multiply each class area by its number of crops. For 2024 that gives 3.71 million "crop-hectares" in the Mekong Delta and 0.80 million in the Red River Delta, taking the "3 or more" class as exactly 3.
+
+A single season is easier to compare. The statistics for winter–spring 2024: Mekong Delta 1,487.7 thousand ha, Red River Delta 471.4 thousand ha (GSO 2024). The maps show 1,692 thousand ha (Mekong) and 469 thousand ha (Red River) of farmland with at least one crop. The close match in the north is partly luck: the map frame cuts off eastern Quang Ninh, and the "1 crop" class also holds fields that grow only the main crop.
+
+</Depth>
+
+## 4.2 The rice plant seen from space
+
+A rice crop leaves a very clear trace in satellite images, because it starts as a sheet of water.
+
+<Steps title="One rice crop through the satellite's eyes" items={[
+  { t: 'Flooding, land preparation, planting', tag: 'day 0', d: 'The field is open water: negative NDVI, LSWI above NDVI, very low VH (−25 dB or lower) because water reflects like a mirror.' },
+  { t: 'Tillering', tag: '~20–45 days', d: 'Leaves cover the water: NDVI and EVI climb fast, VH rises strongly through volume scattering in the canopy and bounces between stems and water.' },
+  { t: 'Panicle initiation, heading', tag: '~60–75 days', d: 'Densest canopy: NDVI about 0.9. VH hardly rises any more.' },
+  { t: 'Ripening, harvest', tag: '~90–110 days', d: 'Leaves yellow and the field is drained: NDVI and LSWI fall. After harvest the dry field has low NDVI and LSWI, and VH follows soil moisture and stubble.' },
+]} />
+
+"Flooded just before the canopy greens up" is the key to telling rice from other crops. Xiao et al. (2006) used exactly this sign with MODIS: a pixel whose <Term id="lswi">LSWI</Term> comes close to or exceeds its <Term id="evi">EVI</Term> early in the season is flooded. On radar the same sign is a deep <Term id="vh-backscatter">VH</Term> trough followed by a fast rise.
+
+<Predict client:visible lang="en"
+  title="When was the An Giang field darkest on radar?"
+  q="When did the 500 m An Giang rice box in Figure 4.2 reach its lowest VH (−29.5 dB)?"
+  options={['At winter–spring sowing, December 2023', 'In the middle of the flood, November 2023', 'At harvest, March 2024', 'In mid summer–autumn crop, June 2024']} answer={1}
+  why="On 13 November 2023, in the middle of the flood. This field lets the river flood in from September to November (VH around −29 dB for two months). A wide, calm flood surface is darker than a freshly sown paddy." />
+
+<Figure
+  title="Figure 4.2 — One year of two rice fields: NDVI, EVI, LSWI (Sentinel-2) and VH, VV (Sentinel-1)"
+  try="In An Giang, find 2023-12-07 → 2023-12-31: by how many dB does VH rise in 24 days? Switch to Nam Dinh: how many usable Sentinel-2 images are there from late November 2023 to early March 2024, and what does the radar show in that window?"
+  source="The 50 × 50 pixel (500 m) box of 10 m pixels with the highest seasonal VH range in the site frame (An Giang 105.108–105.113°E, 10.487–10.492°N; Nam Dinh 106.442–106.447°E, 20.219–20.223°N), chosen automatically. Sentinel-2 SR Harmonized, Cloud Score+ cs_cdf ≥ 0.6, dates kept only when ≥ 80 % of the box is clear, box mean. Sentinel-1 IW GRD, relative orbit 26 (An Giang) and 91 (Nam Dinh), box mean in linear power, then dB. Sep 2023 – Dec 2024. Points are not joined across gaps > 40 days. The shaded stages are this handbook's reading of the two series, not field records. Contains modified Copernicus Sentinel data 2023–2024."
+>
+  <RiceSeries client:visible lang="en" />
+</Figure>
+
+The two fields tell two stories:
+
+- **An Giang.** The winter–spring crop was sown in early December 2023, right as the flood receded. NDVI jumped from 0.15 (11 Dec) to 0.76 (21 Dec) and peaked at 0.94 on 15 January 2024. VH rose almost 8 dB in 12 days, from −25.7 dB (19 Dec) to −17.9 dB (31 Dec). Harvest came around mid-March (NDVI down to 0.26 on 15 Mar). The summer–autumn crop was sown in April, and then Sentinel-2 had no clean image for 60 days, from 18 June to 17 August 2024, so the harvest date is unknown. From September the field took in the flood again. It is a two-crop field in an area where many farms grow three.
+- **Nam Dinh.** The 2023 main crop was harvested in late October. The 2024 spring crop starts with two VH troughs, −26.2 dB (16 Jan) and −26.8 dB (9 Feb): flooding for land preparation, then transplanting. Exactly then, Sentinel-2 had no clean image for 55 days (24 Nov 2023 → 18 Jan 2024) and another 45 days (20 Jan → 5 Mar 2024). NDVI peaked at 0.95 on 12 May. The main crop was transplanted in mid-July (VH −23.6 dB on 14 Jul) and harvested in late October.
+
+<Predict client:visible lang="en"
+  title="Optical or radar?"
+  q="In Nam Dinh, which kind of imagery recorded the spring transplanting (January–February)?"
+  options={['Sentinel-2 (optical)', 'Sentinel-1 (radar)', 'Both equally']} answer={1}
+  why="Radar. The drizzle and low cloud of the northern spring hid almost every Sentinel-2 image from December to February. Sentinel-1 imaged every 12 days through the cloud. The FAO handbook (2017, section 5.2.3) makes the same point for monsoon rice in South and Southeast Asia." />
+
+<Note kind="key">
+
+A rice crop begins as water: negative NDVI, high LSWI, a VH trough. As the crop greens, NDVI and VH rise together. Optical imagery drops out when clouds coincide with planting; radar still sees the VH trough.
+
+</Note>
+
+<Depth level="advanced" title="Why VH rises as rice grows while VV rises less">
+
+Over a freshly planted paddy the radar wave is mostly reflected away like a mirror, so both VV and VH are dark. As rice tillers, the wave bounces many times inside the canopy (volume scattering) and between upright stems and the water. Volume scattering changes the polarisation, so VH rises strongly. VV also carries a double-bounce term between upright stems and water, and that term weakens as the canopy thickens, so VV rises less and less regularly. The FAO handbook (2017, section 5.2.3) describes the same sequence: backscatter climbs with tillering up to the reproductive stage and then levels off. Scattering and polarisation are covered in the <a href="https://quanta1985.github.io/rs-knowledge/en/ch11-sar/">SAR chapter of rs-knowledge</a>.
+
+</Depth>
+
+## 4.3 Crop calendars from time series
+
+A <Term id="crop-calendar">crop calendar</Term> tells you when each area sows, heads and harvests. It feeds yield forecasts, irrigation scheduling and the timing of sowing to avoid salinity (Chapter 10). From an image series one estimates three <Term id="phenology">phenological</Term> dates: the <Term id="sos">start of season (SOS)</Term>, the <Term id="pos">peak of season (POS)</Term> and the <Term id="eos">end of season (EOS)</Term>.
+
+An EVI series carries noise from leftover cloud, so gaps are filled and the series is smoothed first, here with a <Term id="savitzky-golay">Savitzky–Golay filter</Term>. Then comes the hard question: **when does a season "start"?** A common answer (Jönsson and Eklundh 2004) takes the pre-season trough, the peak and the amplitude A between them, and defines SOS as the first date the series climbs past a level:
+
+<Formula label="Start of season from an amplitude threshold" tex="\mathrm{SOS}_f = \min\{\, t : \mathrm{EVI}(t) \ge \mathrm{EVI}_{\text{min}} + f\,A \,\}, \qquad A = \mathrm{EVI}_{\text{max}} - \mathrm{EVI}_{\text{min}}" where="
+f :: fraction of the amplitude: 0 (as soon as the series leaves the trough), 0.2 or 0.5
+A :: EVI amplitude of the season
+\mathrm{EVI}_{\text{min}},\ \mathrm{EVI}_{\text{max}} :: pre-season trough and seasonal peak of the smoothed series
+" />
+
+<Predict client:visible lang="en"
+  title="Change the definition: how far does the start move?"
+  q="For the 2023–24 winter–spring crop in the Mekong Delta, how many days separate the median SOS with f = 0 from the median with f = 0.5?"
+  slider={{ min: 0, max: 60, step: 1, unit: 'days' }} answer={36} tol={6}
+  why="36 days: the median is 17 Nov 2023 with f = 0 and 23 Dec 2023 with f = 0.5. Same images, different definition, and the calendar shifts by more than a month. Every SOS map has to state its threshold." />
+
+<Figure
+  title="Figure 4.3 — Start of the 2023–24 winter–spring crop (Mekong) and 2024 spring transplanting (Red River)"
+  try="In the Mekong Delta, step the time slider through 0 %, 20 %, 50 %: which area always sows first (dark purple)? Turn on 'Compare' to set two thresholds side by side. Switch to the Red River Delta: does the coast transplant earlier or later than the area around Hanoi?"
+  source="Mekong: MODIS MOD13Q1 + MYD13Q1 v061 EVI, 8-day series smoothed with Savitzky–Golay; highest EVI peak in the winter–spring window, trough = minimum of the 12 samples before the peak, SOS = first crossing of trough + f × amplitude (f = 0, 0.2, 0.5). Red River: Sentinel-1 VH orbit 91, date of the first VH trough in the first 90 days of 2024 (12-day steps). Value = days from 1 Jan 2024 (negative = late 2023). Only cells with ≥ 50 % cropland (ESA WorldCover 2021). Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="en" label="Start of season" region="mekong" compare time={1} choices={[
+    { key: 'sos', label: { vi: 'Ngày bắt đầu vụ', en: 'Start of season' }, ids: { mekong: 'rice-sos-2024-mekong', red: 'rice-sos-2024-red' } },
+  ]} />
+</Figure>
+
+<Stats items={[
+  { v: '17 Nov', l: 'Mekong, median SOS with f = 0' },
+  { v: '9 Dec', l: 'Mekong, median SOS with f = 0.2' },
+  { v: '23 Dec', l: 'Mekong, median SOS with f = 0.5' },
+  { v: '21 Feb', l: 'Red River, median 2024 spring transplanting (VH trough)' },
+]} caption="2023 for the Mekong, 2024 for the Red River. 80 % of Mekong cells have their SOS (f = 0) between 16 Oct 2023 and 4 Jan 2024; 80 % of Red River cells transplant between 28 Jan and 16 Mar 2024. Numbers: scripts/rice_numbers.ts." />
+
+Which threshold is right? None is right everywhere. f = 0 tracks the first greening but reacts to noise at the trough. f = 0.5 is steadier but late, because by then the rice is tillering. To match sowing dates recorded in the field, the threshold has to be calibrated on fields with farm records. In the Red River Delta the VH trough marks transplanting more directly, but only to within Sentinel-1's 12-day step. Sakamoto et al. (2006) mapped rice phenology across the Mekong Delta from MODIS in a similar way and showed that the crop calendar there follows the flood rhythm of the Tien and Hau rivers.
+
+<Predict client:visible lang="en"
+  title="When does the Red River Delta transplant its spring crop?"
+  q="According to the Sentinel-1 VH trough, the median 2024 spring transplanting date in the Red River Delta is around…"
+  options={['Early January', 'Late February', 'Mid-April']} answer={1}
+  why="21 February 2024, about ten days after Tết (10 February 2024). The VH trough marks the field being flooded for transplanting; the seedlings were sown in nursery beds before that." />
+
+<Note kind="key">
+
+A satellite crop calendar always comes with a definition. With the same EVI series, moving the threshold from 0 to 50 % of the amplitude pushes the Mekong winter–spring start back by 36 days. State the threshold on every map and calibrate it against field records.
+
+</Note>
+
+## 4.4 Mapping rice with Sentinel-1
+
+The FAO handbook (2017, section 2.5.3) judges that dense, regular SAR series such as Sentinel-1 have made irrigated rice mapping a mature technique. IRRI's PRISM project in the Philippines, Asia-RiCE (JAXA) and GEO-Rice (ESA) all rely on radar series. Section 5.2.3 of the book outlines the workflow: calibrate, filter speckle, co-register at least three images about 20–25 days apart (before, during and after planting), and write decision rules on the backscatter profile.
+
+This section uses a simpler rule with a single number: the **seasonal VH range**, the 90th minus the 10th percentile of the in-season VH series (after a 3 × 3 smoothing in linear power). Rice goes from a flooded trough (−25 dB) to a dense canopy (−15 dB), so its range is large. Buildings, tree crops and permanent water change little.
+
+<Predict client:visible lang="en"
+  title="The Otsu threshold in An Giang"
+  q="For the 2023–24 winter–spring VH range over the 10 km An Giang frame, at how many dB does the Otsu threshold (0.5 dB steps) split the frame?"
+  slider={{ min: 2, max: 16, step: 0.5, unit: 'dB' }} answer={9} tol={1}
+  why="9 dB. The part above it (taken as rice) covers 5,934 ha, 56.6 % of the frame. In Nam Dinh the Otsu threshold is lower (7.5 dB): the spring series is shorter there, and fields are smaller and mixed with villages." />
+
+<Figure
+  title="Figure 4.4 — Thresholding the VH range: winter–spring rice 2023–24, An Giang"
+  try="Press 'Use Otsu', then drag the threshold from 5 dB to 12 dB: how far does the rice area fall? Hover over canals, canal-side villages and fields: how does the range differ?"
+  source="Sentinel-1 IW GRD VH, relative orbit 26, 13 acquisitions 1 Nov 2023 – 1 Apr 2024; 3 × 3 mean in linear power, range = 90th − 10th percentile of the series, in dB; 10 m grid. Threshold computed in the browser. Not checked against a field map. Contains modified Copernicus Sentinel data 2023–2024. Basemap © Esri."
+>
+  <ThresholdLab client:visible lang="en" label="VH range threshold, An Giang" layer="rice-dvh-angiang" below={false}
+    range={[0, 20]} step={0.5} maskLabel={{ vi: 'Lúa', en: 'Rice' }} />
+</Figure>
+
+<Figure
+  title="Figure 4.5 — The same method in Nam Dinh, spring 2024"
+  try="Press 'Use Otsu' and compare with An Giang. Set the threshold to 5 dB: are the villages (small low-range patches) still counted as rice? What colour is the coastal strip in the south?"
+  source="Sentinel-1 IW GRD VH, relative orbit 91, 14 acquisitions 15 Jan – 1 Jul 2024; computed as in Figure 4.4. Contains modified Copernicus Sentinel data 2024. Basemap © Esri."
+>
+  <ThresholdLab client:visible lang="en" label="VH range threshold, Nam Dinh" layer="rice-dvh-namdinh" below={false}
+    range={[0, 20]} step={0.5} maskLabel={{ vi: 'Lúa', en: 'Rice' }} height={460} />
+</Figure>
+
+<div class="table-wrap">
+
+| 10 km frame | Threshold | "Rice" area | Share of frame |
+|---|---|---|---|
+| An Giang | 5 dB | 8,557 ha | 81.6 % |
+| An Giang | 9 dB (Otsu) | 5,934 ha | 56.6 % |
+| Nam Dinh | 5 dB | 6,844 ha | 65.3 % |
+| Nam Dinh | 7.5 dB (Otsu) | 4,386 ha | 41.8 % |
+
+</div>
+
+The table carries the main lesson of this section: **the area depends on the threshold**. Lowering it by 4 dB adds 2,600 ha of rice in An Giang. Otsu only finds the natural split of the histogram; it does not guarantee the true boundary between rice and non-rice. In the small fields of the Red River Delta many 10 m pixels fall on bunds, village roads and ditches, which dilutes the range.
+
+<Note kind="key">
+
+Rice has a very distinctive radar series, a flooded trough followed by a strong rise, so a single statistic such as the seasonal VH range already separates most paddies. But the area moves by thousands of hectares when the threshold changes, so the map has to be checked before it is used for area (section 4.5).
+
+</Note>
+
+<Depth level="advanced" title="The FAO three-date rule and why it is not used here">
+
+The FAO handbook (2017, Box 2, section 5.2.3) quotes decision rules for Mirzapur district (India) based on σ⁰ at three dates L1, L2, L3. Water, for example, is any pixel below −17 dB on all three dates; early transplanted rice rises by more than 1 dB at each step within given ranges. Those ranges belong to one sensor, one incidence angle and one crop calendar, so they cannot be copied to the Mekong Delta. With a 12-day Sentinel-1 series, statistics that summarise the whole series (range, trough, rate of rise) are more robust than three isolated dates. Nguyen et al. (2016) used Sentinel-1A series to map rice extent and cropping intensity across the Mekong Delta.
+
+</Depth>
+
+## 4.5 From map to area
+
+The easiest way to get an area is **pixel counting**: add up the area of every pixel classified as rice. The FAO handbook (2017, section 5.2.1.1) calls this direct estimation. The handbook's annex (by Gallego) explains the catch: the <Term id="pixel-counting-bias">bias of pixel counting</Term> equals **commission** (non-rice labelled rice) minus **omission** (rice labelled non-rice), and no theorem makes the two cancel. Mixed pixels at field edges make it worse. Waldner and Defourny (2017, cited in the annex) found that with Landsat-8, mixed pixels alone could bias the crop area by more than 10 % across much of South Africa, even with every pure pixel classified correctly.
+
+The fix is to check a **sample of points**. Cross-tabulating map class against true class at those points gives a <Term id="confusion-matrix">confusion matrix</Term>. Its rows give the <Term id="user-accuracy">user's accuracy</Term>, its columns the <Term id="producer-accuracy">producer's accuracy</Term>. If the points come from a <Term id="stratified-sample">stratified sample</Term> with the map classes as strata, the matrix yields the true area and its standard error (Olofsson et al. 2014). This is the "direct calibration" estimator of the FAO annex.
+
+<Formula label="Bias-corrected area from a stratified sample" tex="\hat p_{ij} = W_i\,\frac{n_{ij}}{n_{i\cdot}}, \qquad \hat A_j = A_{\text{tot}} \sum_i \hat p_{ij}, \qquad \widehat{SE}(\hat A_j) = A_{\text{tot}} \sqrt{\sum_i W_i^2\,\frac{\frac{n_{ij}}{n_{i\cdot}}\left(1-\frac{n_{ij}}{n_{i\cdot}}\right)}{n_{i\cdot}-1}}" where="
+A_{\text{tot}} :: total map area
+W_i :: share of the map area in class i (known from the map)
+n_{ij} :: number of points mapped as class i whose reference class is j
+n_{i\cdot} :: number of points drawn in map class i
+\hat A_j :: estimated area of class j; 95 % confidence interval ≈ ± 1.96 SE
+" />
+
+<Predict client:visible lang="en"
+  title="Does pixel counting over- or underestimate?"
+  q="Suppose 12 of 100 points the map calls rice are not rice, and 9 of 100 points the map calls non-rice are rice. For the 2024 Mekong map, does pixel counting over- or underestimate?"
+  options={['Overestimate', 'Underestimate', 'About right, since 12 and 9 are similar']} answer={0}
+  why="It overestimates by about 188 thousand ha. 12 % of 1,692 thousand ha of 'rice' is commission, while 9 % of only 170 thousand ha of 'non-rice' is omission. The error rates are similar, but they multiply very different areas, so they do not cancel." />
+
+<Figure
+  title="Figure 4.6 — From a confusion matrix to a bias-corrected rice area"
+  try="Keep the default matrix and switch Mekong ↔ Red River: how does the bias change? Raise 'map: Rice, reference: Not rice' from 12 to 30: how much does the corrected area drop? Double all four cells: how much narrower is the confidence interval?"
+  source="Map areas: the '≥ 1 crop' (rice) and '0 crops' (not rice) classes of the 2024 seasons map (Figure 4.1), inside the ESA WorldCover 2021 cropland mask only, pixel area by latitude. The default matrix is illustrative, not survey results. Estimator: Olofsson et al. (2014)."
+>
+  <AreaCorrection client:visible lang="en" label="Rice area correction" />
+</Figure>
+
+With the illustrative matrix, pixel counting gives 1,692 thousand ha and the corrected estimate is 1,504 ± 109 thousand ha (95 % confidence interval). In the Red River Delta, 469 thousand ha becomes 430 ± 32 thousand ha. An overall accuracy of about 88 % looks good, yet the area is still 11 % off. That 1,504 lands near the winter–spring statistic proves nothing: the matrix is made up.
+
+<Predict client:visible lang="en"
+  title="Can training points double as check points?"
+  q="To save money, can the points used to choose the threshold or train the classifier be reused as the check sample?"
+  options={['Yes, if there are enough of them', 'No, the check sample must be independent and drawn at random', 'Yes, if they sit in the middle of large fields']} answer={1}
+  why="No. The FAO annex sets the rules: the check sample must be drawn by a probability method, must not overlap or be spatially correlated with the training data, and must not drop field-edge pixels. Breaking these rules makes the matrix optimistic and pushes the correction the wrong way." />
+
+<Note kind="key">
+
+Pixel counting gives a biased area, and the bias is commission minus omission; it does not cancel by itself. A trustworthy area needs a check sample drawn at random within strata, and a corrected estimate with a confidence interval. The map tells you where the rice is; the sample tells you how much.
+
+</Note>
+
+<Depth level="advanced" title="Direct calibration, inverse calibration and the regression estimator">
+
+The FAO annex compares three ways of correcting the bias. **Direct calibration** (the formula above) uses the probability "true class j given map class i" and fits a sample stratified by map class. **Inverse calibration** uses "map class i given true class j" and inverts the matrix; it becomes unstable when the matrix is close to singular. The **regression estimator** uses large sample segments (for example 300 × 300 m or 500 × 500 m) with the crop share measured in the field and the share on the map. The annex considers it probably the safest option, because it tolerates location errors and naturally includes mixed pixels. Chapter 5 (Sampling frames & area estimation) treats it in depth.
+
+The annex also warns of a trap: if analysts know the expected figure (say, the official statistic) and tune the classifier until the pixel count matches, the counted area is no longer objective. The map still answers "where is the rice?", but it is no longer an independent area estimate.
+
+</Depth>
+
+## 4.6 Rice and the environment
+
+The number of rice crops is not only about output. Each change on the Figure 4.1 map is tied to water, sediment and emissions.
+
+<Tiles items={[
+  { t: 'High dykes and the third crop', d: 'High dykes keep the flood out so an autumn–winter crop can be grown. Triple cropping spreads in the upper Mekong Delta (Figure 4.1). Floods and dykes: Chapter 8.' },
+  { t: 'Lost sediment', d: 'Fields that no longer take in flood water no longer receive river sediment, which then has to be replaced by fertiliser (Chapman et al. 2016).' },
+  { t: 'Salinity and sowing dates', d: 'Along the coast the winter–spring crop is sown early so it can be harvested before the salinity peak. The crop calendar (section 4.3) is the monitoring tool. Salinity: Chapter 10.' },
+  { t: 'Methane', d: 'Flooded paddies emit CH₄. Alternate wetting and drying (AWD) cuts emissions, and radar can see the mid-season dry spells. Emissions: Chapter 13.' },
+  { t: 'Policy', d: 'Government Resolution 120/NQ-CP (2017) turned the Mekong Delta towards working with nature. The one-million-hectare high-quality, low-emission rice programme (Decision 1490/QD-TTg, 2023) needs rice maps and crop calendars for monitoring.' },
+]} />
+
+<Predict client:visible lang="en"
+  title="Are three crops always better than two?"
+  q="In the flood zone of the upper Mekong Delta, what is traded off when farms move from 2 crops (letting the flood in) to 3 crops (fully closed dykes)?"
+  options={['Nothing, it only adds output', 'One more crop, but sediment and flood storage are lost and more fertiliser is needed', 'One rice crop is lost']} answer={1}
+  why="One more rice crop, but the fields no longer receive sediment and no longer store flood water. The water is pushed to other areas or downstream. Chapter 8 looks at how the peak flood area changed from 2016 to 2025." />
+
+<Note kind="key">
+
+Maps of cropping intensity and crop calendars feed the environment chapters: they show where dykes change the flood regime, where sowing has to dodge salinity and where flooded paddies emit methane.
+
+</Note>
+
+## 4.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Chapman, A. D., Darby, S. E., Hồng, H. M., Tompkins, E. L., & Van, T. P. D. (2016). Adaptation and development trade-offs: fluvial sediment deposition and the sustainability of rice-cropping in An Giang Province, Mekong Delta. *Climatic Change*, 137, 593–608.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. Global Strategy to improve Agricultural and Rural Statistics (GSARS), Rome. Sections 2.5.3, 5.2.1, 5.2.3, 5.2.5 and the annex "Estimating and correcting the bias of pixel counting" (J. Gallego).
+- General Statistics Office of Viet Nam (2024). *Kết quả sản xuất vụ đông xuân năm 2024* [Results of the 2024 winter–spring crop]. https://www.nso.gov.vn/tin-tuc-thong-ke/2024/07/ket-qua-san-xuat-vu-dong-xuan-nam-2024/
+- Huete, A. et al. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. *Remote Sensing of Environment*, 83, 195–213.
+- Jönsson, P., & Eklundh, L. (2004). TIMESAT — a program for analyzing time-series of satellite sensor data. *Computers & Geosciences*, 30, 833–845.
+- Nguyen, D. B., Gruber, A., & Wagner, W. (2016). Mapping rice extent and cropping scheme in the Mekong Delta using Sentinel-1A data. *Remote Sensing Letters*, 7(12), 1209–1218.
+- Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. *Remote Sensing of Environment*, 148, 42–57.
+- Sakamoto, T. et al. (2006). Spatio-temporal distribution of rice phenology and cropping systems in the Mekong Delta with special reference to the seasonal water flow of the Mekong and Bassac rivers. *Remote Sensing of Environment*, 100, 1–16.
+- Savitzky, A., & Golay, M. J. E. (1964). Smoothing and differentiation of data by simplified least squares procedures. *Analytical Chemistry*, 36(8), 1627–1639.
+- Xiao, X. et al. (2006). Mapping paddy rice agriculture in South and Southeast Asia using multi-temporal MODIS images. *Remote Sensing of Environment*, 100, 95–113.
+- Zanaga, D. et al. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo, doi:10.5281/zenodo.7254221.

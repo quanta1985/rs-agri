@@ -1,0 +1,101 @@
+[
+ {
+  "q": { "vi": "Vì sao mặn ở ĐBSCL vào sâu nhất trong các tháng 2–4?", "en": "Why does salinity reach farthest inland in the Mekong Delta in February–April?" },
+  "options": [
+   { "vi": "Dòng chảy sông mùa khô yếu nhất, không đủ đẩy nước biển ra", "en": "Dry-season river flow is at its weakest and cannot push seawater back" },
+   { "vi": "Mưa lớn mang muối từ đất xuống sông", "en": "Heavy rain washes salt from the soil into the rivers" },
+   { "vi": "Nhiệt độ cao làm nước biển nở ra", "en": "High temperatures expand seawater" },
+   { "vi": "Các cống ngăn mặn đều mở", "en": "All salinity sluices are open" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Mặn là kết quả giằng co giữa dòng chảy sông và thủy triều. Cuối mùa khô dòng chảy nhỏ nhất, nên triều đẩy nước mặn vào xa nhất.", "en": "Salinity is a tug-of-war between river flow and the tide. At the end of the dry season the flow is smallest, so the tide pushes saltwater farthest." }
+ },
+ {
+  "q": { "vi": "'Ranh mặn 4 g/L vào sâu 78 km trên sông Hàm Luông' nghĩa là gì?", "en": "What does 'the 4 g/L line reached 78 km up the Ham Luong River' mean?" },
+  "options": [
+   { "vi": "Điểm xa nhất có độ mặn 4 g/L cách cửa sông 78 km", "en": "The farthest point with 4 g/L salinity is 78 km from the river mouth" },
+   { "vi": "Cả 78 km sông có độ mặn đúng 4 g/L", "en": "All 78 km of river have exactly 4 g/L" },
+   { "vi": "78 km² đất bị nhiễm mặn", "en": "78 km² of land is salinised" },
+   { "vi": "Nước biển dâng cao 78 cm", "en": "The sea rose by 78 cm" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Chiều dài xâm nhập đo dọc sông, từ cửa sông tới điểm xa nhất đạt ngưỡng. Độ mặn giảm dần từ cửa sông vào trong.", "en": "Intrusion length is measured along the river, from the mouth to the farthest point reaching the threshold. Salinity decreases from the mouth inland." }
+ },
+ {
+  "q": { "vi": "Mùa khô 2019–20 mặn vào sâu tương đương 2015–16, nhưng diện tích lúa thiệt hại nhỏ hơn nhiều. Lý do chính được nêu trong các báo cáo?", "en": "In 2019–20 salinity went about as far as in 2015–16, yet much less rice was damaged. The main reason given in reports?" },
+  "options": [
+   { "vi": "Dự báo sớm, xuống giống né mặn và trữ nước ngọt", "en": "Early forecasts, salinity-avoiding sowing dates and freshwater storage" },
+   { "vi": "Mặn năm 2020 nhạt hơn", "en": "The 2020 salinity was weaker" },
+   { "vi": "Không còn ai trồng lúa", "en": "Nobody grew rice any more" },
+   { "vi": "Vệ tinh đo sai", "en": "The satellites measured wrongly" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Bài học năm 2016 là phải dùng dự báo dài hạn để sắp xếp lịch thời vụ. Năm 2020 nhiều nơi gieo sạ sớm và thu hoạch trước đỉnh mặn.", "en": "The 2016 lesson was to use long-range forecasts to arrange the crop calendar. In 2020 many areas sowed early and harvested before the salinity peak." }
+ },
+ {
+  "q": { "vi": "Dị thường EVI mùa khô âm ở một pixel cho biết điều gì?", "en": "What does a negative dry-season EVI anomaly at a pixel tell you?" },
+  "options": [
+   { "vi": "Cây xanh kém hơn bình thường, chưa rõ nguyên nhân", "en": "Vegetation is less green than usual, cause unknown" },
+   { "vi": "Đất ở đó bị nhiễm mặn", "en": "The soil there is salinised" },
+   { "vi": "Nước sông ở đó mặn trên 4 g/L", "en": "River water there exceeds 4 g/L" },
+   { "vi": "Pixel đó bị mây che", "en": "The pixel was cloudy" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Thu hoạch sớm, bỏ hoang để né mặn, hạn hán, chuyển đổi cây trồng đều làm EVI giảm. Năm 2016 và 2020, tỷ lệ dị thường ở các tỉnh nội đồng còn cao hơn các tỉnh ven biển.", "en": "Early harvest, fallowing to avoid salinity, drought and crop change all lower EVI. In 2016 and 2020 the anomaly share was even higher in inland provinces than in coastal ones." }
+ },
+ {
+  "q": { "vi": "NDSI = (R − NIR)/(R + NIR) có quan hệ gì với NDVI?", "en": "How is NDSI = (R − NIR)/(R + NIR) related to NDVI?" },
+  "options": [
+   { "vi": "NDSI đúng bằng −NDVI", "en": "NDSI is exactly −NDVI" },
+   { "vi": "Không liên quan", "en": "Unrelated" },
+   { "vi": "NDSI = 1 − NDVI", "en": "NDSI = 1 − NDVI" },
+   { "vi": "NDSI = NDVI²", "en": "NDSI = NDVI²" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Đổi chỗ R và NIR ở tử số chỉ đổi dấu. Bản đồ NDSI chỉ là bản đồ NDVI lật màu.", "en": "Swapping R and NIR in the numerator only flips the sign. An NDSI map is an NDVI map with the colours reversed." }
+ },
+ {
+  "q": { "vi": "Chỉ số mặn SI = √(B·R) có thể dùng hợp lý ở đâu?", "en": "Where can the salinity index SI = √(B·R) be used sensibly?" },
+  "options": [
+   { "vi": "Trên đất trống, khô, có muối kết tinh trên mặt", "en": "On dry bare soil with salt crusts at the surface" },
+   { "vi": "Trên ruộng lúa đang xanh", "en": "On green rice fields" },
+   { "vi": "Trên mặt sông để đo độ mặn nước", "en": "On rivers, to measure water salinity" },
+   { "vi": "Dưới tán dừa", "en": "Under coconut canopy" }
+  ],
+  "answer": 0,
+  "why": { "vi": "SI chỉ đo độ sáng ở dải khả kiến. Muối kết tinh làm đất sáng hơn, nhưng mái nhà, đường, cát cũng vậy, còn nước và cây thì che mất tín hiệu đất.", "en": "SI only measures visible brightness. Salt crusts brighten soil, but so do roofs, roads and sand, while water and plants hide the soil signal." }
+ },
+ {
+  "q": { "vi": "Trong Dynamic World, ao nuôi tôm thường được gán nhãn gì?", "en": "In Dynamic World, shrimp ponds are usually labelled as…" },
+  "options": [
+   { "vi": "Nước", "en": "Water" },
+   { "vi": "Cây trồng", "en": "Crops" },
+   { "vi": "Xây dựng", "en": "Built area" },
+   { "vi": "Đất trống", "en": "Bare ground" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Dynamic World không có lớp 'nuôi trồng thủy sản'. Ao tôm hiện là nước; ao xen cây (tôm–rừng) hay dao động giữa nước và thực vật ngập nước.", "en": "Dynamic World has no aquaculture class. Shrimp ponds appear as water; ponds mixed with trees (shrimp–mangrove) flip between water and flooded vegetation." }
+ },
+ {
+  "q": { "vi": "Ở khung Bến Tre, phần lớn diện tích 'Cây trồng' năm 2018 chuyển sang nhãn gì năm 2024?", "en": "At the Ben Tre site, most 2018 'Crops' pixels became which label in 2024?" },
+  "options": [
+   { "vi": "Cây gỗ (vườn dừa, cây ăn trái)", "en": "Trees (coconut and fruit gardens)" },
+   { "vi": "Nước (ao tôm)", "en": "Water (shrimp ponds)" },
+   { "vi": "Đất trống", "en": "Bare ground" },
+   { "vi": "Giữ nguyên cây trồng", "en": "Stayed crops" }
+  ],
+  "answer": 0,
+  "why": { "vi": "69 % pixel 'Cây trồng' năm 2018 thành 'Cây gỗ' năm 2024, chỉ 0,3 % thành nước. Ở khung này, xu hướng là lúa sang vườn cây, không phải sang tôm.", "en": "69 % of the 2018 'Crops' pixels were 'Trees' in 2024 and only 0.3 % became water. At this site the shift is from rice to tree crops, not to shrimp." }
+ },
+ {
+  "q": { "vi": "Tinh thần chính của Nghị quyết 120/NQ-CP (2017) về ĐBSCL là gì?", "en": "What is the core idea of Resolution 120/NQ-CP (2017) on the Mekong Delta?" },
+  "options": [
+   { "vi": "Thuận thiên: sống chung với lũ, mặn; coi nước lợ, mặn là tài nguyên", "en": "Working with nature: living with floods and salinity; brackish and saline water as resources" },
+   { "vi": "Xây đê ngăn mặn kín toàn bộ bờ biển", "en": "Sealing the whole coast with dykes" },
+   { "vi": "Tăng vụ lúa thứ ba ở mọi tỉnh", "en": "Adding a third rice crop in every province" },
+   { "vi": "Cấm nuôi tôm", "en": "Banning shrimp farming" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Nghị quyết chuyển từ tư duy 'chống' sang 'thích ứng', phân vùng theo nước ngọt, lợ, mặn và khuyến khích lúa–tôm, thủy sản ở vùng ven biển.", "en": "The resolution shifts from 'fighting' to 'adapting', zoning the delta by fresh, brackish and saline water and favouring rice–shrimp and aquaculture on the coast." }
+ }
+]

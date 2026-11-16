@@ -1,0 +1,332 @@
+---
+title: Salinity intrusion
+n: 10
+summary: In the dry season the tide carries seawater far up the Mekong estuaries. This chapter explains how salinity intrusion works, compares the 2015–16, 2019–20 and 2023–24 events with published figures, and then looks at what satellites can see (less green crops, changing land use) and what they cannot (the salinity of the water).
+objectives:
+  - Explain why dry-season discharge, tides, sea-level rise and a lowered riverbed push salinity farther inland.
+  - Read and compare 4 g/L intrusion lengths of the major events, and tell season peaks from mid-season values.
+  - Read a dry-season EVI anomaly map and say why it is not a salinity map.
+  - Recognise the limits of soil salinity indices (SI, NDSI) where the ground is covered by plants and water.
+  - Use Dynamic World to follow coastal land-use change and know when its labels cannot be trusted.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SalinityMechanism from '../../../islands/SalinityMechanism.tsx';
+import IntrusionChart from '../../../islands/IntrusionChart.tsx';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/salinity.json';
+
+## 10.1 How salt gets into the rivers
+
+Twice a day the East Sea tide pushes seawater into the Mekong (Cuu Long) estuaries, and the river pushes back. In the flood season the river is strong and the salt stays near the mouths. In the dry season (December to May) the <Term id="dry-season-discharge">dry-season discharge</Term> falls, so the tide carries saltwater farther inland. This is <Term id="salinity-intrusion">salinity intrusion</Term>. It happens every year; what changes is **how far, how early and for how long**.
+
+Four factors push the salt limit farther inland:
+
+1. **Little water from upstream.** The 2015 flood was the smallest in 90 years at Tan Chau, with about 220 billion m³ of flood-season water, 60 % of an average flood year. From December 2015 to March 2016 the flow at Tan Chau and Chau Doc was only 57–85 % of the long-term mean (Nguyen Ngoc Anh 2017).
+2. **The <Term id="tidal-regime">tide</Term>.** Salinity reaches farthest during spring tides (around full and new moon), so salinity bulletins are usually issued per spring-tide period.
+3. **<Term id="sea-level-rise">Sea-level rise</Term> and subsidence.** A higher sea relative to the land strengthens the tide in the rivers. In the Mekong Delta the land sinks by about 1–4 cm a year, mainly from groundwater pumping (Erban et al. 2014, as reviewed by Park et al. 2021), many times faster than the sea rises (see Chapter 11).
+4. **<Term id="riverbed-lowering">Riverbed lowering</Term>.** Upstream dams trap sediment and sand mining removes the riverbed. Sand extraction in the delta rose from about 7.75 million m³ a year (2012) to 29.3 million m³ a year (2018) (as compiled by Park et al. 2021). Deeper channels let the tide and the salt travel farther (Eslami et al. 2019).
+
+<Figure
+  title="Figure 10.1 — Four factors that push the salt limit inland: an illustrative model"
+  try="Cut the discharge to 50 %: how many percent farther does the salt limit move? Keep 100 % discharge, raise the sea by 100 cm, then lower the bed by 3 m: which acts more strongly in this model? Switch to spring tide."
+  source="Illustrative schematic, not a forecast, and it gives no km. The L ∝ Q^(−1/3) law comes from exchange-flow theory for partially mixed estuaries (MacCready & Geyer 2010); measured exponents are often weaker, e.g. −1/7 in San Francisco Bay (Monismith et al. 2002). The linear depth factor (15 m channel) and the ±15 % tide factor are assumptions for illustration."
+>
+  <SalinityMechanism client:visible lang="en" />
+</Figure>
+
+<Formula label="Power law for the intrusion length (used in Figure 10.1)" tex="\frac{L}{L_0} = \left(\frac{Q}{Q_0}\right)^{-1/3}" where="
+L,\ L_0 :: intrusion length now and at the baseline
+Q,\ Q_0 :: dry-season river discharge now and at the baseline
+" />
+
+<Predict client:visible lang="en"
+  title="What matters most?"
+  q="Within one dry season, what decides most how far salt travels up the Mekong estuaries?"
+  options={['River flow from upstream', 'Local rainfall', 'Air temperature', 'The north-east monsoon wind']} answer={0}
+  why="There is almost no rain in the dry season, so the fresh water that pushes the salt back comes mainly from upstream. In 2016 the flow fell to 57–85 % of normal and salt went farther than ever recorded. The north-east monsoon wind adds to the intrusion, but it is secondary." />
+
+<Predict client:visible lang="en"
+  title="Half the discharge"
+  q="Under L ∝ Q^(−1/3), if the dry-season discharge halves, by how many percent does the intrusion length grow?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={26} tol={3}
+  why="0.5^(−1/3) ≈ 1.26, so about 26 % longer. With a power law, halving the flow does not double the intrusion. With the −1/7 exponent measured in San Francisco it would be only about 10 %." />
+
+<Note kind="key">
+
+Salinity is a tug-of-war between the river and the tide. Salt goes farther when the dry-season flow is small, at spring tide, and when the channel is deeper because of sand mining, sediment starvation or relative sea-level rise. Figure 10.1 only shows the direction of each effect; it cannot forecast kilometres.
+
+</Note>
+
+<Depth level="advanced" title="Why theory says −1/3 but measurements differ">
+
+In a partially mixed estuary the denser saltwater creeps in along the bed while fresh water flows out on top. Classic exchange-flow theory makes the intrusion length scale with Q^(−1/3) and grow strongly with channel depth (MacCready & Geyer 2010). Real estuaries deviate because mixing changes between spring and neap tides, because of their shape, and because the salt field needs time to adjust to a new discharge. In San Francisco Bay the measured exponent is only about −1/7 (Monismith et al. 2002). The Mekong mouths have strong tides and many branches, so operational salinity forecasts use one-dimensional hydraulic models of the whole river network, calibrated with gauge data.
+
+</Depth>
+
+## 10.2 Three major events: 2015–16, 2019–20, 2023–24
+
+Salinity is measured at river gauges, not from satellites. Water agencies report the <Term id="salinity-4gl">4 g/L isohaline</Term>: the distance from the river mouth to the farthest point with 4 g/L salinity, roughly where rice is clearly harmed. The quick way to measure salinity is <Term id="ec-salinity">electrical conductivity (EC)</Term>.
+
+<Predict client:visible lang="en"
+  title="How far did the salt go in 2016?"
+  q="At the end of March 2016, how far from the mouth did the 4 g/L line reach on the Vam Co Tay River (Long An)?"
+  slider={{ min: 20, max: 160, step: 5, unit: 'km' }} answer={135} tol={10}
+  why="135 km, 25 km beyond Tuyen Nhon (Nguyen Ngoc Anh 2017). The two Vam Co rivers are not branches of the Mekong, so in the dry season there is very little fresh water to push the salt back. Salt always goes farther there than on the Mekong branches." />
+
+<Figure
+  title="Figure 10.2 — Published 4 g/L intrusion lengths"
+  try="Read the date next to each bar. Dashed hollow bars are mid-season values, not season peaks: can they be compared directly with the solid bars?"
+  source="2015–16: Nguyen Ngoc Anh (2017), VJSTE 59(1), peak at the end of March 2016, measured from the river mouth. 2019–20: Vam Co Tay ~130 km in May 2020 per the Directorate of Water Resources at the end-of-season review of 20 Jun 2020 (SGGP newspaper); Mekong estuaries 45–66 km on 6–13 Jan 2020 (MARD 2020). 2023–24: 4 ‰ line 40–66 km delta-wide on 8–13 Mar 2024 (Southern Regional Hydro-Meteorological Centre, Nong Nghiep newspaper, 22 Mar 2024); Vam Co 60–64 km on 8–14 Feb 2024 (Department of Water Resources, Government e-newspaper, 23 Feb 2024). No verified per-estuary season peaks were found for 2020 and 2024."
+>
+  <IntrusionChart client:visible lang="en" />
+</Figure>
+
+The three dry seasons tell three different stories:
+
+- **2015–16** was the historic event. Salt arrived in early November 2015, about 1.5 months early. At the end-of-March 2016 peak it reached 135 km on the Vam Co Tay, 78 km on the Ham Luong, 81 km on the Co Chien and 70 km on the Hau (Bassac). Drought hit all 13 provinces and salinity the nine coastal ones (Nguyen Ngoc Anh 2017).
+- **2019–20** started almost a month earlier than 2015–16 and lasted 2–2.5 times as long. The area inside the 4 g/L line was 1.68 million ha, 50,376 ha more than in 2016 (Directorate of Water Resources, 20 Jun 2020).
+- **2023–24** arrived at the end of December 2023, about a month earlier than average. On 8–14 Feb 2024 the 4 g/L line at the Mekong mouths reached 40–50 km, about 5–10 km less than the same period of 2016 and 8–12 km less than 2020 (Department of Water Resources, 23 Feb 2024).
+
+<Stats items={[
+  { v: '238,276', u: 'ha', l: 'rice damaged in the 2015–16 dry season (Nguyen Ngoc Anh 2017, from MARD)' },
+  { v: '211,261', l: 'households short of domestic water in 2016, over 1 million people' },
+  { v: '58,400', u: 'ha', l: 'rice damaged in 2019–20 (41,900 ha winter–spring + 16,500 ha main-season rice on Ca Mau rice–shrimp land)' },
+  { v: '96,000', l: 'households short of domestic water in 2020, about 430,000 people' },
+]} caption="2019–20 figures: Directorate of Water Resources at the end-of-season review on 20 Jun 2020 (SGGP newspaper). Reports count damage differently, see the box below." />
+
+<Predict client:visible lang="en"
+  title="Same salt, same damage?"
+  q="In 2019–20 salt went about as far as, and in places farther than, in 2015–16. How did the damaged rice area compare?"
+  options={['Much smaller', 'About the same', 'Twice as large']} answer={0}
+  why="About 58,400 ha against 238,276 ha. After 2016, salinity forecasts came early, many areas sowed early to harvest before the peak, stored fresh water and operated sluices. For the same salinity, damage depends heavily on preparation." />
+
+<Note kind="key">
+
+Salinity is measured at gauges, not from satellites. Comparing events means comparing the same threshold (4 g/L), the same river and the same kind of number: season peak with season peak. In 2020 salt went as far as in 2016, yet only about a quarter as much rice was damaged, thanks to forecasts and crop calendars.
+
+</Note>
+
+<Depth level="advanced" title="Why sources disagree">
+
+For the same 2015–16 season, Nguyen Ngoc Anh (2017) gives 238,276 ha of damaged rice from MARD, while a 2020 MARD report gives 405,000 ha. For intrusion length, Park et al. (2021) write that salt penetrated "up to 93 km" in 2016, while Nguyen Ngoc Anh gives 135 km on the Vam Co Tay. The differences come from which river was measured, where the distance starts (river mouth or coastline), measured versus forecast values, and what counts as damage (yield loss or total loss). The handbook names the source of every number and never mixes sources within one series.
+
+</Depth>
+
+## 10.3 What satellites see: the dry-season EVI anomaly
+
+Satellites cannot measure the salinity of river water. They only see the **effect on plants**: rice stunted by salt, wilted, or fields left empty. A simple way to see this across the delta is the <Term id="evi-anomaly">EVI anomaly</Term>: the February–April mean EVI of one year minus the median February–April EVI of the 15 years 2010–2024. EVI is the vegetation index covered in [rs-knowledge, Chapter 6](https://quanta1985.github.io/rs-knowledge/en/ch06-spectral/) and Chapter 4.
+
+<Figure
+  title="Figure 10.3 — Dry-season (Feb–Apr) EVI anomaly in the Mekong Delta: 2016, 2020, 2024"
+  try="Turn on Compare, set 2016 on the left and 2020 on the right, drag the swipe. Do the brown areas (EVI below normal) lie along the coast or inland? Hover over An Giang and Ben Tre."
+  source="MODIS MOD13Q1 + MYD13Q1 v061 (NASA LP DAAC), EVI × 0.0001, SummaryQA ≤ 1 only; mean of the year's Feb–Apr 16-day composites minus the median of the 2010–2024 Feb–Apr means; 250 m, Web Mercator grid; clipped to the 13 provinces (geoBoundaries, pre-2025 boundaries); all land, not only rice land. Fixed colour scale −0.2…+0.2."
+>
+  <DeltaMap client:visible lang="en" label="Mekong Delta dry-season EVI anomaly" compare time={1} compareTime={0} choices={[
+    { key: 'anom', label: { vi: 'Dị thường EVI', en: 'EVI anomaly' }, ids: { mekong: 'sal-evianom-mekong' } },
+  ]} />
+  <details slot="caption">
+    <summary>Data table: share of area with EVI anomaly ≤ −0.05</summary>
+    <div class="table-wrap">
+
+| Area | 2016 | 2020 | 2024 |
+|---|---|---|---|
+| Whole delta | 22.7 % | 31.1 % | 18.6 % |
+| 8 coastal provinces | 21.5 % | 26.9 % | 15.3 % |
+| 5 inland provinces | 25.8 % | 41.6 % | 26.7 % |
+| An Giang | 40.1 % | 54.5 % | 49.5 % |
+| Hau Giang | 44.8 % | 26.4 % | 27.7 % |
+| Long An | 34.6 % | 49.6 % | 23.1 % |
+| Soc Trang | 30.3 % | 31.9 % | 24.1 % |
+| Tra Vinh | 19.5 % | 17.0 % | 3.6 % |
+| Ben Tre | 12.7 % | 13.4 % | 7.6 % |
+| Ca Mau | 11.9 % | 9.3 % | 7.4 % |
+
+    </div>
+    Coastal provinces: Long An, Tien Giang, Ben Tre, Tra Vinh, Soc Trang, Bac Lieu, Ca Mau, Kien Giang. Computed by `scripts/salinity_numbers.ts`.
+  </details>
+</Figure>
+
+In 2016, 22.7 % of the delta (about 890 thousand ha) had dry-season EVI at least 0.05 below normal. In 2020 it was 31.1 % (about 1.21 million ha), in 2024 18.6 %. That order matches the severity of the three events. A closer look at the table shows something odd, though.
+
+<Predict client:visible lang="en"
+  title="Which province was 'brownest' in 2016?"
+  q="In 2016, which province had the largest share of area with an EVI anomaly ≤ −0.05?"
+  options={['Ben Tre', 'Ca Mau', 'Hau Giang', 'Tra Vinh']} answer={2}
+  why="Hau Giang (44.8 %), an inland province, followed by An Giang (40.1 %), which hardly gets salt at all. Ben Tre, the province worst hit by salinity, had only 12.7 %. The EVI anomaly reflects everything that makes plants less green in February–April, not salinity alone." />
+
+Ben Tre was hit hardest by salt but had only 12.7 % anomalous area in 2016. Most of Ben Tre is coconut and fruit gardens whose canopy stays green all year, so EVI barely moves even when the trees suffer. An Giang, in contrast, gets no salt but shows 40–55 % anomalous area every year. February–April is when its winter–spring rice is harvested, and sowing a few weeks earlier or later than usual is enough to shift the February–April EVI a lot (see the start-of-season map in [Chapter 4](../rice/)).
+
+<Predict client:visible lang="en"
+  title="How brown was 2020?"
+  q="In 2020, what share of the Mekong Delta had a dry-season EVI anomaly ≤ −0.05?"
+  slider={{ min: 0, max: 60, step: 1, unit: '%' }} answer={31} tol={4}
+  why="31.1 %, the highest of the three years. But the share in the 5 inland provinces (41.6 %) was well above the 8 coastal ones (26.9 %). 2020 brought both salt and drought, and many areas sowed early to dodge the salt: all three lower February–April EVI." />
+
+<Note kind="key">
+
+An EVI anomaly says that **plants are less green than usual**, not **why**. Early harvest to avoid salt, fallowing, drought, salinity and crop change all lower EVI. Statements about salinity need gauge measurements, crop calendars and local knowledge as well.
+
+</Note>
+
+<Depth level="advanced" title="Weak points of this calculation">
+
+- **The 2010–2024 baseline contains the salinity years.** A median is robust to a few bad years, but if many recent years were all sown early, "normal" shifts too.
+- **No rice mask.** The layer covers all land inside the provinces, including gardens, mangroves, shrimp ponds and towns. Chapter 4 has a rice map to filter with.
+- **Clouds.** February–April is fairly clear in the Mekong Delta, but pixels with SummaryQA > 1 are dropped, so some places have few images.
+- **250 m.** One MODIS pixel holds many fields, canals and houses; a single fallow field is hard to see.
+
+</Depth>
+
+## 10.4 Soil salinity indices: where do they work?
+
+Many papers propose detecting saline soil with band indices. Two common ones are the <Term id="salinity-index">salinity index SI</Term> and <Term id="ndsi">NDSI</Term>:
+
+<Formula label="Two common salinity indices" tex="\begin{gathered} SI = \sqrt{B \cdot R} \cr NDSI = \frac{R - NIR}{R + NIR} = -\,NDVI \end{gathered}" where="
+B,\ R,\ NIR :: surface reflectance in blue, red and near infrared (Sentinel-2: B2, B4, B8)
+" />
+
+The idea behind SI is that salt crusts on bare soil make it brighter in the visible bands (Khan et al. 2001). NDSI, as the formula shows, is **exactly NDVI with the sign flipped**.
+
+<Predict client:visible lang="en"
+  title="What does NDSI add?"
+  q="What information does NDSI = (R − NIR)/(R + NIR) contain that NDVI = (NIR − R)/(NIR + R) does not?"
+  options={['Nothing: NDSI = −NDVI', 'Water salinity', 'Soil moisture', 'The amount of salt crust']} answer={0}
+  why="Swapping R and NIR in the numerator only flips the sign. The 'high salinity' areas on an NDSI map are simply the less green areas on an NDVI map: water, bare soil, roofs." />
+
+<Figure
+  title="Figure 10.4 — NDVI and the salinity index SI at Giong Trom – Ba Tri (Ben Tre), dry season 2024"
+  try="Switch between NDVI and SI. Where is SI high (red)? Is that saline soil, or river, roads and houses? Hover over the Ham Luong River and a village."
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED), Cloud Score+ cs_cdf ≥ 0.6, median of Feb–Apr 2024 images; 10.24 × 10.24 km frame, 10 m. NDVI = (B8 − B4)/(B8 + B4), scale −0.2…0.9; SI = √(B2 × B4) on surface reflectance (Khan et al. 2001), scale 0…0.15. Contains modified Copernicus Sentinel data 2024."
+>
+  <DeltaMap client:visible lang="en" label="NDVI and SI, Ben Tre" choices={[
+    { key: 'ndvi', label: { vi: 'NDVI', en: 'NDVI' }, ids: { bentre: 'sal-ndvi-bentre-2024' } },
+    { key: 'si', label: { vi: 'Chỉ số mặn SI', en: 'Salinity index SI' }, ids: { bentre: 'sal-si-bentre-2024' } },
+  ]} />
+</Figure>
+
+In the Ben Tre frame the median NDVI is 0.75: almost everything is green coconut and fruit gardens. Only 3.5 % of the frame has NDVI below 0.2. SI and NDVI correlate at **r = −0.80** over more than a million pixels. In other words SI mostly measures "where there are no plants", and those places are rivers, canals, roads and roofs, not saline soil.
+
+<Predict client:visible lang="en"
+  title="How do SI and NDVI correlate?"
+  q="In the Ben Tre frame, what is the Pearson correlation between NDVI and SI?"
+  slider={{ min: -1, max: 1, step: 0.05 }} answer={-0.8} tol={0.1}
+  why="r = −0.80. Where plants are green (high NDVI) the blue and red bands are dark (low SI). SI behaves almost like an inverted vegetation index, not a salinity index." />
+
+<Note kind="myth">
+
+**Misconception:** "An NDSI or SI map from Sentinel-2 shows which fields are saline."
+
+**In fact:** NDSI is exactly −NDVI, so it is just a greenness map with the colours reversed. SI only makes sense on dry bare soil with salt crusts, which is rare in Mekong rice fields and gardens. Salinity here travels mainly in the irrigation **water**, and water, plants and roofs all hide the soil signal. Knowing the salinity means measuring EC at a gauge or in the field.
+
+</Note>
+
+<Note kind="key">
+
+Optical soil salinity indices only work on dry bare soil. In the Mekong Delta, where salt moves with the water and the ground is almost always covered by plants or water, these indices mostly repeat what NDVI already says.
+
+</Note>
+
+## 10.5 Coastal land-use change
+
+After the salinity events, many coastal households made a <Term id="land-use-conversion">land-use conversion</Term>: from rice to coconut, fruit trees or shrimp, or to a <Term id="shrimp-rice">rice–shrimp</Term> rotation. Satellites follow this kind of change far better than they follow salinity. The <Term id="dynamic-world">Dynamic World</Term> dataset labels the land cover of every Sentinel-2 image at 10 m (Brown et al. 2022). Taking the most frequent label of the year gives one land-cover map per year.
+
+<Figure
+  title="Figure 10.5 — Dynamic World land cover in 2018 and 2024 at Ben Tre and Ca Mau"
+  try="At Ben Tre, turn on Compare and swipe between 2018 and 2024: where did the 'Crops' class (orange) go? Switch to Ca Mau: how do 'Water' and 'Flooded vegetation' trade places?"
+  source="GOOGLE/DYNAMICWORLD/V1, most frequent (mode) 'label' over all images in the calendar year; 10 m, 10.24 × 10.24 km frames. The first year is 2018 because 2016–17 had only Sentinel-2A, about 2 labels a year at Ca Mau. Dynamic World (Brown et al. 2022, Scientific Data 9:251), CC BY 4.0; contains modified Copernicus Sentinel data. Area shares computed by scripts/salinity_numbers.ts."
+>
+  <DeltaMap client:visible lang="en" label="Dynamic World, Ben Tre and Ca Mau" compare time={1} compareTime={0} choices={[
+    { key: 'dw', label: { vi: 'Dynamic World', en: 'Dynamic World' }, ids: { bentre: 'dw-bentre', camau: 'dw-camau' } },
+  ]} />
+  <details slot="caption">
+    <summary>Data table: share of the frame per label</summary>
+    <div class="table-wrap">
+
+| Label | Ben Tre 2018 | Ben Tre 2024 | Ca Mau 2018 | Ca Mau 2024 |
+|---|---|---|---|---|
+| Water | 3.1 % | 2.9 % | 58.0 % | 47.7 % |
+| Trees | 48.7 % | 58.2 % | 7.4 % | 2.9 % |
+| Grass | 5.5 % | 0.7 % | 0.1 % | 0.2 % |
+| Flooded vegetation | 0.0 % | 0.1 % | 26.9 % | 42.1 % |
+| Crops | 19.0 % | 6.0 % | 1.7 % | 0.4 % |
+| Built area | 23.7 % | 32.2 % | 5.5 % | 6.7 % |
+
+    </div>
+  </details>
+</Figure>
+
+<Predict client:visible lang="en"
+  title="How much cropland is left at Ben Tre?"
+  q="In 2018 the 'Crops' label covered 19 % of the Giong Trom – Ba Tri frame. What share did it cover in 2024?"
+  slider={{ min: 0, max: 30, step: 1, unit: '%' }} answer={6} tol={2}
+  why="6.0 %. Of the 2018 'Crops' pixels, 69 % were 'Trees' in 2024, 10 % 'Built area' and only 0.3 % water. At this site the shift is from fields to coconut and fruit gardens, not to shrimp ponds." />
+
+At Ben Tre, fields became gardens. That fits farmers giving up rice, a crop with poor salt tolerance, after 2016. Confirming the cause, however, needs the province's rice statistics and field checks. The rise of 'Built area' from 23.7 % to 32.2 % should also be read with care: houses hide under coconut canopy, and the model may call the same hamlet trees one year and buildings another.
+
+<Predict client:visible lang="en"
+  title="Ca Mau: did water turn into forest?"
+  q="At Nam Can – Ngoc Hien, 'Water' fell from 58 % to 48 % and 'Flooded vegetation' rose from 27 % to 42 %. Which reading is most careful?"
+  options={['Mangroves regrew on 15 % of the area', 'Labels flip between the two classes on shrimp–mangrove farms; a field check is needed', 'The sea retreated']} answer={1}
+  why="Shrimp–mangrove farms are ponds mixed with mangrove trees. A 10 m pixel there holds both water and trees, so its label can change with water level, season and model. Dynamic World has no aquaculture class. A label change is not necessarily a real change." />
+
+<Note kind="key">
+
+Satellites follow the **consequences** of salinity for land use well: fields turning into gardens or shrimp ponds. But automatic labels have errors, especially where water and plants mix. A label change is a hypothesis to be checked against statistics and field visits.
+
+</Note>
+
+## 10.6 Adaptation
+
+After 2016 the response to salinity shifted from "fighting" to "living with" it. <Term id="resolution-120">Resolution 120/NQ-CP</Term> of 17 November 2017 on sustainable, climate-resilient development of the Mekong Delta chose to **work with nature**: fresh, brackish and saline water are all resources, and production follows ecological zones.
+
+<Steps title="Layers of salinity response in the Mekong Delta" items={[
+  { tag: 'Forecast', t: 'Seasonal and spring-tide salinity forecasts', d: 'The lesson of 2016 was that long-range forecasts existed from the end of the 2015 flood season but were not used to arrange cropping (Nguyen Ngoc Anh 2017). Since then, water institutes and hydro-meteorological centres issue weekly salinity bulletins in the dry season.' },
+  { tag: 'Calendar', t: 'Sowing to avoid the salt', d: 'Coastal areas sow winter–spring rice early to harvest before the February–April salinity peak. The start-of-season map in Chapter 4 shows this calendar from space.' },
+  { tag: 'Storage', t: 'Storing fresh water', d: 'Filling canals, ponds and tanks with fresh water before the salt arrives; trucking water to villages when it runs short.' },
+  { tag: 'Works', t: 'Salinity sluices: Cai Lon – Cai Be', d: 'Construction began in October 2019 at VND 3,309.5 billion; the Cai Be sluice ran provisionally from February 2021; phase 1 was inaugurated on 5 March 2022. The system serves about 384,000 ha in Kien Giang, Hau Giang, Ca Mau and Bac Lieu. Critics have reported backwater flooding downstream when the gates close at spring tide.' },
+  { tag: 'Conversion', t: 'Crops and livestock that match the water', d: 'Coastal areas move to rice–shrimp, shrimp–mangrove and salt-tolerant crops; inland areas keep rice and fruit. Figure 10.5 shows this kind of change from space.' },
+]} />
+
+A <Term id="sluice-gate">salinity-control sluice</Term> closes when the tide brings salt in and opens to take in fresh water or to drain. It protects the area behind it but also holds water back, so it must follow an operating procedure issued by MARD (for Cai Lon – Cai Be, Decision 1834/QĐ-BNN-TL of 2024).
+
+<Predict client:visible lang="en"
+  title="The spirit of Resolution 120"
+  q="Which direction did Resolution 120/NQ-CP (2017) choose for the coastal Mekong Delta?"
+  options={['Seal the whole coast with dykes to keep rice', 'Work with nature: treat brackish and saline water as resources, move to rice–shrimp and aquaculture', 'Abandon the coastal zone']} answer={1}
+  why="The resolution moves from resisting to adapting. The coast favours brackish and saline aquaculture and rice–shrimp; the upper and middle delta keep rice and fruit." />
+
+<Note kind="key">
+
+There is no single fix. Forecasts and crop calendars cut damage fastest and cheapest; large sluices protect wide areas but must be run well; changing what is farmed is the long-term answer. Remote sensing helps track calendars, water in canals and land use, but it does not replace salinity gauges.
+
+</Note>
+
+## 10.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Brown, C. F. et al. (2022). Dynamic World, Near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251.
+- Do Huong (23 Feb 2024). Chủ động ứng phó với xâm nhập mặn tại ĐBSCL [Proactive response to salinity intrusion in the Mekong Delta]. *Government e-newspaper* (data from the Department of Water Resources).
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9(8), 084010.
+- Eslami, S. et al. (2019). Tidal amplification and salt intrusion in the Mekong Delta driven by anthropogenic sediment starvation. *Scientific Reports*, 9, 18746.
+- Government of Viet Nam (2017). *Resolution 120/NQ-CP of 17 November 2017 on sustainable and climate-resilient development of the Mekong Delta*.
+- Huynh Loi, Dang Nguyen (20 Jun 2020). Hơn 58.000ha lúa ở ĐBSCL bị thiệt hại do hạn mặn [Over 58,000 ha of Mekong Delta rice damaged by drought and salinity]. *Sai Gon Giai Phong* (data from the Directorate of Water Resources).
+- Khan, N. M., Rastoskuev, V. V., Shalina, E. V., & Sato, Y. (2001). Mapping salt-affected soils using remote sensing indicators: a simple approach with the use of GIS IDRISI. *22nd Asian Conference on Remote Sensing*, Singapore.
+- Kien Trung (22 Mar 2024). Xâm nhập mặn năm 2024 phức tạp, cao hơn, tiến sâu vào các hệ thống sông [Salinity in 2024 is complex, higher, deeper into the river systems]. *Nong Nghiep* (data from the Southern Regional Hydro-Meteorological Centre).
+- MacCready, P., & Geyer, W. R. (2010). Advances in estuarine physics. *Annual Review of Marine Science*, 2, 35–58.
+- MARD (2020). *MARD Report on the Drought and Saltwater Intrusion in Mekong River Delta*. Viet Nam Disaster Management Authority, phongchongthientai.mard.gov.vn.
+- Monismith, S. G., Kimmerer, W., Burau, J. R., & Stacey, M. T. (2002). Structure and flow-induced variability of the subtidal salinity field in northern San Francisco Bay. *Journal of Physical Oceanography*, 32, 3003–3019.
+- Nguyen Ngoc Anh (2017). Historic drought and salinity intrusion in the Mekong Delta in 2016: lessons learned and response solutions. *Vietnam Journal of Science, Technology and Engineering*, 59(1), 93–96.
+- Park, E., Loc, H. H., Binh, D. V., & Kantoush, S. (2021). The worst 2020 saline water intrusion disaster of the past century in the Mekong Delta: impacts, causes, and management implications. *Ambio*, 51(3), 691–699 (online 2021). doi:10.1007/s13280-021-01577-z.
+- Sai Gon Giai Phong (5 Mar 2022). Thủ tướng Phạm Minh Chính dự khánh thành dự án thủy lợi Cái Lớn – Cái Bé [Prime Minister attends the inauguration of the Cai Lon – Cai Be irrigation project].

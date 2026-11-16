@@ -1,0 +1,337 @@
+---
+title: Nước mặt & lũ
+n: 8
+summary: Đồng bằng sông Cửu Long sống cùng nhịp lũ Mê Kông hằng năm, còn đồng bằng sông Hồng sống sau đê và sợ ngập úng sau bão. Chương này dùng dữ liệu nước mặt Landsat 1984–2021, ảnh Sentinel-2 và Sentinel-1 thật để phát hiện nước, theo dõi lũ ĐBSCL theo tháng trong mười năm 2016–2025, lập bản đồ nước sau bão Yagi 9/2024 và chỉ ra vì sao bản đồ nước không phải là bản đồ thiệt hại.
+objectives:
+  - Phân biệt chế độ nước của hai châu thổ và đọc hai lớp tần suất có nước, tính mùa của JRC Global Surface Water.
+  - Phát hiện nước bằng MNDWI (Sentinel-2) và tán xạ ngược VV (Sentinel-1), chọn ngưỡng bằng Otsu và biết khi nào Otsu sai.
+  - Đọc diễn biến nước mặt ĐBSCL theo tháng và theo năm, phân biệt nước lũ, ruộng ngập để cấy và ao nuôi.
+  - Giải thích tác động của đê bao cao và đập thượng nguồn lên lũ, có trích dẫn.
+  - Lập bản đồ nước mới sau bão bằng phát hiện thay đổi, chồng với bản đồ lúa và so với số liệu thiệt hại công bố.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ThresholdLab from '../../../islands/ThresholdLab.tsx';
+import FloodArea from '../../../islands/FloodArea.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/flood.json';
+
+Nước quyết định lịch thời vụ ở cả hai châu thổ. Ở ĐBSCL, lũ về mỗi năm mang phù sa và cá, nhưng cũng giới hạn số vụ lúa. Ở ĐBSH, sông Hồng chảy giữa hai bờ đê, còn mối lo chính là mưa bão làm ruộng ngập úng. Vệ tinh cho thấy nước ở đâu và khi nào. Nó không trực tiếp cho biết lúa có bị hại hay không: đó là điều chương này muốn làm rõ.
+
+Chương này không giảng lại nguyên lý radar và chỉ số phổ. Muốn ôn, xem <a href="https://quanta1985.github.io/rs-knowledge/vi/ch11-sar/">chương Radar SAR</a> và <a href="https://quanta1985.github.io/rs-knowledge/vi/ch06-spectral/">chương Chỉ số phổ</a> của sổ tay *Viễn thám & GIS*.
+
+<Stats items={[
+  { v: '37', u: '%', l: 'diện tích ĐBSCL có nước ít nhất một tháng năm 2021 (ĐBSH: 14 %)' },
+  { v: '604', u: 'nghìn ha', l: 'nước mặt tháng cao nhất năm 2017, lớn nhất 2016–2025 (radar)' },
+  { v: '395', u: 'nghìn ha', l: 'tháng cao nhất năm 2021, nhỏ nhất trong mười năm' },
+  { v: '23.430', u: 'ha', l: 'nước mới trên đất trồng trọt ĐBSH sau bão Yagi, 12/9/2024' },
+]} caption="Tính từ JRC Global Surface Water và Sentinel-1 bằng scripts/flood_numbers.ts. 'Nước mặt' gồm cả ruộng đang ngập để cấy và ao nuôi." />
+
+## 8.1 Hai châu thổ, hai chế độ nước
+
+**ĐBSCL** nằm cuối lưu vực sông Mê Kông. Mùa mưa, nước từ thượng nguồn dâng lên từ khoảng tháng 7, tràn vào vùng trũng Đồng Tháp Mười và Tứ giác Long Xuyên, rồi rút dần đến tháng 12. Người ta gọi chu kỳ này là <Term id="flood-pulse">nhịp lũ</Term>. Lũ chậm và lên từ từ. Nó cấp phù sa, rửa phèn, mang cá vào đồng, và quyết định ruộng nào làm được mấy vụ lúa.
+
+**ĐBSH** khác hẳn. Dòng sông Hồng đã được các hồ chứa thượng nguồn (Hòa Bình, Sơn La, Lai Châu) điều tiết, và đồng ruộng nằm sau hệ thống đê. Nước ngoài đê chỉ phủ bãi sông. Trong đê, mối lo là <Term id="waterlogging">ngập úng</Term>: mưa bão lớn đổ xuống nhanh hơn trạm bơm tiêu kịp.
+
+Hình 8.1 so sánh hai châu thổ bằng bộ <Term id="jrc-gsw">JRC Global Surface Water</Term> (Pekel và cs., 2016), lập từ mọi ảnh Landsat từ 1984. Lớp đầu là <Term id="water-occurrence">tần suất có nước</Term> 1984–2021. Lớp sau là <Term id="water-seasonality">số tháng có nước</Term> trong năm 2021.
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu phần ĐBSCL có nước theo mùa?"
+  q="Năm 2021, bao nhiêu phần trăm diện tích ĐBSCL có nước mặt ít nhất một tháng (trung bình ô 250 m)?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={37} tol={6}
+  why="Khoảng 37 % (1,48 triệu ha), gấp gần ba lần ĐBSH (14 %). Phần lớn là nước theo mùa: chỉ khoảng 126 nghìn ha có nước từ 10 tháng trở lên. Năm 2021 lại là năm lũ nhỏ nhất trong mười năm gần đây (mục 8.4)." />
+
+<Figure
+  title="Hình 8.1 — Nước mặt ở hai châu thổ: tần suất 1984–2021 và số tháng có nước năm 2021"
+  try="Đổi giữa ĐBSCL và ĐBSH: vùng nào có màu xanh trải rộng trên đồng ruộng, vùng nào nước chỉ nằm dọc sông? Chọn lớp 'Số tháng có nước' rồi rê chuột lên Đồng Tháp Mười và Tứ giác Long Xuyên."
+  source="JRC Global Surface Water v1.4 (Pekel và cs., 2016), Landsat 30 m: tần suất 1984–2021 và tính mùa năm 2021, lấy trung bình về ô ~250 m trên lưới Web Mercator; pixel chưa từng có nước = 0. Cắt theo ranh vùng thống kê (geoBoundaries ADM1, ranh 2008). Nguồn: EC JRC / Google."
+>
+  <DeltaMap client:visible lang="vi" label="Bản đồ nước mặt hai châu thổ" choices={[
+    { key: 'occ', label: { vi: 'Tần suất 1984–2021', en: 'Occurrence 1984–2021' }, ids: { mekong: 'flood-gsw-mekong', red: 'flood-gsw-red' }, clearBelow: 1 },
+    { key: 'season', label: { vi: 'Số tháng có nước 2021', en: 'Months with water 2021' }, ids: { mekong: 'flood-gswseason-mekong', red: 'flood-gswseason-red' }, clearBelow: 0.05 },
+  ]} />
+</Figure>
+
+Lấy tần suất nhân với diện tích ô, nước mặt "trung bình" chiếm **15,5 %** diện tích ĐBSCL (615 nghìn ha) và **7,4 %** ĐBSH (125 nghìn ha). Khác biệt lớn nằm ở nước theo mùa: năm 2021 có **1,35 triệu ha** ở ĐBSCL mang nước từ 1 đến dưới 10 tháng, so với 180 nghìn ha ở ĐBSH.
+
+<Note kind="key">
+
+ĐBSCL có lũ theo mùa phủ rộng trên đồng ruộng; ĐBSH có nước tập trung ở sông, bãi sông và ao hồ, còn đồng ruộng nằm sau đê. Vì thế câu hỏi viễn thám ở hai nơi khác nhau: ĐBSCL hỏi "lũ năm nay lớn đến đâu", ĐBSH hỏi "sau trận bão này ruộng nào bị ngập".
+
+</Note>
+
+<Depth level="advanced" title="Đọc lớp JRC ở ô 250 m">
+
+Bộ JRC phân loại từng ảnh Landsat 30 m thành nước / không nước rồi đếm. Tần suất là tỉ lệ số lần thấy nước trên số lần quan sát không mây; tính mùa là số tháng trong năm có ít nhất một lần thấy nước. Ở đây mỗi ô 250 m là **trung bình** của khoảng 70 pixel 30 m. Một ô có giá trị 3 tháng có thể là cả ô ngập 3 tháng, hoặc một phần tư ô là ao có nước quanh năm. Muốn phân biệt, phải về lại độ phân giải 30 m.
+
+Năm 2021 là năm cuối của phiên bản 1.4. Ảnh Landsat thiếu nhiều vào mùa mưa nhiều mây, nên số tháng có nước có thể bị đếm thiếu ở những tháng không có ảnh sạch.
+
+</Depth>
+
+## 8.2 Phát hiện nước: MNDWI và radar
+
+Có hai cách phổ biến. Ảnh quang học dùng chỉ số <Term id="mndwi">MNDWI</Term> (Xu, 2006): nước phản xạ một ít ánh sáng lục nhưng hấp thụ gần hết hồng ngoại sóng ngắn (SWIR), nên MNDWI của nước dương còn của đất và cây thường âm.
+
+<Formula label="Chỉ số nước MNDWI (Sentinel-2)" tex="\mathrm{MNDWI} = \frac{B_3 - B_{11}}{B_3 + B_{11}}" where="
+B_3 :: phản xạ băng lục (560 nm, 10 m)
+B_{11} :: phản xạ hồng ngoại sóng ngắn (1610 nm, 20 m)
+" />
+
+Ảnh radar dựa vào <Term id="specular-reflection">phản xạ gương</Term>: mặt nước lặng đẩy sóng đi xa khỏi vệ tinh, nên nước rất tối. Cả hai cách đều cần một <Term id="water-threshold">ngưỡng nước</Term>. Ngưỡng tự động phổ biến nhất là <Term id="otsu">ngưỡng Otsu</Term>: nó chọn giá trị tách histogram thành hai nhóm khác nhau nhất.
+
+Khung An Giang (10 × 10 km quanh Thoại Sơn – Tri Tôn) có một cảnh Sentinel-2 không mây đúng mùa lũ, ngày 26/10/2024, và Sentinel-1 chụp cùng ngày. Đây là cơ hội hiếm để so hai cách trên cùng một mặt đất.
+
+<Predict client:visible lang="vi"
+  title="Ngưỡng MNDWI của nước"
+  q="Sách giáo khoa hay nói 'nước có MNDWI > 0'. Otsu sẽ chọn ngưỡng nào cho khung An Giang ngày 26/10/2024?"
+  options={['Đúng 0', 'Khoảng +0,06', 'Khoảng +0,4', 'Khoảng −0,3']} answer={1}
+  why="Otsu chọn 0,06 (bước 0,02). Ngưỡng 0 là quy ước; ngưỡng tốt nhất thay đổi theo cảnh vì nước đục phù sa, ruộng lúa non ngập nước và mép ruộng có MNDWI gần 0." />
+
+<Figure
+  title="Hình 8.2 — Nước theo MNDWI, Sentinel-2, An Giang 26/10/2024"
+  try="Bấm 'Dùng Otsu' rồi kéo ngưỡng từ 0 lên 0,3: diện tích nước giảm bao nhiêu? Những pixel nào đổi lớp đầu tiên: giữa ô ruộng ngập hay mép ruộng, bờ kênh?"
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED) ngày 26/10/2024, Cloud Score+ cs_cdf ≥ 0,6; MNDWI = (B3 − B11)/(B3 + B11), B11 20 m lấy mẫu láng giềng gần nhất về lưới 10 m Web Mercator. Otsu trên 256 khoảng trong −0,8…+0,8, làm tròn theo bước 0,02. Diện tích tính theo diện tích mặt đất từng hàng pixel. Contains modified Copernicus Sentinel data 2024."
+>
+  <ThresholdLab client:visible lang="vi" label="Ngưỡng MNDWI, An Giang" layer="s2mndwi-angiang-2024" below={false} step={0.02}
+    maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-0.8, 0.8]} />
+</Figure>
+
+<Figure
+  title="Hình 8.3 — Nước theo radar VV, Sentinel-1, An Giang 12/3, 14/10 và 26/10/2024"
+  try="Chọn ngày 26/10/2024 và bấm Otsu: diện tích nước có gần với Hình 8.2 không? Bật lọc Lee. Sau đó chọn ngày 12/03/2024 (mùa khô) và bấm Otsu: 49 % khung là 'nước' có hợp lý không?"
+  source="Sentinel-1A IW GRD, VV, quỹ đạo 26, ngày 12/03, 14/10 và 26/10/2024, σ⁰ (dB) như phân phối trong Earth Engine; lấy mẫu láng giềng gần nhất về lưới 10 m Web Mercator, chưa lọc speckle (lọc Lee 5×5 tùy chọn trong trình duyệt). Otsu trên 256 khoảng trong −30…0 dB, làm tròn theo bước 0,25 dB. Contains modified Copernicus Sentinel data 2024."
+>
+  <ThresholdLab client:visible lang="vi" label="Ngưỡng radar, An Giang" layer="s1-angiang-2024" time={2} speckle
+    maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-30, 0]} />
+</Figure>
+
+Kết quả trên khung 10.467 ha:
+
+<div class="table-wrap">
+
+| Ảnh | Ngưỡng Otsu | Diện tích nước | Tỉ lệ khung |
+|---|---|---|---|
+| Sentinel-2 MNDWI, 26/10/2024 | > 0,06 | 5.855 ha | 55,9 % |
+| Sentinel-1 VV, 26/10/2024 | < −15,5 dB | 5.980 ha | 57,0 % |
+| Sentinel-1 VV, 14/10/2024 | < −16,5 dB | 6.045 ha | 57,6 % |
+
+</div>
+
+Hai cảm biến cùng ngày chênh nhau chỉ khoảng 2 % diện tích. So từng pixel, hai bản đồ cùng kết luận ở **85,1 %** số pixel (49,0 % cùng là nước). 6,9 % chỉ MNDWI gọi là nước, 8,0 % chỉ radar gọi là nước. Chỗ bất đồng thường là mép ô ruộng, kênh hẹp (pixel SWIR 20 m to gấp bốn lần), lúa non ngập nước và mặt nước gợn sóng gió.
+
+Ngày 12/3/2024 khung gần như không có nước mặt (chỉ 74 ha có VV < −18 dB), nhưng Otsu vẫn chia histogram làm đôi ở −10,25 dB và gọi **49 %** khung là "nước". Otsu luôn trả về một ngưỡng, kể cả khi cảnh chỉ có một lớp.
+
+<Note kind="key">
+
+MNDWI và radar cho diện tích nước rất gần nhau khi cảnh có nhiều nước và trời quang. Radar thắng khi có mây (gần như cả mùa mưa), quang học dễ đọc hơn ở mép ruộng và cây ngập. Ngưỡng Otsu chỉ đáng tin khi histogram có hai đỉnh rõ: hãy nhìn histogram trước khi tin con số.
+
+</Note>
+
+<Depth level="advanced" title="Vì sao không dùng một ngưỡng cố định cho mọi ảnh">
+
+Ngưỡng nước radar thay đổi theo góc tới, gió và loại nước. Mặt ruộng ngập nông có lúa non nhô lên có thể sáng hơn mặt sông vì sóng dội giữa thân lúa và mặt nước. Cây ngập nước (rừng tràm, lúa đã cao) có thể **sáng hơn** đất khô vì dội hai lần, nên hoàn toàn không hiện ra là nước. Các chuỗi xử lý tự động như của Twele và cs. (2016) chia ảnh thành ô nhỏ, chỉ tính Otsu ở những ô có histogram hai đỉnh, rồi tinh chỉnh bằng địa hình. Mục 8.3 dùng một ngưỡng cố định −18 dB cho cả châu thổ vì cần so sánh nhiều năm với nhau, chấp nhận sai số ở mép.
+
+</Depth>
+
+## 8.3 Lũ ĐBSCL theo tháng
+
+Để theo dõi cả châu thổ suốt mùa lũ, ta không thể chờ ảnh quang học không mây. Bản đồ ở Hình 8.4 dùng mọi ảnh Sentinel-1 trong tháng: lấy trung vị VV của từng pixel, gọi là nước nếu VV < −18 dB và độ dốc < 5°, tính ở 100 m rồi đổi thành **tỉ lệ nước** trong mỗi ô 250 m. Ra 6 bản đồ tháng (7–12) cho mỗi năm từ 2016 đến 2025.
+
+<Predict client:visible lang="vi"
+  title="Tháng nào nhiều nước nhất?"
+  q="Trên ảnh radar, diện tích nước mặt ở ĐBSCL thường lớn nhất vào tháng nào?"
+  options={['Tháng 8', 'Tháng 9', 'Tháng 10 hoặc 11', 'Tháng 12']} answer={2}
+  why="Cả mười năm 2016–2025, tháng đỉnh là tháng 10 (5 năm) hoặc tháng 11 (5 năm). Nước lũ trong các ô ruộng rút chậm, và nhiều nơi cho nước vào ruộng để làm đất vụ Đông Xuân." />
+
+<Figure
+  title="Hình 8.4 — Nước mặt ĐBSCL theo tháng, tháng 7–12 năm 2018 và 2024 (radar)"
+  try="Bấm Chạy để xem nước lan từ biên giới Campuchia vào Đồng Tháp Mười và Tứ giác Long Xuyên. Bật So sánh: bên trái tháng 7, bên phải tháng 10. Đổi lớp 2018 ↔ 2024: vùng nào ít nước hơn năm 2024?"
+  source="Sentinel-1 IW GRD (COPERNICUS/S1_GRD), VV, mọi quỹ đạo; trung vị theo tháng, nước = VV < −18 dB và độ dốc SRTM < 5°, tính ở ~100 m, tỉ lệ nước trong ô ~250 m. Ruộng đang ngập, ao nuôi, sông kênh đều được tính là nước. 2018: Sentinel-1A + 1B; 2024: chỉ Sentinel-1A. Contains modified Copernicus Sentinel data 2018, 2024."
+>
+  <DeltaMap client:visible lang="vi" label="Nước mặt ĐBSCL theo tháng" compare time={3} compareTime={0} choices={[
+    { key: 's1-2018', label: { vi: '2018', en: '2018' }, ids: { mekong: 'flood-s1-2018-mekong' }, clearBelow: 1 },
+    { key: 's1-2024', label: { vi: '2024', en: '2024' }, ids: { mekong: 'flood-s1-2024-mekong' }, clearBelow: 1 },
+  ]} />
+</Figure>
+
+Cộng tỉ lệ nước nhân diện tích ô, ta có diện tích nước mặt theo tháng cho cả vùng và từng tỉnh (Hình 8.5). Tháng đỉnh năm 2018 là tháng 10 với **566 nghìn ha**; năm 2024 cũng là tháng 10 nhưng chỉ **410 nghìn ha**. Trung bình đỉnh mười năm, bốn tỉnh nhiều nước nhất là Kiên Giang (121 nghìn ha), Long An (80), Đồng Tháp (75) và An Giang (58).
+
+<Figure
+  title="Hình 8.5 — Diện tích nước mặt theo tháng, ĐBSCL và từng tỉnh, 2016–2025"
+  try="Chọn Long An, rồi Năm A = 2018, Năm B = 2024: đỉnh khác nhau bao nhiêu? Chọn Kiên Giang: đường cong khác Long An ở chỗ nào?"
+  source="Như Hình 8.4, cộng theo tỉnh (geoBoundaries ADM1, ranh 63 tỉnh trước sáp nhập 2025). Tháng nào cũng có ảnh radar cho ≥ 99,7 % diện tích vùng. Contains modified Copernicus Sentinel data 2016–2025."
+>
+  <FloodArea client:visible lang="vi" view="months" />
+</Figure>
+
+<Note kind="key">
+
+Diện tích "nước mặt" ở đây gồm sông, kênh, ao tôm, ruộng đang ngập để cấy và nước lũ trên đồng. Nó cho biết lũ lớn hay nhỏ so với năm khác, **không phải** diện tích thiệt hại: phần lớn nước lũ ở ĐBSCL nằm trên ruộng đã thu hoạch, đúng như người dân chờ đợi.
+
+</Note>
+
+<Depth level="advanced" title="Ba lựa chọn trong cách tính và hệ quả">
+
+**Trung vị tháng** loại bỏ ảnh lẻ có gió mạnh (mặt nước gợn, sáng lên) nhưng làm mất các đợt ngập ngắn dưới nửa tháng. **Ngưỡng −18 dB** chặt hơn Otsu của khung An Giang (−15,5 dB) để tránh gọi đất ướt là nước; đổi lại, ruộng ngập có lúa non sẽ bị đếm thiếu. **Độ phân giải 100 m** là để Earth Engine tính được cả châu thổ trong vài phút; kênh rạch hẹp bị mất. Năm 2022 – tháng 3/2025 chỉ còn Sentinel-1A (vệ tinh 1B hỏng cuối 2021), nên mỗi tháng có ít ảnh hơn, trung vị nhiễu hơn. So sánh các năm vẫn hợp lệ vì mọi năm dùng cùng một quy trình.
+
+</Depth>
+
+## 8.4 Năm lũ lớn, năm lũ nhỏ và đê bao cao
+
+Hình 8.6 tóm mỗi năm bằng một số: diện tích nước mặt của tháng cao nhất.
+
+<Figure
+  title="Hình 8.6 — Diện tích nước mặt tháng cao nhất mỗi năm, ĐBSCL 2016–2025 (radar)"
+  try="Rê chuột lên các năm. Chọn An Giang, Đồng Tháp, Long An: năm nào cả ba cùng thấp? Có năm nào tỉnh này cao mà toàn vùng thấp không?"
+  source="Như Hình 8.4 và 8.5: lớn nhất của sáu tháng 7–12 mỗi năm; đường nét đứt = trung bình 2016–2025. Contains modified Copernicus Sentinel data 2016–2025."
+>
+  <FloodArea client:visible lang="vi" view="years" />
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Năm nào nhiều nước nhất?"
+  q="Trong 2016–2025, năm nào có diện tích nước mặt tháng cao nhất lớn nhất?"
+  options={['2016', '2017', '2022', '2025']} answer={1}
+  why="2017: 604 nghìn ha (tháng 11). Tiếp theo là 2025 (588), 2018 (566) và 2022 (543). Năm nhỏ nhất là 2021 với 395 nghìn ha. Trung bình mười năm khoảng 496 nghìn ha." />
+
+Biến động giữa các năm rất lớn: năm cao nhất gấp hơn 1,5 lần năm thấp nhất. Ở Long An, đỉnh giảm từ 125 nghìn ha (2018) xuống 55 nghìn ha (2024). An Giang dao động từ 34 nghìn ha (2020) đến 81 nghìn ha (2018). Mười năm là quá ngắn để nói về xu thế, nhưng các nghiên cứu dài hạn chỉ ra hai thay đổi do con người:
+
+- **Đê bao cao.** Sau trận lũ lớn năm 2000, các tỉnh vùng Tứ giác Long Xuyên và Đồng Tháp Mười xây nhiều <Term id="high-dyke">đê bao cao</Term> giữ ruộng khô quanh năm để làm vụ Thu Đông, thay cho <Term id="low-dyke">đê bao thấp</Term> chỉ chặn lũ sớm. Triet và cs. (2017) thấy đỉnh mực nước và thời gian ngập ở hạ lưu vùng đê cao tăng rõ từ 2000/2001. Mô hình thủy lực của họ cho thấy riêng đê cao làm đỉnh lũ vùng giữa châu thổ cao thêm 9–13 cm và kéo dài thêm khoảng 15 ngày; thủy triều còn ảnh hưởng lớn hơn (19–32 cm).
+- **Đập thượng nguồn.** Binh và cs. (2020) cho rằng trong giai đoạn 2009–2015, các đập có hồ chứa lớn trong lưu vực đã cùng nhau làm giảm nhịp lũ và tăng dòng chảy mùa khô dọc sông Mê Kông, vượt ảnh hưởng của biến đổi khí hậu.
+
+Kondolf và cs. (2022) xem đê bao là một trong bốn nguyên nhân khiến châu thổ "chìm dần" (cùng với đập, khai thác cát và bơm nước ngầm): đê ngăn nước lũ giàu phù sa tràn lên đồng để bồi đất. Họ đề xuất cho nước lũ tràn vào đồng trở lại ở những nơi có thể.
+
+<Predict client:visible lang="vi"
+  title="Đê bao cao làm gì với ảnh radar?"
+  q="Một ô đê bao cao trồng lúa Thu Đông. Trên ảnh radar tháng 10, ô đó hiện ra thế nào?"
+  options={['Tối như nước, vì cả vùng xung quanh đang lũ', 'Không phải nước: ruộng khô hoặc có lúa đang lớn', 'Không có dữ liệu', 'Sáng nhất ảnh vì có đê']} answer={1}
+  why="Đê giữ ruộng khô, lúa trong ô làm tán xạ khối nên ảnh sáng vừa. Vì thế diện tích nước tháng đỉnh có thể giảm dù dòng lũ trên sông không đổi: cần mô hình thủy lực hoặc số liệu trạm mới tách được hai nguyên nhân." />
+
+<Note kind="key">
+
+Diện tích nước tháng đỉnh thay đổi mạnh theo năm (395–604 nghìn ha trong 2016–2025). Ảnh vệ tinh cho biết nước nằm ở đâu, nhưng không tự tách được phần do lượng lũ thượng nguồn, phần do đê bao và phần do lịch thời vụ. Muốn tách phải ghép với mực nước trạm, bản đồ đê và mô hình thủy lực.
+
+</Note>
+
+## 8.5 Bão Yagi và ngập ở ĐBSH
+
+Bão Yagi đổ bộ vào Quảng Ninh – Hải Phòng ngày 7/9/2024. Mưa lớn sau bão gây lũ sông Hồng, sông Thái Bình và ngập úng nhiều cánh đồng. Mây che gần như suốt những ngày đó. Sentinel-1 có hai ảnh cùng quỹ đạo 91 (xuống) phủ gần hết châu thổ: **31/8** (trước bão) và **12/9** (năm ngày sau khi bão đổ bộ), cách nhau đúng một chu kỳ 12 ngày.
+
+Cách làm là <Term id="change-detection">phát hiện thay đổi</Term>: nước mới = pixel có VV < −18 dB ngày 12/9 nhưng không phải nước ngày 31/8. Hai ảnh cùng hình học nên mọi khác biệt là do mặt đất thay đổi, không phải do góc nhìn.
+
+<Figure
+  title="Hình 8.7 — Nước mặt ĐBSH trước (31/8) và sau (12/9/2024) bão Yagi, radar"
+  try="Bật So sánh và kéo thanh vuốt: dọc sông Hồng qua Hà Nội, sông Đáy ở Ninh Bình, ven biển Nam Định – Hải Phòng, chỗ nào nước mở rộng? Rê chuột để đọc tên tỉnh."
+  source="Sentinel-1A IW GRD, VV, quỹ đạo 91 (xuống), 31/08/2024 và 12/09/2024; nước = VV < −18 dB và độ dốc SRTM < 5° ở 10 m, tỉ lệ nước trong ô ~250 m. Chưa đối chiếu thực địa. Contains modified Copernicus Sentinel data 2024."
+>
+  <DeltaMap client:visible lang="vi" label="Nước trước và sau bão Yagi" compare time={1} compareTime={0} choices={[
+    { key: 'yagi', label: { vi: 'Yagi 2024', en: 'Yagi 2024' }, ids: { red: 'flood-yagi-red' }, clearBelow: 1 },
+  ]} />
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Tỉnh nào nhiều nước mới trên ruộng nhất?"
+  q="Ngày 12/9/2024, tỉnh nào có nhiều nước mới trên đất trồng trọt nhất (theo radar)?"
+  options={['Thái Bình', 'Hà Nội', 'Hải Phòng', 'Nam Định']} answer={1}
+  why="Hà Nội: 6.432 ha. Hải Phòng có nhiều nước mới (10.605 ha) nhưng gần hết nằm ngoài đất trồng trọt. Thái Bình chỉ có 860 ha, dù báo cáo thiệt hại lúa ở đây rất lớn (mục 8.6)." />
+
+Cặp ảnh quỹ đạo 91 phủ 95,9 % vùng ĐBSH (11 tỉnh). Trên phần đó, radar thấy **51.501 ha** nước mới, trong đó **23.430 ha** (45,5 %) nằm trên đất trồng trọt theo ESA WorldCover. Phần còn lại nằm trên các lớp khác của WorldCover (cỏ, đất ngập nước, đất trống…).
+
+<Note kind="key">
+
+Hai ảnh radar cùng quỹ đạo, cách nhau một chu kỳ, cho bản đồ nước mới sau bão bất kể mây. Nhưng bản đồ chỉ nói nước có mặt **vào lúc vệ tinh bay qua**: ngập trước hoặc sau thời điểm đó, và thiệt hại không kèm nước đọng, đều không hiện ra.
+
+</Note>
+
+<Depth level="advanced" title="Ngưỡng hay phát hiện thay đổi?">
+
+Ở <a href="https://quanta1985.github.io/rs-knowledge/vi/ch11-sar/">chương Radar SAR của sổ tay Viễn thám & GIS</a> (mục 16.5), cùng cặp ảnh này trên khung Hà Nội cho thấy cách "ngưỡng trên ảnh sau" và cách "VV giảm hơn 3 dB" cho kết quả khác nhau. Ở đây dùng điều kiện đơn giản (nước ngày sau, không nước ngày trước) cho toàn châu thổ. Nước mới ở ô 250 m Hình 8.7 là tỉ lệ; cộng phần tăng tỉ lệ nước trên cả vùng được khoảng 49 nghìn ha, gần với con số 51.501 ha tính ở 10 m.
+
+</Depth>
+
+## 8.6 Từ bản đồ nước đến thiệt hại lúa
+
+Bảng dưới là nước mới theo tỉnh, tính ở 10 m rồi cộng theo ranh tỉnh (ranh 2008, trước sáp nhập 2025).
+
+<div class="table-wrap">
+
+| Tỉnh | Nước mới (ha) | Trên đất trồng trọt (ha) | % đất trồng trọt của tỉnh |
+|---|---|---|---|
+| Hà Nội | 10.574 | 6.432 | 5,1 |
+| Ninh Bình | 5.635 | 4.262 | 7,7 |
+| Nam Định | 7.124 | 3.148 | 3,4 |
+| Hải Dương | 4.510 | 2.673 | 3,6 |
+| Bắc Ninh | 3.415 | 2.122 | 4,0 |
+| Vĩnh Phúc | 2.636 | 1.831 | 4,6 |
+| Thái Bình | 3.639 | 860 | 1,0 |
+| Hưng Yên | 1.071 | 811 | 1,5 |
+| Hà Nam | 1.133 | 699 | 1,5 |
+| Hải Phòng | 10.605 | 569 | 1,7 |
+| Quảng Ninh | 1.159 | 23 | 0,1 |
+| **Tổng** | **51.501** | **23.430** | |
+
+</div>
+
+Đất trồng trọt (WorldCover 2021) gồm cả rau màu. Thay bằng bản đồ lúa radar năm 2024 của <a href="../rice/">Chương 4</a>: các ô 250 m có ít nhất một vụ lúa rộng 469 nghìn ha, và tỉ lệ nước trên đó tăng tương đương **khoảng 19.900 ha** (4,2 %). Hai cách cho cùng cỡ số, khoảng 20 nghìn ha.
+
+Số liệu thống kê lớn hơn nhiều:
+
+- Báo cáo nhanh của Cục Thủy lợi (Bộ NN&PTNT) ngày 8/9/2024: Thái Bình 18.000 ha ngập úng, ước 55.000 ha lúa thiệt hại; Hà Nội 13.750 ha lúa đổ và 152 ha lúa ngập; Bắc Ninh 8.209 ha lúa đổ, úng ngập; Nam Định 2.340 ha lúa sâu nước (dẫn theo Báo Đầu tư, 8/9/2024).
+- Văn bản Bộ NN&PTNT gửi Thủ tướng, số liệu đến 6h ngày 15/9/2024: ngập úng, thiệt hại 190.358 ha, cùng 48.727 ha hoa màu và 31.745 ha cây ăn quả (dẫn theo Báo Nông nghiệp và Môi trường, 15/9/2024).
+- Tổng cục Thống kê (7/10/2024): ở các tỉnh phía Bắc, bão và mưa sau bão làm ngập úng, hư hại gần 350 nghìn ha lúa, hoa màu, trong đó 75 nghìn ha lúa mùa thiệt hại từ 70 % trở lên.
+
+Các con số này khác phạm vi (toàn miền Bắc so với 11 tỉnh), khác ngày và khác định nghĩa ("thiệt hại" so với "có nước"), nên không cộng hay trừ trực tiếp với số vệ tinh được.
+
+<Predict client:visible lang="vi"
+  title="Vì sao radar thấy ít nước ở Thái Bình?"
+  q="Báo cáo nhanh ước 55.000 ha lúa Thái Bình thiệt hại, radar chỉ thấy 860 ha nước mới trên đất trồng trọt. Lý do nào ít khả năng nhất?"
+  options={['Radar không chụp xuyên được mây bão', 'Phần lớn là lúa đổ do gió, không có nước đọng', 'Nước úng đã được bơm tiêu trước 12/9', 'Nước nông dưới tán lúa đang trổ không làm ảnh tối đi']} answer={0}
+  why="Radar băng C chụp xuyên mây. Ba lý do còn lại đều có thể: Thái Bình nằm sát nơi bão đổ bộ nên lúa đổ nhiều; năm ngày đủ để trạm bơm tiêu bớt nước; và giữa tháng 9 lúa mùa đang trổ, tán lúa dày che mặt nước bên dưới." />
+
+Vì sao bản đồ nước ít hơn số thiệt hại cả chục lần?
+
+1. **Thiệt hại không có nước.** <Term id="storm-lodging">Lúa đổ</Term> do gió, hạt lép do mưa lúc trổ bông: không có nước đọng nào để vệ tinh thấy.
+2. **Thời điểm.** Ảnh 12/9 là năm ngày sau khi bão đổ bộ. Ngập úng ngắn đã được tiêu trước đó; nơi ngập sau đó (lũ sông về muộn) chỉ hiện ra ở ảnh 24/9.
+3. **Tán lúa che nước.** Ngày 6/9/2024, Bộ NN&PTNT cảnh báo khoảng 1 triệu ha lúa miền Bắc đang ở giai đoạn trổ bông (Báo Nông nghiệp Việt Nam, 6/9/2024), tức tán lúa dày nhất. Radar băng C chủ yếu "thấy" tán lá; nước nông bên dưới có khi làm ảnh **sáng hơn** (dội hai lần giữa thân lúa và mặt nước) chứ không tối đi. Đây là giới hạn lớn nhất của ngưỡng VV trên ruộng lúa đang lớn.
+4. **Phạm vi.** Số thống kê gồm cả các tỉnh trung du, miền núi phía Bắc (báo cáo ngày 8/9 còn gồm Bắc Trung Bộ); bản đồ chỉ có 11 tỉnh châu thổ.
+
+<Steps title="Quy trình ước tính lúa bị ngập từ vệ tinh" items={[
+  { tag: '1', t: 'Cặp ảnh trước / sau', d: 'Cùng quỹ đạo, càng gần ngày bão càng tốt; thêm ảnh 12 ngày sau để bắt lũ muộn.' },
+  { tag: '2', t: 'Bản đồ nước mới', d: 'Ngưỡng hoặc phát hiện thay đổi; lọc vùng dốc và nước thường xuyên.' },
+  { tag: '3', t: 'Chồng với bản đồ lúa cùng mùa', d: 'Chương 4: bản đồ lúa radar năm 2024. Ghi rõ giai đoạn sinh trưởng.' },
+  { tag: '4', t: 'Tính theo tỉnh, huyện', d: 'Diện tích theo diện tích mặt đất từng pixel, ranh hành chính đúng năm.' },
+  { tag: '5', t: 'Kiểm tra và giải thích', d: 'Điểm thực địa, ảnh UAV, số liệu xã; nói rõ cái vệ tinh không thấy (lúa đổ, ngập dưới tán).' },
+]} />
+
+<Note kind="key">
+
+Bản đồ nước sau bão là bằng chứng nhanh, khách quan về **nơi có nước** vào một ngày. Con số thiệt hại cần thêm bản đồ lúa, chuỗi ảnh nhiều ngày và kiểm tra thực địa. Báo cáo một con số vệ tinh mà không nói nó đo cái gì là cách nhanh nhất để mất lòng tin của người dùng.
+
+</Note>
+
+## 8.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Báo Đầu tư (08/09/2024). Khắc phục hơn 85.000 ha lúa và rau màu bị ngập úng sau bão Yagi (dẫn báo cáo Cục Thủy lợi, Bộ NN&PTNT). https://baodautu.vn/khac-phuc-hon-85000-ha-lua-va-rau-mau-bi-ngap-ung-sau-bao-yagi-d224376.html
+- Báo Nông nghiệp và Môi trường (15/09/2024). Bão số 3 khiến 348 người chết và mất tích, thiệt hại kinh tế hơn 31.000 tỷ đồng. https://nongnghiepmoitruong.vn/bao-so-3-khien-348-nguoi-chet-va-mat-tich-thiet-hai-kinh-te-hon-31000-ty-dong-d400034.html
+- Báo Nông nghiệp Việt Nam (06/09/2024). 1 million ha rice in risks of being affected by super typhoon Yagi. https://van.nongnghiepmoitruong.vn/1-million-ha-rice-in-risks-of-being-affected-by-super-typhoon-yagi-d398646.html
+- Binh, D. V., Kantoush, S. A., Sumi, T. và cs. (2020). Long-term alterations of flow regimes of the Mekong River and adaptation strategies for the Vietnamese Mekong Delta. *Journal of Hydrology: Regional Studies*, 32, 100742. https://doi.org/10.1016/j.ejrh.2020.100742
+- Kondolf, G. M. và cs. (2022). Save the Mekong Delta from drowning. *Science*, 376(6593), 583–585. https://doi.org/10.1126/science.abm5176
+- Otsu, N. (1979). A threshold selection method from gray-level histograms. *IEEE Transactions on Systems, Man, and Cybernetics*, 9(1), 62–66.
+- Pekel, J.-F., Cottam, A., Gorelick, N., & Belward, A. S. (2016). High-resolution mapping of global surface water and its long-term changes. *Nature*, 540, 418–422.
+- Tổng cục Thống kê (07/10/2024). Tăng trưởng nông nghiệp quý III và 9 tháng năm 2024 sụt giảm. https://www.nso.gov.vn/?p=53573
+- Triet, N. V. K., Dung, N. V., Fujii, H., Kummu, M., Merz, B., & Apel, H. (2017). Has dyke development in the Vietnamese Mekong Delta shifted flood hazard downstream? *Hydrology and Earth System Sciences*, 21, 3991–4010. https://doi.org/10.5194/hess-21-3991-2017
+- Twele, A., Cao, W., Plank, S., & Martinis, S. (2016). Sentinel-1-based flood mapping: a fully automated processing chain. *International Journal of Remote Sensing*, 37(13), 2990–3004.
+- Xu, H. (2006). Modification of normalised difference water index (NDWI) to enhance open water features in remotely sensed imagery. *International Journal of Remote Sensing*, 27(14), 3025–3033.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

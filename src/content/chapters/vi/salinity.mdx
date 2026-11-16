@@ -1,0 +1,332 @@
+---
+title: Xâm nhập mặn
+n: 10
+summary: Mùa khô, nước biển theo triều vào sâu các cửa sông Cửu Long. Chương này giải thích cơ chế xâm nhập mặn, so sánh ba đợt 2015–16, 2019–20 và 2023–24 bằng số liệu công bố, rồi xem vệ tinh thấy được gì (cây xanh kém đi, đất đổi mục đích) và không thấy được gì (độ mặn của nước).
+objectives:
+  - Giải thích vì sao lưu lượng mùa khô, thủy triều, nước biển dâng và đáy sông hạ thấp làm mặn vào sâu hơn.
+  - Đọc và so sánh chiều dài xâm nhập ranh mặn 4 g/L của các đợt mặn lớn, biết số nào là đỉnh mùa, số nào là giữa mùa.
+  - Đọc bản đồ dị thường EVI mùa khô và nói được vì sao nó không phải bản đồ độ mặn.
+  - Nhận ra giới hạn của các chỉ số mặn đất (SI, NDSI) trên vùng có cây và nước.
+  - Dùng Dynamic World để theo dõi chuyển đổi sử dụng đất ven biển và biết khi nào nhãn không đáng tin.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SalinityMechanism from '../../../islands/SalinityMechanism.tsx';
+import IntrusionChart from '../../../islands/IntrusionChart.tsx';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/salinity.json';
+
+## 10.1 Mặn vào sông như thế nào
+
+Mỗi ngày, thủy triều Biển Đông đẩy nước biển vào các cửa sông Cửu Long hai lần. Dòng chảy của sông đẩy ngược lại. Mùa lũ, sông mạnh, nước mặn chỉ quanh quẩn ở cửa sông. Mùa khô (tháng 12 đến tháng 5), <Term id="dry-season-discharge">lưu lượng mùa khô</Term> nhỏ dần, nên triều đưa nước mặn vào sâu hơn. Hiện tượng này là <Term id="salinity-intrusion">xâm nhập mặn</Term>. Nó xảy ra hằng năm; điều thay đổi là mặn vào **sâu bao nhiêu, sớm bao nhiêu và kéo dài bao lâu**.
+
+Bốn yếu tố đẩy ranh mặn vào sâu hơn:
+
+1. **Dòng chảy thượng nguồn ít.** Lũ năm 2015 nhỏ nhất trong 90 năm ở Tân Châu, tổng lượng nước mùa lũ chỉ khoảng 220 tỷ m³, bằng 60 % một năm lũ trung bình. Từ tháng 12/2015 đến tháng 3/2016, lưu lượng ở Tân Châu và Châu Đốc chỉ bằng 57–85 % trung bình nhiều năm (Nguyễn Ngọc Anh 2017).
+2. **<Term id="tidal-regime">Triều</Term>.** Vào kỳ triều cường (quanh rằm và mùng một), mặn vào sâu nhất. Các báo cáo mặn vì vậy thường nêu theo từng đợt triều cường.
+3. **<Term id="sea-level-rise">Nước biển dâng</Term> và sụt lún.** Mặt biển cao hơn so với mặt đất làm triều mạnh hơn trong sông. Ở ĐBSCL, đất lún khoảng 1–4 cm mỗi năm, chủ yếu do khai thác nước ngầm (Erban và cs. 2014, theo Park và cs. 2021), nhanh hơn mực nước biển dâng nhiều lần (xem Chương 11).
+4. **<Term id="riverbed-lowering">Đáy sông hạ thấp</Term>.** Đập thượng nguồn giữ lại phù sa, còn khai thác cát lấy đi đáy sông. Lượng cát khai thác ở ĐBSCL tăng từ khoảng 7,75 triệu m³/năm (2012) lên 29,3 triệu m³/năm (2018) (theo tổng hợp của Park và cs. 2021). Lòng sông sâu hơn để triều và nước mặn đi xa hơn (Eslami và cs. 2019).
+
+<Figure
+  title="Hình 10.1 — Bốn yếu tố đẩy ranh mặn vào sâu: mô hình minh họa"
+  try="Giảm lưu lượng còn 50 %: ranh mặn dịch thêm bao nhiêu phần trăm? Giữ lưu lượng 100 %, tăng nước biển dâng lên 100 cm rồi hạ đáy sông 3 m: yếu tố nào tác động mạnh hơn trong mô hình này? Đổi sang triều cường."
+  source="Sơ đồ minh họa, không phải dự báo và không cho ra km. Quy luật L ∝ Q^(−1/3) lấy từ lý thuyết dòng trao đổi cho cửa sông pha trộn một phần (MacCready & Geyer 2010); số mũ đo được thường yếu hơn, ví dụ −1/7 ở vịnh San Francisco (Monismith và cs. 2002). Hệ số độ sâu (tuyến tính, lòng sông 15 m) và hệ số triều ±15 % là giả định để minh họa."
+>
+  <SalinityMechanism client:visible lang="vi" />
+</Figure>
+
+<Formula label="Quy luật lũy thừa của chiều dài xâm nhập (dùng trong Hình 10.1)" tex="\frac{L}{L_0} = \left(\frac{Q}{Q_0}\right)^{-1/3}" where="
+L,\ L_0 :: chiều dài xâm nhập mặn lúc này và lúc làm mốc
+Q,\ Q_0 :: lưu lượng sông mùa khô lúc này và lúc làm mốc
+" />
+
+<Predict client:visible lang="vi"
+  title="Yếu tố nào quyết định?"
+  q="Trong một mùa khô, yếu tố nào quyết định nhiều nhất việc mặn vào sâu bao xa ở các cửa sông Cửu Long?"
+  options={['Lưu lượng sông từ thượng nguồn', 'Mưa tại chỗ', 'Nhiệt độ không khí', 'Gió mùa đông bắc']} answer={0}
+  why="Mùa khô gần như không mưa, nên nước ngọt đẩy mặn ra chủ yếu đến từ thượng nguồn. Năm 2016, lưu lượng chỉ còn 57–85 % trung bình và mặn vào sâu kỷ lục. Gió chướng (đông bắc) có làm mặn vào sâu thêm, nhưng là yếu tố phụ." />
+
+<Predict client:visible lang="vi"
+  title="Lưu lượng giảm một nửa"
+  q="Theo quy luật L ∝ Q^(−1/3), nếu lưu lượng mùa khô giảm còn một nửa thì chiều dài xâm nhập tăng bao nhiêu phần trăm?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={26} tol={3}
+  why="0,5^(−1/3) ≈ 1,26, tức tăng khoảng 26 %. Quan hệ lũy thừa nghĩa là lưu lượng giảm 50 % chưa làm mặn vào sâu gấp đôi. Với số mũ −1/7 như đo ở San Francisco thì chỉ tăng khoảng 10 %." />
+
+<Note kind="key">
+
+Mặn là cuộc giằng co giữa dòng sông và thủy triều. Mặn vào sâu khi lưu lượng mùa khô nhỏ, khi triều cường, và khi lòng sông sâu thêm do khai thác cát, thiếu phù sa hay nước biển dâng tương đối. Hình 10.1 chỉ minh họa chiều tác động, không dự báo được số km.
+
+</Note>
+
+<Depth level="advanced" title="Vì sao lý thuyết cho số mũ −1/3 mà đo thực tế lại khác">
+
+Trong cửa sông pha trộn một phần, nước mặn nặng hơn chui vào theo đáy, nước ngọt chảy ra ở trên. Lý thuyết dòng trao đổi kinh điển cho chiều dài xâm nhập tỷ lệ với Q^(−1/3) và tăng mạnh theo độ sâu lòng sông (MacCready & Geyer 2010). Thực tế lệch khỏi lý thuyết vì độ pha trộn thay đổi theo triều cường – triều kém, vì hình dạng cửa sông, và vì mặn cần thời gian để điều chỉnh theo lưu lượng. Ở vịnh San Francisco, số mũ đo được chỉ khoảng −1/7 (Monismith và cs. 2002). Các cửa sông Cửu Long có triều mạnh và nhiều nhánh, nên dự báo mặn thực tế dùng mô hình thủy lực một chiều cho cả mạng sông, hiệu chỉnh bằng số liệu trạm đo.
+
+</Depth>
+
+## 10.2 Ba đợt mặn lớn: 2015–16, 2019–20, 2023–24
+
+Độ mặn được đo tại trạm trên sông, không đo từ vệ tinh. Các cơ quan thủy lợi và khí tượng thủy văn báo cáo bằng <Term id="salinity-4gl">ranh mặn 4 g/L</Term>: khoảng cách từ cửa sông tới điểm xa nhất có độ mặn 4 g/L. Lúa bị hại rõ ở khoảng mức này. Cách đo nhanh độ mặn là <Term id="ec-salinity">độ dẫn điện (EC)</Term>.
+
+<Predict client:visible lang="vi"
+  title="Mặn vào sâu bao nhiêu năm 2016?"
+  q="Cuối tháng 3/2016, ranh mặn 4 g/L trên sông Vàm Cỏ Tây (Long An) vào sâu bao nhiêu km tính từ cửa sông?"
+  slider={{ min: 20, max: 160, step: 5, unit: 'km' }} answer={135} tol={10}
+  why="135 km, vượt Tuyên Nhơn 25 km (Nguyễn Ngọc Anh 2017). Hai sông Vàm Cỏ không phải nhánh của sông Mê Kông, nên mùa khô có rất ít dòng ngọt đẩy mặn ra. Mặn ở đây luôn vào sâu hơn các nhánh sông Cửu Long." />
+
+<Figure
+  title="Hình 10.2 — Chiều dài xâm nhập ranh mặn 4 g/L theo các nguồn công bố"
+  try="Đọc thời điểm ghi cạnh mỗi thanh. Thanh rỗng là số giữa mùa, chưa phải đỉnh mùa: có so được trực tiếp với thanh đặc không?"
+  source="2015–16: Nguyễn Ngọc Anh (2017), VJSTE 59(1), đỉnh cuối tháng 3/2016, tính từ cửa sông. 2019–20: Vàm Cỏ Tây ~130 km tháng 5/2020 theo Tổng cục Thủy lợi tại hội nghị tổng kết 20/6/2020 (báo SGGP); cửa sông Cửu Long 45–66 km ngày 6–13/1/2020 (Bộ NN-PTNT 2020). 2023–24: ranh 4 ‰ toàn vùng 40–66 km đợt 8–13/3/2024 (Đài KTTV khu vực Nam Bộ, báo Nông nghiệp 22/3/2024); Vàm Cỏ 60–64 km đợt 8–14/2/2024 (Cục Thủy lợi, Báo Chính phủ 23/2/2024). Chưa tìm được số đỉnh mùa đã kiểm chứng cho từng cửa sông năm 2020 và 2024."
+>
+  <IntrusionChart client:visible lang="vi" />
+</Figure>
+
+Ba mùa khô có ba câu chuyện khác nhau:
+
+- **2015–16** là đợt mặn lịch sử. Mặn vào từ đầu tháng 11/2015, sớm khoảng 1,5 tháng. Đỉnh cuối tháng 3/2016: 135 km trên Vàm Cỏ Tây, 78 km trên Hàm Luông, 81 km trên Cổ Chiên, 70 km trên sông Hậu. Hạn hán ảnh hưởng cả 13 tỉnh, mặn ảnh hưởng 9 tỉnh ven biển (Nguyễn Ngọc Anh 2017).
+- **2019–20** mặn đến sớm hơn mùa 2015–16 gần một tháng và kéo dài gấp 2–2,5 lần. Vùng chịu ranh 4 g/L rộng 1,68 triệu ha, hơn năm 2016 là 50 376 ha (Tổng cục Thủy lợi, 20/6/2020).
+- **2023–24** mặn đến cuối tháng 12/2023, sớm hơn trung bình khoảng một tháng. Đợt 8–14/2/2024, ranh 4 g/L ở các cửa sông Cửu Long vào 40–50 km, ít hơn cùng kỳ 2016 khoảng 5–10 km và cùng kỳ 2020 khoảng 8–12 km (Cục Thủy lợi, 23/2/2024).
+
+<Stats items={[
+  { v: '238 276', u: 'ha', l: 'lúa thiệt hại mùa khô 2015–16 (Nguyễn Ngọc Anh 2017, theo Bộ NN-PTNT)' },
+  { v: '211 261', u: 'hộ', l: 'thiếu nước sinh hoạt năm 2016, hơn 1 triệu người' },
+  { v: '58 400', u: 'ha', l: 'lúa thiệt hại mùa khô 2019–20 (41 900 ha Đông Xuân + 16 500 ha lúa mùa trên đất lúa–tôm Cà Mau)' },
+  { v: '96 000', u: 'hộ', l: 'thiếu nước sinh hoạt năm 2020, khoảng 430 000 người' },
+]} caption="Số năm 2019–20: Tổng cục Thủy lợi tại hội nghị tổng kết ngày 20/6/2020 (báo SGGP). Cách tính thiệt hại khác nhau giữa các báo cáo, xem khung bên dưới." />
+
+<Predict client:visible lang="vi"
+  title="Mặn tương đương, thiệt hại thì sao?"
+  q="Mùa khô 2019–20 mặn vào sâu tương đương, có nơi hơn 2015–16. Diện tích lúa thiệt hại so với 2015–16 thì sao?"
+  options={['Ít hơn nhiều', 'Gần bằng', 'Gấp đôi']} answer={0}
+  why="Khoảng 58 400 ha so với 238 276 ha. Sau năm 2016, dự báo mặn được đưa ra sớm, nhiều nơi xuống giống sớm để thu hoạch trước đỉnh mặn, trữ nước ngọt và vận hành cống. Cùng một mức mặn, thiệt hại phụ thuộc nhiều vào việc chuẩn bị." />
+
+<Note kind="key">
+
+Độ mặn đo ở trạm, không đo từ vệ tinh. So sánh các đợt mặn phải so cùng ngưỡng (4 g/L), cùng con sông và cùng loại số: đỉnh mùa với đỉnh mùa. Năm 2020 mặn sâu như 2016 nhưng lúa thiệt hại chỉ bằng khoảng một phần tư, nhờ dự báo và lịch thời vụ.
+
+</Note>
+
+<Depth level="advanced" title="Vì sao các nguồn cho số khác nhau">
+
+Cùng mùa 2015–16, Nguyễn Ngọc Anh (2017) ghi 238 276 ha lúa thiệt hại theo Bộ NN-PTNT, còn báo cáo của Bộ NN-PTNT năm 2020 lại ghi 405 000 ha. Với chiều dài xâm nhập, Park và cs. (2021) viết mặn năm 2016 vào sâu "tới 93 km", trong khi Nguyễn Ngọc Anh ghi 135 km trên Vàm Cỏ Tây. Khác biệt đến từ việc đo ở sông nào, mốc tính từ đâu (cửa sông hay bờ biển), số đo hay số dự báo, và thiệt hại tính theo mức nào (giảm năng suất hay mất trắng). Sổ tay ghi rõ nguồn cho từng số và không trộn số từ nhiều nguồn vào một chuỗi.
+
+</Depth>
+
+## 10.3 Vệ tinh thấy gì: dị thường EVI mùa khô
+
+Vệ tinh không đo được độ mặn của nước sông. Nó chỉ thấy **hậu quả lên cây**: ruộng lúa bị mặn còi cọc, khô héo hoặc bị bỏ trống. Cách đơn giản để thấy điều đó trên cả vùng là <Term id="evi-anomaly">dị thường EVI</Term>: lấy EVI trung bình tháng 2–4 của một năm trừ đi trung vị tháng 2–4 của 15 năm 2010–2024. EVI là chỉ số thực vật đã học ở [rs-knowledge, Chương 6](https://quanta1985.github.io/rs-knowledge/vi/ch06-spectral/) và Chương 4.
+
+<Figure
+  title="Hình 10.3 — Dị thường EVI mùa khô (tháng 2–4) ở ĐBSCL: 2016, 2020, 2024"
+  try="Bật So sánh, đặt bên trái 2016, bên phải 2020, kéo thanh vuốt. Vùng nâu (EVI thấp hơn bình thường) nằm ở ven biển hay trong nội đồng? Rê chuột lên An Giang và Bến Tre."
+  source="MODIS MOD13Q1 + MYD13Q1 v061 (NASA LP DAAC), EVI × 0,0001, chỉ giữ SummaryQA ≤ 1; trung bình các ảnh tổng hợp 16 ngày tháng 2–4 của năm trừ trung vị của các trung bình tháng 2–4 năm 2010–2024; 250 m, lưới Web Mercator; cắt theo ranh 13 tỉnh (geoBoundaries, ranh trước 2025); tính trên mọi loại đất, không riêng đất lúa. Thang màu cố định −0,2…+0,2."
+>
+  <DeltaMap client:visible lang="vi" label="Dị thường EVI mùa khô ĐBSCL" compare time={1} compareTime={0} choices={[
+    { key: 'anom', label: { vi: 'Dị thường EVI', en: 'EVI anomaly' }, ids: { mekong: 'sal-evianom-mekong' } },
+  ]} />
+  <details slot="caption">
+    <summary>Bảng số liệu: phần trăm diện tích có dị thường EVI ≤ −0,05</summary>
+    <div class="table-wrap">
+
+| Khu vực | 2016 | 2020 | 2024 |
+|---|---|---|---|
+| Toàn ĐBSCL | 22,7 % | 31,1 % | 18,6 % |
+| 8 tỉnh ven biển | 21,5 % | 26,9 % | 15,3 % |
+| 5 tỉnh nội đồng | 25,8 % | 41,6 % | 26,7 % |
+| An Giang | 40,1 % | 54,5 % | 49,5 % |
+| Hậu Giang | 44,8 % | 26,4 % | 27,7 % |
+| Long An | 34,6 % | 49,6 % | 23,1 % |
+| Sóc Trăng | 30,3 % | 31,9 % | 24,1 % |
+| Trà Vinh | 19,5 % | 17,0 % | 3,6 % |
+| Bến Tre | 12,7 % | 13,4 % | 7,6 % |
+| Cà Mau | 11,9 % | 9,3 % | 7,4 % |
+
+    </div>
+    Tỉnh ven biển: Long An, Tiền Giang, Bến Tre, Trà Vinh, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang. Tính bằng `scripts/salinity_numbers.ts`.
+  </details>
+</Figure>
+
+Năm 2016, 22,7 % diện tích ĐBSCL (khoảng 890 nghìn ha) có EVI mùa khô thấp hơn bình thường từ 0,05 trở lên. Năm 2020 con số này là 31,1 % (khoảng 1,21 triệu ha), năm 2024 là 18,6 %. Thứ tự đó khớp với mức độ của ba đợt mặn. Nhưng nhìn kỹ bảng số liệu thì có điều lạ.
+
+<Predict client:visible lang="vi"
+  title="Tỉnh nào 'nâu' nhất năm 2016?"
+  q="Năm 2016, tỉnh nào có tỷ lệ diện tích dị thường EVI ≤ −0,05 cao nhất?"
+  options={['Bến Tre', 'Cà Mau', 'Hậu Giang', 'Trà Vinh']} answer={2}
+  why="Hậu Giang (44,8 %), một tỉnh nội đồng, rồi đến An Giang (40,1 %), nơi gần như không bị mặn. Bến Tre, tỉnh bị mặn nặng nhất, chỉ 12,7 %. Dị thường EVI phản ánh mọi thứ làm cây kém xanh trong tháng 2–4, không riêng mặn." />
+
+Bến Tre bị mặn nặng nhất nhưng chỉ có 12,7 % diện tích dị thường năm 2016. Phần lớn Bến Tre là vườn dừa và cây ăn trái, tán cây xanh quanh năm nên EVI ít đổi kể cả khi cây bị mặn. Ngược lại, An Giang không bị mặn mà năm nào cũng có 40–55 % diện tích dị thường. Ở đó, tháng 2–4 là lúc thu hoạch lúa Đông Xuân. Chỉ cần lịch gieo sạ sớm hay muộn vài tuần so với mọi năm, EVI tháng 2–4 đã lệch nhiều (xem bản đồ ngày bắt đầu vụ ở [Chương 4](../rice/)).
+
+<Predict client:visible lang="vi"
+  title="Năm 2020 nâu đến đâu?"
+  q="Năm 2020, bao nhiêu phần trăm diện tích ĐBSCL có dị thường EVI mùa khô ≤ −0,05?"
+  slider={{ min: 0, max: 60, step: 1, unit: '%' }} answer={31} tol={4}
+  why="31,1 %, cao nhất trong ba năm. Nhưng tỷ lệ ở 5 tỉnh nội đồng (41,6 %) cao hơn hẳn 8 tỉnh ven biển (26,9 %). Năm 2020 vừa mặn vừa hạn, và nhiều nơi gieo sạ sớm để né mặn: cả ba điều đều làm EVI tháng 2–4 giảm." />
+
+<Note kind="key">
+
+Dị thường EVI cho biết **cây kém xanh hơn mọi năm**, không cho biết **vì sao**. Thu hoạch sớm để né mặn, bỏ hoang, hạn hán, mặn và đổi cây trồng đều làm EVI giảm. Muốn nói về mặn phải kết hợp với số đo mặn ở trạm, lịch thời vụ và hiểu biết tại chỗ.
+
+</Note>
+
+<Depth level="advanced" title="Những điểm yếu của cách tính này">
+
+- **Nền 2010–2024 chứa chính các năm mặn.** Trung vị ít bị kéo bởi một vài năm xấu, nhưng nếu nhiều năm gần đây đều gieo sạ sớm thì "bình thường" cũng dịch theo.
+- **Không tách đất lúa.** Lớp này tính trên mọi loại đất trong ranh tỉnh, kể cả vườn cây, rừng ngập mặn, ao tôm và đô thị. Chương 4 có bản đồ lúa để lọc.
+- **Mây.** Tháng 2–4 ở ĐBSCL khá trong, nhưng pixel có SummaryQA > 1 bị bỏ, nên một số nơi chỉ còn ít ảnh.
+- **250 m.** Một pixel MODIS gồm nhiều thửa ruộng, kênh và nhà; một thửa bỏ hoang khó thấy.
+
+</Depth>
+
+## 10.4 Chỉ số mặn đất: dùng được ở đâu
+
+Nhiều tài liệu đề xuất phát hiện đất mặn bằng chỉ số tính từ kênh phổ. Hai chỉ số hay gặp là <Term id="salinity-index">chỉ số mặn SI</Term> và <Term id="ndsi">NDSI</Term>:
+
+<Formula label="Hai chỉ số mặn thường gặp" tex="\begin{gathered} SI = \sqrt{B \cdot R} \cr NDSI = \frac{R - NIR}{R + NIR} = -\,NDVI \end{gathered}" where="
+B,\ R,\ NIR :: phản xạ bề mặt kênh lam, đỏ, cận hồng ngoại (Sentinel-2: B2, B4, B8)
+" />
+
+Ý tưởng của SI: muối kết tinh trên mặt đất trống làm đất sáng hơn ở dải khả kiến (Khan và cs. 2001). Còn NDSI thì, như công thức cho thấy, **đúng bằng NDVI đổi dấu**.
+
+<Predict client:visible lang="vi"
+  title="NDSI có gì mới?"
+  q="NDSI = (R − NIR)/(R + NIR) chứa thông tin gì mà NDVI = (NIR − R)/(NIR + R) không có?"
+  options={['Không có gì: NDSI = −NDVI', 'Độ mặn của nước', 'Độ ẩm của đất', 'Lượng muối kết tinh']} answer={0}
+  why="Đổi chỗ R và NIR ở tử số chỉ đổi dấu. Vùng 'mặn cao' trên bản đồ NDSI chính là vùng ít cây xanh trên bản đồ NDVI: nước, đất trống, mái nhà." />
+
+<Figure
+  title="Hình 10.4 — NDVI và chỉ số mặn SI ở Giồng Trôm – Ba Tri (Bến Tre), mùa khô 2024"
+  try="Chuyển giữa NDVI và SI. Nơi nào SI cao (màu đỏ)? Đó là đất mặn, hay là sông, đường và nhà? Rê chuột lên sông Hàm Luông và một khu dân cư."
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED), lọc mây Cloud Score+ cs_cdf ≥ 0,6, trung vị các ảnh tháng 2–4/2024; khung 10,24 × 10,24 km, 10 m. NDVI = (B8 − B4)/(B8 + B4), thang −0,2…0,9; SI = √(B2 × B4) trên phản xạ bề mặt (Khan và cs. 2001), thang 0…0,15. Contains modified Copernicus Sentinel data 2024."
+>
+  <DeltaMap client:visible lang="vi" label="NDVI và SI Bến Tre" choices={[
+    { key: 'ndvi', label: { vi: 'NDVI', en: 'NDVI' }, ids: { bentre: 'sal-ndvi-bentre-2024' } },
+    { key: 'si', label: { vi: 'Chỉ số mặn SI', en: 'Salinity index SI' }, ids: { bentre: 'sal-si-bentre-2024' } },
+  ]} />
+</Figure>
+
+Trong khung Bến Tre, NDVI trung vị là 0,75: gần như mọi nơi là vườn dừa, cây ăn trái xanh tốt. Chỉ 3,5 % khung có NDVI dưới 0,2. SI và NDVI có hệ số tương quan **r = −0,80** trên hơn một triệu pixel. Nghĩa là SI chủ yếu đo "chỗ nào không có cây", và chỗ đó là sông, kênh, đường, mái nhà, không phải đất mặn.
+
+<Predict client:visible lang="vi"
+  title="SI và NDVI tương quan thế nào?"
+  q="Ở khung Bến Tre, hệ số tương quan Pearson giữa NDVI và SI là bao nhiêu?"
+  slider={{ min: -1, max: 1, step: 0.05 }} answer={-0.8} tol={0.1}
+  why="r = −0,80. Nơi cây xanh (NDVI cao) thì tối ở kênh lam và đỏ (SI thấp). SI gần như là một chỉ số thực vật nghịch, không phải chỉ số mặn." />
+
+<Note kind="myth">
+
+**Hiểu lầm:** "Bản đồ NDSI hay SI từ Sentinel-2 cho biết đất ruộng nào bị mặn."
+
+**Thực tế:** NDSI đúng bằng −NDVI, nên nó chỉ là bản đồ độ xanh lật màu. SI chỉ có ý nghĩa trên đất trống, khô, có muối kết tinh trên mặt, điều hiếm thấy ở ruộng lúa và vườn cây ĐBSCL. Mặn ở đây chủ yếu nằm trong **nước** tưới, mà nước, cây và mái nhà đều che mất tín hiệu đất. Muốn biết độ mặn phải đo EC tại trạm hoặc tại ruộng.
+
+</Note>
+
+<Note kind="key">
+
+Chỉ số mặn đất từ ảnh quang học chỉ dùng được trên đất trống, khô. Ở ĐBSCL, nơi mặn đi theo nước và đất gần như luôn có cây hoặc nước phủ, các chỉ số này chủ yếu lặp lại thông tin của NDVI.
+
+</Note>
+
+## 10.5 Chuyển đổi sử dụng đất ven biển
+
+Sau các đợt mặn, nhiều nông hộ ven biển <Term id="land-use-conversion">chuyển đổi sử dụng đất</Term>: bỏ lúa sang dừa, cây ăn trái, hay nuôi tôm, hoặc luân canh <Term id="shrimp-rice">lúa – tôm</Term>. Đây là thay đổi mà vệ tinh theo dõi tốt hơn nhiều so với độ mặn. Bộ dữ liệu <Term id="dynamic-world">Dynamic World</Term> gán nhãn lớp phủ cho từng ảnh Sentinel-2 ở 10 m (Brown và cs. 2022). Lấy nhãn xuất hiện nhiều nhất trong năm cho ra một bản đồ lớp phủ mỗi năm.
+
+<Figure
+  title="Hình 10.5 — Lớp phủ Dynamic World 2018 và 2024 ở Bến Tre và Cà Mau"
+  try="Ở Bến Tre, bật So sánh và vuốt giữa 2018 và 2024: lớp 'Cây trồng' (cam) biến đi đâu? Chuyển sang Cà Mau: các ô 'Nước' và 'Thực vật ngập nước' đổi chỗ cho nhau thế nào?"
+  source="GOOGLE/DYNAMICWORLD/V1, nhãn 'label' xuất hiện nhiều nhất (mode) trên mọi ảnh trong năm dương lịch; 10 m, khung 10,24 × 10,24 km. Năm đầu là 2018 vì 2016–17 chỉ có Sentinel-2A, khoảng 2 nhãn trong một năm ở Cà Mau. Dynamic World (Brown và cs. 2022, Scientific Data 9:251), CC BY 4.0; contains modified Copernicus Sentinel data. Tỷ lệ diện tích tính bằng scripts/salinity_numbers.ts."
+>
+  <DeltaMap client:visible lang="vi" label="Dynamic World Bến Tre và Cà Mau" compare time={1} compareTime={0} choices={[
+    { key: 'dw', label: { vi: 'Dynamic World', en: 'Dynamic World' }, ids: { bentre: 'dw-bentre', camau: 'dw-camau' } },
+  ]} />
+  <details slot="caption">
+    <summary>Bảng số liệu: phần trăm diện tích khung theo nhãn</summary>
+    <div class="table-wrap">
+
+| Nhãn | Bến Tre 2018 | Bến Tre 2024 | Cà Mau 2018 | Cà Mau 2024 |
+|---|---|---|---|---|
+| Nước | 3,1 % | 2,9 % | 58,0 % | 47,7 % |
+| Cây gỗ | 48,7 % | 58,2 % | 7,4 % | 2,9 % |
+| Cỏ | 5,5 % | 0,7 % | 0,1 % | 0,2 % |
+| Thực vật ngập nước | 0,0 % | 0,1 % | 26,9 % | 42,1 % |
+| Cây trồng | 19,0 % | 6,0 % | 1,7 % | 0,4 % |
+| Xây dựng | 23,7 % | 32,2 % | 5,5 % | 6,7 % |
+
+    </div>
+  </details>
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Cây trồng ở Bến Tre còn bao nhiêu?"
+  q="Năm 2018, nhãn 'Cây trồng' chiếm 19 % khung Giồng Trôm – Ba Tri. Năm 2024 còn bao nhiêu phần trăm?"
+  slider={{ min: 0, max: 30, step: 1, unit: '%' }} answer={6} tol={2}
+  why="6,0 %. Trong số pixel 'Cây trồng' năm 2018, 69 % thành 'Cây gỗ' năm 2024, 10 % thành 'Xây dựng' và chỉ 0,3 % thành nước. Ở khung này, xu hướng là ruộng chuyển sang vườn dừa, cây ăn trái, không phải sang ao tôm." />
+
+Ở Bến Tre, ruộng đổi thành vườn. Điều này hợp với việc nông dân bỏ lúa, loại cây chịu mặn kém, sau năm 2016. Nhưng muốn khẳng định nguyên nhân, cần đối chiếu với thống kê diện tích lúa của tỉnh và khảo sát thực địa. Lớp 'Xây dựng' tăng từ 23,7 % lên 32,2 % cũng nên đọc thận trọng: nhà ẩn dưới tán dừa, và mô hình có thể gọi cùng một xóm là cây năm này, nhà năm khác.
+
+<Predict client:visible lang="vi"
+  title="Cà Mau: nước biến thành rừng?"
+  q="Ở Năm Căn – Ngọc Hiển, nhãn 'Nước' giảm từ 58 % xuống 48 %, 'Thực vật ngập nước' tăng từ 27 % lên 42 %. Cách đọc nào thận trọng nhất?"
+  options={['Rừng ngập mặn mọc lại trên 15 % diện tích', 'Nhãn dao động giữa hai lớp trên các vuông tôm – rừng; cần kiểm tra thực địa', 'Nước biển rút đi']} answer={1}
+  why="Vuông tôm – rừng là ao nước xen cây đước. Một pixel 10 m ở đó vừa có nước vừa có cây, nên nhãn có thể đổi theo mực nước, mùa và mô hình. Dynamic World không có lớp 'nuôi trồng thủy sản'. Thay đổi nhãn không chắc là thay đổi thật." />
+
+<Note kind="key">
+
+Vệ tinh theo dõi tốt **hệ quả** của mặn lên sử dụng đất: ruộng thành vườn, ruộng thành ao tôm. Nhưng nhãn tự động có sai số, đặc biệt ở vùng pha trộn nước và cây. Một thay đổi nhãn chỉ là giả thuyết, phải kiểm chứng bằng thống kê và thực địa.
+
+</Note>
+
+## 10.6 Thích ứng
+
+Sau năm 2016, cách ứng phó với mặn đã đổi từ "chống" sang "sống chung". <Term id="resolution-120">Nghị quyết 120/NQ-CP</Term> ngày 17/11/2017 về phát triển bền vững ĐBSCL thích ứng với biến đổi khí hậu chọn hướng **thuận thiên**: coi nước ngọt, nước lợ, nước mặn đều là tài nguyên, và bố trí sản xuất theo vùng sinh thái.
+
+<Steps title="Các lớp giải pháp với mặn ở ĐBSCL" items={[
+  { tag: 'Dự báo', t: 'Dự báo mặn theo mùa và theo đợt triều', d: 'Bài học năm 2016 là dự báo dài hạn có từ cuối mùa lũ 2015 nhưng chưa được dùng để sắp xếp thời vụ (Nguyễn Ngọc Anh 2017). Từ đó, các viện thủy lợi và đài khí tượng thủy văn ra bản tin mặn hằng tuần trong mùa khô.' },
+  { tag: 'Lịch vụ', t: 'Xuống giống né mặn', d: 'Vùng ven biển gieo sạ lúa Đông Xuân sớm để thu hoạch trước đỉnh mặn tháng 2–4. Bản đồ ngày bắt đầu vụ ở Chương 4 cho thấy lịch này từ vệ tinh.' },
+  { tag: 'Trữ nước', t: 'Trữ nước ngọt', d: 'Lấy nước ngọt vào kênh, ao, bồn trước khi mặn tới; chở nước tới khu dân cư khi thiếu.' },
+  { tag: 'Công trình', t: 'Cống ngăn mặn: Cái Lớn – Cái Bé', d: 'Khởi công tháng 10/2019, vốn 3 309,5 tỷ đồng; cống Cái Bé vận hành tạm từ tháng 2/2021; khánh thành giai đoạn 1 ngày 5/3/2022. Hệ thống phục vụ khoảng 384 000 ha ở Kiên Giang, Hậu Giang, Cà Mau, Bạc Liêu. Đã có ý kiến phản ánh tình trạng nước dềnh ở hạ lưu khi đóng cống lúc triều cường.' },
+  { tag: 'Chuyển đổi', t: 'Đổi cây, đổi con theo vùng nước', d: 'Vùng ven biển chuyển sang lúa – tôm, tôm – rừng, cây chịu mặn; vùng nội đồng giữ lúa và cây ăn trái. Hình 10.5 cho thấy kiểu thay đổi này nhìn từ vệ tinh.' },
+]} />
+
+Một <Term id="sluice-gate">cống ngăn mặn</Term> đóng khi triều đưa nước mặn vào và mở để lấy nước ngọt hay tiêu nước. Cống bảo vệ được vùng phía trong, nhưng cũng giữ nước lại, nên phải vận hành theo quy trình được Bộ NN-PTNT ban hành (với Cái Lớn – Cái Bé là Quyết định 1834/QĐ-BNN-TL năm 2024).
+
+<Predict client:visible lang="vi"
+  title="Tinh thần Nghị quyết 120"
+  q="Nghị quyết 120/NQ-CP (2017) chọn hướng nào cho vùng ven biển ĐBSCL?"
+  options={['Đắp đê kín toàn bộ bờ biển để giữ lúa', 'Thuận thiên: coi nước lợ, mặn là tài nguyên, chuyển sang lúa – tôm và thủy sản', 'Bỏ hoang vùng ven biển']} answer={1}
+  why="Nghị quyết chuyển từ chống sang thích ứng. Vùng ven biển ưu tiên thủy sản nước lợ, mặn và mô hình lúa – tôm; vùng thượng nguồn và giữa giữ lúa, cây ăn trái." />
+
+<Note kind="key">
+
+Không có giải pháp duy nhất. Dự báo và lịch thời vụ giảm thiệt hại nhanh nhất và rẻ nhất; cống lớn bảo vệ vùng rộng nhưng cần vận hành tốt; chuyển đổi sản xuất là giải pháp dài hạn. Viễn thám giúp theo dõi lịch vụ, nước trong kênh và sử dụng đất, nhưng không thay được trạm đo mặn.
+
+</Note>
+
+## 10.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Brown, C. F. và cs. (2022). Dynamic World, Near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251.
+- Bộ NN-PTNT (2020). *MARD Report on the Drought and Saltwater Intrusion in Mekong River Delta*. Ban Chỉ đạo Quốc gia về Phòng chống thiên tai, phongchongthientai.mard.gov.vn.
+- Chính phủ (2017). *Nghị quyết số 120/NQ-CP ngày 17/11/2017 về phát triển bền vững đồng bằng sông Cửu Long thích ứng với biến đổi khí hậu*.
+- Đỗ Hương (23/2/2024). Chủ động ứng phó với xâm nhập mặn tại ĐBSCL. *Báo Điện tử Chính phủ* (số liệu Cục Thủy lợi).
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9(8), 084010.
+- Eslami, S. và cs. (2019). Tidal amplification and salt intrusion in the Mekong Delta driven by anthropogenic sediment starvation. *Scientific Reports*, 9, 18746.
+- Huỳnh Lợi, Đăng Nguyên (20/6/2020). Hơn 58.000ha lúa ở ĐBSCL bị thiệt hại do hạn mặn. *Sài Gòn Giải Phóng* (số liệu Tổng cục Thủy lợi tại hội nghị tổng kết).
+- Khan, N. M., Rastoskuev, V. V., Shalina, E. V., & Sato, Y. (2001). Mapping salt-affected soils using remote sensing indicators: a simple approach with the use of GIS IDRISI. *22nd Asian Conference on Remote Sensing*, Singapore.
+- Kiên Trung (22/3/2024). Xâm nhập mặn năm 2024 phức tạp, cao hơn, tiến sâu vào các hệ thống sông. *Báo Nông nghiệp* (số liệu Đài KTTV khu vực Nam Bộ).
+- MacCready, P., & Geyer, W. R. (2010). Advances in estuarine physics. *Annual Review of Marine Science*, 2, 35–58.
+- Monismith, S. G., Kimmerer, W., Burau, J. R., & Stacey, M. T. (2002). Structure and flow-induced variability of the subtidal salinity field in northern San Francisco Bay. *Journal of Physical Oceanography*, 32, 3003–3019.
+- Nguyễn Ngọc Anh (2017). Historic drought and salinity intrusion in the Mekong Delta in 2016: lessons learned and response solutions. *Vietnam Journal of Science, Technology and Engineering*, 59(1), 93–96.
+- Park, E., Loc, H. H., Binh, D. V., & Kantoush, S. (2021). The worst 2020 saline water intrusion disaster of the past century in the Mekong Delta: impacts, causes, and management implications. *Ambio*, 51(3), 691–699 (online 2021). doi:10.1007/s13280-021-01577-z.
+- Sài Gòn Giải Phóng (5/3/2022). Thủ tướng Phạm Minh Chính dự khánh thành dự án thủy lợi Cái Lớn – Cái Bé.

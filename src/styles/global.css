@@ -271,6 +271,7 @@ tbody tr:hover td { background: color-mix(in srgb, var(--surface-2) 45%, transpa
 .viz label { display: inline-flex; gap: var(--s2); align-items: center; }
 .viz select, .viz input[type='range'] { min-height: 34px; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0 var(--s2); }
 input[type='range'] { accent-color: var(--primary); }
+.viz .confusion input { width: 4.5em; min-height: 32px; font: inherit; text-align: right; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0 var(--s2); }
 .viz input[type='range'] { padding: 0; min-width: 160px; border: 0; background: none; }
 .viz .readout { font: 0.85rem var(--font-mono); color: var(--primary); min-height: 1.5em; }
 .viz .status, .status { padding: var(--s5); text-align: center; color: var(--fg-muted); }

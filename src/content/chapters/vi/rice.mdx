@@ -1,0 +1,326 @@
+---
+title: Lúa & lịch mùa vụ
+n: 4
+summary: Lúa chiếm phần lớn đất canh tác của cả hai châu thổ. Chương này đọc cây lúa trên chuỗi ảnh Sentinel-2, Sentinel-1 và MODIS thật, đếm số vụ mỗi năm, tìm ngày bắt đầu vụ, lập bản đồ lúa bằng radar và chỉ ra vì sao đếm pixel không cho ra diện tích đúng.
+objectives:
+  - Phân biệt lịch mùa vụ lúa của ĐBSH (Xuân, Mùa) và ĐBSCL (Đông Xuân, Hè Thu, Thu Đông) và đọc chúng trên bản đồ số vụ.
+  - Đọc chuỗi NDVI, EVI, LSWI và VH của một ruộng lúa và gọi tên từng giai đoạn ngập, đẻ nhánh, trổ, chín.
+  - Giải thích vì sao ngày bắt đầu vụ phụ thuộc vào định nghĩa (ngưỡng 0, 20 hay 50 % biên độ).
+  - Lập bản đồ lúa bằng biên độ VH trong vụ và một ngưỡng; biết giới hạn của cách làm.
+  - Tính diện tích đã hiệu chỉnh và khoảng tin cậy từ ma trận nhầm lẫn của một mẫu phân tầng.
+updated: "2026-11-16"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Steps from '../../../components/Steps.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ThresholdLab from '../../../islands/ThresholdLab.tsx';
+import RiceSeries from '../../../islands/RiceSeries.tsx';
+import AreaCorrection from '../../../islands/AreaCorrection.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/rice.json';
+
+## 4.1 Lúa ở hai châu thổ
+
+Ở cả hai châu thổ, phần lớn đất canh tác là <Term id="rice">lúa nước</Term>. Hai vùng trồng lúa theo hai nhịp khác nhau.
+
+- **ĐBSH** có mùa đông lạnh. Mỗi năm thường có hai <Term id="rice-season">vụ lúa</Term>: vụ **Xuân** cấy sau Tết, gặt khoảng tháng 6, và vụ **Mùa** cấy tháng 6–7, gặt tháng 10. Nông dân phần lớn <Term id="transplanting">cấy</Term> mạ.
+- **ĐBSCL** nóng quanh năm, nên số vụ do nước quyết định. Vụ **Đông Xuân** gieo sau khi lũ rút (tháng 11–12), vụ **Hè Thu** gieo tháng 4–5. Ở những nơi có đê bao chống lũ tháng 8 thì làm thêm vụ **Thu Đông**. Nông dân phần lớn <Term id="direct-seeding">sạ thẳng</Term>.
+
+<Predict client:visible lang="vi"
+  title="Ruộng 3 vụ nhiều hơn hay ít đi?"
+  q="So năm 2016 với năm 2024, tỉ lệ đất canh tác ĐBSCL có từ 3 vụ trở lên tăng hay giảm?"
+  options={['Tăng rõ', 'Gần như không đổi', 'Giảm rõ']} answer={0}
+  why="Tăng từ 25 % lên 35 % đất canh tác (từ 470 lên 652 nghìn ha theo bản đồ vệ tinh). Đê bao cao ở An Giang, Đồng Tháp, Kiên Giang cho phép làm vụ Thu Đông ngay trong mùa lũ." />
+
+<Figure
+  title="Hình 4.1 — Số vụ mỗi năm trên đất canh tác của hai châu thổ, 2016 và 2024"
+  try="Bật 'So sánh' và kéo vị trí vuốt: năm 2016 bên trái, năm 2024 bên phải. Ở ĐBSCL, màu xanh dương (3 vụ) lan rộng ở đâu? Chuyển sang ĐBSH: màu xám (không thấy vụ lúa) tăng ở quanh Hà Nội hay ven biển?"
+  source="ĐBSH: Sentinel-1 IW VH, quỹ đạo 91 (12 ngày), trung bình 3 lần chụp liền kề; một vụ = đáy VH ≤ −17 dB rồi tăng ≥ 2,5 dB trong 96 ngày, đếm theo năm dương lịch. ĐBSCL: MODIS MOD13Q1 + MYD13Q1 v061 (EVI, SummaryQA ≤ 1, chuỗi 8 ngày, lấp khoảng trống, lọc Savitzky–Golay 5/2), một vụ = đỉnh EVI ≥ 0,35 cao hơn hai đáy kề ≥ 0,15. Chỉ tính ô 250 m có ≥ 50 % đất canh tác theo ESA WorldCover 2021 v200. Chưa đối chiếu thực địa. Contains modified Copernicus Sentinel data. Ảnh nền © Esri."
+>
+  <DeltaMap client:visible lang="vi" label="Số vụ lúa mỗi năm" region="mekong" compare time={1} choices={[
+    { key: 'seasons', label: { vi: 'Số vụ', en: 'Seasons' }, ids: { mekong: 'rice-seasons-mekong', red: 'rice-seasons-red' } },
+  ]} />
+</Figure>
+
+Hai bản đồ được làm bằng hai loại dữ liệu khác nhau. Ở ĐBSCL, chuỗi EVI 250 m của MODIS đủ dày: mỗi đỉnh EVI là một vụ. Ở ĐBSH, mùa mưa tháng 6–7/2024 chỉ có 7–12 % quan sát MODIS không mây, nên vụ Xuân và vụ Mùa dính vào nhau trên chuỗi EVI. Vì vậy số vụ ở ĐBSH được đếm bằng radar Sentinel-1: mỗi lần ruộng ngập để cấy (VH xuống đáy) rồi lúa lên xanh (VH tăng) là một vụ.
+
+<Stats items={[
+  { v: '25 → 35', u: '%', l: 'ĐBSCL: đất canh tác có ≥ 3 vụ, 2016 → 2024' },
+  { v: '56 → 48', u: '%', l: 'ĐBSH: đất canh tác có 2 vụ lúa, 2016 → 2024' },
+  { v: '15 → 29', u: '%', l: 'ĐBSH: đất canh tác không thấy vụ lúa nào' },
+]} caption="Tỉ lệ theo diện tích, trên 1.861 nghìn ha (ĐBSCL) và 657 nghìn ha (ĐBSH) ô đất canh tác của bản đồ. Số liệu: scripts/rice_numbers.ts." />
+
+Ở ĐBSH, diện tích không thấy vụ lúa nào tăng từ 102 lên 188 nghìn ha. Có ba khả năng cộng lại: ruộng chuyển sang cây khác hoặc thành đất xây dựng (mặt nạ đất canh tác là của năm 2021), ruộng bỏ hoang, và những ruộng mà quy tắc radar không bắt được. Bản đồ chỉ cho biết **ở đâu** cần đi kiểm tra, không cho biết lý do.
+
+<Predict client:visible lang="vi"
+  title="Vệ tinh đếm được bao nhiêu ha lúa Đông Xuân?"
+  q="Năm 2024, Tổng cục Thống kê ghi diện tích lúa Đông Xuân ĐBSCL là 1.487,7 nghìn ha. Bản đồ vệ tinh có bao nhiêu nghìn ha đất canh tác có ít nhất một vụ?"
+  slider={{ min: 1000, max: 2200, step: 10 }} answer={1692} tol={60}
+  why="1.692 nghìn ha, nhiều hơn số thống kê khoảng 14 %. Bản đồ đếm cả ô trồng cây màu, mía và các ô 250 m lẫn bờ, kênh, nhà; thống kê đếm diện tích gieo thực tế của một vụ. Mục 4.5 bàn về độ lệch này." />
+
+<Note kind="key">
+
+ĐBSH làm hai vụ, Xuân và Mùa, theo nhịp nhiệt độ. ĐBSCL làm hai đến ba vụ theo nhịp nước. Từ 2016 đến 2024, bản đồ vệ tinh cho thấy ruộng ba vụ ở ĐBSCL tăng mạnh, còn ở ĐBSH diện tích không thấy vụ lúa gần như tăng gấp đôi.
+
+</Note>
+
+<Depth level="advanced" title="So bản đồ với thống kê: đơn vị không giống nhau">
+
+Thống kê lúa đếm **diện tích gieo trồng** của từng vụ. Một ha làm ba vụ được tính ba lần vào diện tích lúa cả năm. Bản đồ số vụ đếm **diện tích mặt đất**. Muốn so với số cả năm, phải nhân diện tích mỗi lớp với số vụ của nó. Năm 2024, cách nhân này cho 3,71 triệu "ha-vụ" ở ĐBSCL và 0,80 triệu ở ĐBSH, coi lớp "3 vụ trở lên" là đúng 3 vụ.
+
+So từng vụ thì dễ hơn. Thống kê vụ Đông Xuân 2024: ĐBSCL 1.487,7 nghìn ha, ĐBSH 471,4 nghìn ha (Tổng cục Thống kê 2024). Bản đồ có 1.692 nghìn ha (ĐBSCL) và 469 nghìn ha (ĐBSH) đất canh tác với ít nhất một vụ. Ở ĐBSH, hai số gần nhau phần nào là do trùng hợp: khung bản đồ cắt bớt phần phía đông Quảng Ninh, và lớp "1 vụ" gồm cả ruộng chỉ làm vụ Mùa.
+
+</Depth>
+
+## 4.2 Cây lúa nhìn từ vệ tinh
+
+Một vụ lúa để lại dấu vết rất rõ trên ảnh vệ tinh, vì cây lúa bắt đầu từ một mặt nước.
+
+<Steps title="Một vụ lúa qua mắt vệ tinh" items={[
+  { t: 'Ngập, làm đất, gieo cấy', tag: 'ngày 0', d: 'Ruộng là mặt nước: NDVI âm, LSWI cao hơn NDVI, VH rất thấp (−25 dB trở xuống) vì nước phản xạ gương.' },
+  { t: 'Đẻ nhánh', tag: '~20–45 ngày', d: 'Lá che dần mặt nước: NDVI và EVI tăng nhanh, VH tăng mạnh vì tán xạ khối trong thân lá và sóng dội giữa thân lúa với mặt nước.' },
+  { t: 'Làm đòng, trổ', tag: '~60–75 ngày', d: 'Tán dày nhất: NDVI khoảng 0,9. VH gần như không tăng nữa.' },
+  { t: 'Chín, thu hoạch', tag: '~90–110 ngày', d: 'Lá vàng, ruộng rút nước: NDVI giảm, LSWI giảm. Sau khi gặt, ruộng khô có NDVI thấp, LSWI thấp, VH dao động theo độ ẩm đất và rơm rạ.' },
+]} />
+
+Dấu hiệu "ruộng ngập ngay trước khi cây xanh lên" là chìa khóa để tách lúa khỏi các cây khác. Xiao và cộng sự (2006) dùng đúng dấu hiệu này trên ảnh MODIS: pixel có <Term id="lswi">LSWI</Term> gần bằng hoặc cao hơn <Term id="evi">EVI</Term> vào đầu vụ là đang ngập. Trên radar, cùng dấu hiệu đó là một đáy <Term id="vh-backscatter">VH</Term> sâu rồi tăng nhanh.
+
+<Predict client:visible lang="vi"
+  title="Đáy VH sâu nhất của ruộng An Giang rơi vào lúc nào?"
+  q="Ô ruộng 500 m ở An Giang trong Hình 4.2 có VH thấp nhất (−29,5 dB) vào ngày nào?"
+  options={['Lúc cấy vụ Đông Xuân, tháng 12/2023', 'Giữa mùa lũ, tháng 11/2023', 'Lúc thu hoạch, tháng 3/2024', 'Giữa vụ Hè Thu, tháng 6/2024']} answer={1}
+  why="Ngày 13/11/2023, giữa mùa lũ. Ruộng này để nước lũ tràn vào từ tháng 9 đến tháng 11 (đáy VH khoảng −29 dB suốt hai tháng). Mặt nước lũ rộng và lặng hơn ruộng vừa sạ, nên tối hơn cả đáy đầu vụ." />
+
+<Figure
+  title="Hình 4.2 — Một năm của hai ruộng lúa: NDVI, EVI, LSWI (Sentinel-2) và VH, VV (Sentinel-1)"
+  try="Ở An Giang, tìm đoạn 2023-12-07 → 2023-12-31: VH tăng bao nhiêu dB trong 24 ngày? Chuyển sang Nam Định: từ cuối tháng 11/2023 đến đầu tháng 3/2024 có bao nhiêu ảnh Sentinel-2 dùng được, và radar thấy gì trong khoảng đó?"
+  source="Ô 50 × 50 pixel 10 m (500 m) có biên độ VH trong vụ cao nhất của khung điểm (An Giang 105,108–105,113°E, 10,487–10,492°N; Nam Định 106,442–106,447°E, 20,219–20,223°N), chọn tự động. Sentinel-2 SR Harmonized, Cloud Score+ cs_cdf ≥ 0,6, chỉ giữ ngày có ≥ 80 % ô không mây, trung bình ô. Sentinel-1 IW GRD, quỹ đạo 26 (An Giang) và 91 (Nam Định), trung bình ô theo công suất tuyến tính rồi đổi dB. 9/2023–12/2024. Không nối điểm qua khoảng trống > 40 ngày. Các dải tô nền là giải đoán của sổ tay từ chính hai chuỗi, không phải sổ ghi đồng ruộng. Contains modified Copernicus Sentinel data 2023–2024."
+>
+  <RiceSeries client:visible lang="vi" />
+</Figure>
+
+Hai ruộng kể hai câu chuyện:
+
+- **An Giang.** Vụ Đông Xuân sạ đầu tháng 12/2023, ngay khi lũ rút. NDVI tăng từ 0,15 (11/12) lên 0,76 (21/12) và đạt đỉnh 0,94 ngày 15/1/2024. VH tăng gần 8 dB trong 12 ngày, từ −25,7 dB (19/12) lên −17,9 dB (31/12). Lúa gặt khoảng giữa tháng 3 (NDVI còn 0,26 ngày 15/3). Vụ Hè Thu gieo tháng 4. Sau đó Sentinel-2 không có ảnh sạch nào trong 60 ngày, từ 18/6 đến 17/8/2024, nên không biết chính xác ngày gặt. Từ tháng 9, ruộng lại để lũ vào. Đây là ruộng 2 vụ trong vùng nhiều nơi đã làm 3 vụ.
+- **Nam Định.** Vụ Mùa 2023 gặt cuối tháng 10. Vụ Xuân 2024 bắt đầu bằng hai đáy VH: −26,2 dB (16/1) và −26,8 dB (9/2), tức ngập để làm đất rồi cấy. Đúng lúc đó Sentinel-2 không có ảnh sạch trong 55 ngày (24/11/2023 → 18/1/2024) rồi thêm 45 ngày (20/1 → 5/3/2024). Đỉnh NDVI 0,95 ngày 12/5. Vụ Mùa cấy giữa tháng 7 (VH −23,6 dB ngày 14/7) và gặt cuối tháng 10.
+
+<Predict client:visible lang="vi"
+  title="Ảnh quang học hay radar?"
+  q="Ở Nam Định, giai đoạn cấy vụ Xuân (tháng 1–2) được ghi lại chủ yếu bằng loại ảnh nào?"
+  options={['Sentinel-2 (quang học)', 'Sentinel-1 (radar)', 'Cả hai như nhau']} answer={1}
+  why="Radar. Mưa phùn và mây mùa xuân ở miền Bắc che gần hết ảnh Sentinel-2 trong tháng 12–2. Sentinel-1 chụp đều 12 ngày một lần qua mây. Sách FAO (2017, mục 5.2.3) cũng nêu đúng điều này cho lúa mùa mưa ở Nam Á và Đông Nam Á." />
+
+<Note kind="key">
+
+Một vụ lúa bắt đầu bằng mặt nước: NDVI âm, LSWI cao, VH xuống đáy. Lúa lên xanh thì NDVI và VH cùng tăng. Ảnh quang học mất dữ liệu khi trời mây đúng vào lúc gieo cấy, còn radar vẫn thấy được đáy VH.
+
+</Note>
+
+<Depth level="advanced" title="Vì sao VH tăng khi lúa lớn, VV thì ít hơn?">
+
+Sóng radar gặp ruộng ngập vừa cấy chủ yếu phản xạ gương đi xa vệ tinh, nên cả VV lẫn VH đều tối. Khi lúa đẻ nhánh, sóng dội nhiều lần giữa thân lá (tán xạ khối) và giữa thân lúa với mặt nước. Tán xạ khối làm đổi phân cực, nên VH tăng mạnh. VV thì có thêm thành phần dội hai lần giữa thân lúa đứng thẳng và mặt nước, thành phần này lại giảm khi tán dày lên, nên VV tăng ít và không đều. Sách FAO (2017, mục 5.2.3) mô tả cùng quá trình: tán xạ ngược tăng theo đẻ nhánh tới giai đoạn sinh sản rồi gần như đứng yên. Xem thêm phần tán xạ và phân cực ở <a href="https://quanta1985.github.io/rs-knowledge/vi/ch11-sar/">Chương Radar SAR của rs-knowledge</a>.
+
+</Depth>
+
+## 4.3 Lịch mùa vụ từ chuỗi ảnh
+
+<Term id="crop-calendar">Lịch mùa vụ</Term> cho biết mỗi vùng gieo, trổ và gặt lúc nào. Nó cần cho dự báo sản lượng, cho bố trí nước tưới và cho việc né mặn (Chương 10). Từ chuỗi ảnh, người ta ước lượng ba mốc <Term id="phenology">vật hậu</Term>: <Term id="sos">ngày bắt đầu vụ (SOS)</Term>, <Term id="pos">đỉnh vụ (POS)</Term> và <Term id="eos">kết thúc vụ (EOS)</Term>.
+
+Chuỗi EVI có nhiễu do mây sót, nên trước hết phải lấp khoảng trống và làm trơn, ở đây bằng <Term id="savitzky-golay">lọc Savitzky–Golay</Term>. Sau đó đến câu hỏi khó: **"bắt đầu" là lúc nào?** Một cách phổ biến (Jönsson và Eklundh 2004) lấy đáy trước vụ, đỉnh vụ và biên độ A giữa chúng, rồi định nghĩa SOS là lần đầu chuỗi vượt mức:
+
+<Formula label="Ngày bắt đầu vụ theo ngưỡng biên độ" tex="\mathrm{SOS}_f = \min\{\, t : \mathrm{EVI}(t) \ge \mathrm{EVI}_{\text{min}} + f\,A \,\}, \qquad A = \mathrm{EVI}_{\text{max}} - \mathrm{EVI}_{\text{min}}" where="
+f :: tỉ lệ biên độ: 0 (ngay khi rời đáy), 0,2 hoặc 0,5
+A :: biên độ EVI của vụ
+\mathrm{EVI}_{\text{min}},\ \mathrm{EVI}_{\text{max}} :: đáy trước vụ và đỉnh vụ của chuỗi đã làm trơn
+" />
+
+<Predict client:visible lang="vi"
+  title="Đổi định nghĩa, ngày bắt đầu vụ lùi bao nhiêu?"
+  q="Với vụ Đông Xuân 2023–24 ở ĐBSCL, trung vị SOS khi dùng f = 0 và khi dùng f = 0,5 cách nhau khoảng bao nhiêu ngày?"
+  slider={{ min: 0, max: 60, step: 1, unit: 'ngày' }} answer={36} tol={6}
+  why="36 ngày: trung vị f = 0 là 17/11/2023, f = 0,5 là 23/12/2023. Cùng một chuỗi ảnh, chỉ đổi định nghĩa mà lịch mùa vụ lệch hơn một tháng. Vì vậy mỗi bản đồ SOS phải ghi rõ ngưỡng đã dùng." />
+
+<Figure
+  title="Hình 4.3 — Ngày bắt đầu vụ Đông Xuân 2023–24 (ĐBSCL) và ngày cấy vụ Xuân 2024 (ĐBSH)"
+  try="Ở ĐBSCL, kéo thanh thời điểm qua 0 %, 20 %, 50 %: vùng nào luôn gieo sớm nhất (màu tím đậm)? Bật 'So sánh' để đặt hai ngưỡng cạnh nhau. Chuyển sang ĐBSH: vùng ven biển cấy sớm hơn hay muộn hơn quanh Hà Nội?"
+  source="ĐBSCL: MODIS MOD13Q1 + MYD13Q1 v061 EVI, chuỗi 8 ngày đã lọc Savitzky–Golay; đỉnh EVI cao nhất trong cửa sổ Đông Xuân, đáy = cực tiểu của 12 mẫu trước đỉnh, SOS = lần đầu vượt đáy + f × biên độ (f = 0; 0,2; 0,5). ĐBSH: Sentinel-1 VH quỹ đạo 91, ngày của đáy VH đầu tiên trong 90 ngày đầu năm 2024 (bước 12 ngày). Giá trị = số ngày tính từ 1/1/2024 (âm = cuối năm 2023). Chỉ ô có ≥ 50 % đất canh tác (ESA WorldCover 2021). Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="vi" label="Ngày bắt đầu vụ" region="mekong" compare time={1} choices={[
+    { key: 'sos', label: { vi: 'Ngày bắt đầu vụ', en: 'Start of season' }, ids: { mekong: 'rice-sos-2024-mekong', red: 'rice-sos-2024-red' } },
+  ]} />
+</Figure>
+
+<Stats items={[
+  { v: '17/11', l: 'ĐBSCL, trung vị SOS với f = 0' },
+  { v: '9/12', l: 'ĐBSCL, trung vị SOS với f = 0,2' },
+  { v: '23/12', l: 'ĐBSCL, trung vị SOS với f = 0,5' },
+  { v: '21/2', l: 'ĐBSH, trung vị ngày cấy vụ Xuân 2024 (đáy VH)' },
+]} caption="Năm 2023 cho ĐBSCL, năm 2024 cho ĐBSH. 80 % số ô ĐBSCL có SOS (f = 0) trong khoảng 16/10/2023 – 4/1/2024; 80 % số ô ĐBSH cấy trong khoảng 28/1 – 16/3/2024. Số liệu: scripts/rice_numbers.ts." />
+
+Ngưỡng nào đúng? Không có ngưỡng "đúng" chung cho mọi nơi. f = 0 bám sát lúc ruộng bắt đầu xanh nhưng nhạy với nhiễu ở đáy. f = 0,5 ổn định hơn nhưng trễ, vì nó là lúc lúa đã đẻ nhánh. Muốn so với ngày gieo sạ ghi ở đồng ruộng, phải hiệu chỉnh ngưỡng trên các ruộng có sổ ghi. Ở ĐBSH, đáy VH cho ngày cấy trực tiếp hơn, nhưng chỉ chính xác tới bước 12 ngày của Sentinel-1. Sakamoto và cộng sự (2006) đã lập bản đồ vật hậu lúa toàn ĐBSCL từ MODIS theo cách tương tự và chỉ ra rằng lịch vụ ở đây bám theo nhịp lũ của sông Tiền, sông Hậu.
+
+<Predict client:visible lang="vi"
+  title="ĐBSH cấy vụ Xuân vào tháng nào?"
+  q="Trung vị ngày cấy vụ Xuân 2024 ở ĐBSH theo đáy VH của Sentinel-1 là khoảng…"
+  options={['Đầu tháng 1', 'Cuối tháng 2', 'Giữa tháng 4']} answer={1}
+  why="Ngày 21/2/2024, tức sau Tết Giáp Thìn (10/2/2024) khoảng 10 ngày. Đáy VH đánh dấu lúc ruộng ngập để cấy; mạ đã được gieo ở ruộng mạ từ trước đó." />
+
+<Note kind="key">
+
+Lịch mùa vụ từ vệ tinh luôn đi kèm một định nghĩa. Cùng chuỗi EVI, đổi ngưỡng từ 0 sang 50 % biên độ làm ngày bắt đầu vụ Đông Xuân ở ĐBSCL lùi 36 ngày. Hãy ghi ngưỡng trên mọi bản đồ và hiệu chỉnh nó bằng sổ ghi đồng ruộng.
+
+</Note>
+
+## 4.4 Bản đồ lúa bằng Sentinel-1
+
+Sách FAO (2017, mục 2.5.3) nhận định rằng nhờ các vệ tinh SAR chụp dày và đều như Sentinel-1, việc lập bản đồ lúa tưới đã trưởng thành. Các chương trình như PRISM của IRRI ở Philippines, Asia-RiCE (JAXA) và GEO-Rice (ESA) đều dựa vào chuỗi radar. Mục 5.2.3 của sách tóm tắt quy trình: hiệu chuẩn, lọc speckle, đồng đăng ký ít nhất ba ảnh cách nhau khoảng 20–25 ngày (trước, trong và sau khi cấy), rồi đặt luật quyết định trên chuỗi tán xạ ngược.
+
+Ở đây dùng một luật đơn giản hơn, chỉ có một con số: **biên độ VH trong vụ**. Lấy phân vị 90 trừ phân vị 10 của chuỗi VH trong vụ (sau khi làm trơn 3 × 3 theo công suất). Ruộng lúa đi từ đáy ngập (−25 dB) lên tán dày (−15 dB), nên biên độ lớn. Nhà, cây lâu năm, mặt nước thường trực thay đổi ít.
+
+<Predict client:visible lang="vi"
+  title="Ngưỡng Otsu ở An Giang"
+  q="Với biên độ VH vụ Đông Xuân 2023–24 trên khung 10 km ở An Giang, ngưỡng Otsu (ô 0,5 dB) chia khung thành hai lớp ở mức bao nhiêu dB?"
+  slider={{ min: 2, max: 16, step: 0.5, unit: 'dB' }} answer={9} tol={1}
+  why="9 dB. Phần trên ngưỡng (coi là lúa) chiếm 5.934 ha, tức 56,6 % khung. Ở Nam Định, ngưỡng Otsu thấp hơn (7,5 dB) vì vụ Xuân ở đây có chuỗi ngắn hơn và ruộng nhỏ hơn, xen nhiều làng." />
+
+<Figure
+  title="Hình 4.4 — Ngưỡng biên độ VH: lúa Đông Xuân 2023–24 ở An Giang"
+  try="Bấm 'Dùng Otsu', rồi kéo ngưỡng từ 5 dB lên 12 dB: diện tích lúa giảm từ bao nhiêu xuống bao nhiêu ha? Rê chuột lên kênh, làng ven kênh và ruộng: giá trị biên độ khác nhau thế nào?"
+  source="Sentinel-1 IW GRD VH, quỹ đạo 26, 13 lần chụp 1/11/2023 – 1/4/2024; trung bình 3 × 3 theo công suất tuyến tính, biên độ = phân vị 90 − phân vị 10 của chuỗi, theo dB; lưới 10 m. Ngưỡng tính trong trình duyệt. Chưa đối chiếu với bản đồ ruộng thực địa. Contains modified Copernicus Sentinel data 2023–2024. Ảnh nền © Esri."
+>
+  <ThresholdLab client:visible lang="vi" label="Ngưỡng biên độ VH, An Giang" layer="rice-dvh-angiang" below={false}
+    range={[0, 20]} step={0.5} maskLabel={{ vi: 'Lúa', en: 'Rice' }} />
+</Figure>
+
+<Figure
+  title="Hình 4.5 — Cùng cách làm ở Nam Định, vụ Xuân 2024"
+  try="Bấm 'Dùng Otsu' và so với An Giang. Đặt ngưỡng 5 dB: các làng (mảng nhỏ biên độ thấp) có còn bị tính là lúa không? Dải ven biển phía nam có màu gì?"
+  source="Sentinel-1 IW GRD VH, quỹ đạo 91, 14 lần chụp 15/1 – 1/7/2024; cùng cách tính như Hình 4.4. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri."
+>
+  <ThresholdLab client:visible lang="vi" label="Ngưỡng biên độ VH, Nam Định" layer="rice-dvh-namdinh" below={false}
+    range={[0, 20]} step={0.5} maskLabel={{ vi: 'Lúa', en: 'Rice' }} height={460} />
+</Figure>
+
+<div class="table-wrap">
+
+| Khung 10 km | Ngưỡng | Diện tích "lúa" | Tỉ lệ khung |
+|---|---|---|---|
+| An Giang | 5 dB | 8.557 ha | 81,6 % |
+| An Giang | 9 dB (Otsu) | 5.934 ha | 56,6 % |
+| Nam Định | 5 dB | 6.844 ha | 65,3 % |
+| Nam Định | 7,5 dB (Otsu) | 4.386 ha | 41,8 % |
+
+</div>
+
+Bảng trên cho thấy điều quan trọng nhất của mục này: **diện tích phụ thuộc vào ngưỡng**. Hạ ngưỡng 4 dB làm diện tích lúa ở An Giang tăng 2.600 ha. Ngưỡng Otsu chỉ là điểm chia tự nhiên của histogram, không bảo đảm là ranh giới đúng giữa lúa và không lúa. Ở ruộng nhỏ của ĐBSH, nhiều pixel 10 m nằm trên bờ ruộng, đường làng, mương, nên biên độ bị "pha loãng".
+
+<Note kind="key">
+
+Lúa có chuỗi radar rất riêng: đáy ngập rồi tăng mạnh, nên chỉ một chỉ số như biên độ VH trong vụ đã tách được phần lớn ruộng lúa. Nhưng diện tích thay đổi hàng nghìn ha khi đổi ngưỡng, nên bản đồ cần được kiểm chứng trước khi dùng để tính diện tích (mục 4.5).
+
+</Note>
+
+<Depth level="advanced" title="Luật ba ngày của sách FAO và vì sao ở đây không dùng">
+
+Sách FAO (2017, Hộp 2, mục 5.2.3) dẫn một bộ luật cho huyện Mirzapur (Ấn Độ) dựa trên σ⁰ ở ba ngày L1, L2, L3. Ví dụ, nước là pixel có cả ba ngày dưới −17 dB; lúa cấy sớm là pixel tăng dần qua ba ngày, mỗi lần hơn 1 dB, trong những khoảng giá trị cho trước. Các khoảng này gắn với một cảm biến, một góc tới và một lịch vụ cụ thể, nên không thể chép nguyên sang ĐBSCL. Với Sentinel-1 có chuỗi 12 ngày, các chỉ số tóm tắt cả chuỗi (biên độ, đáy, tốc độ tăng) bền hơn so với ba ngày rời rạc. Nguyen và cộng sự (2016) đã dùng chuỗi Sentinel-1A để lập bản đồ diện tích và số vụ lúa toàn ĐBSCL.
+
+</Depth>
+
+## 4.5 Từ bản đồ đến diện tích
+
+Cách tính diện tích dễ nhất là **đếm pixel**: cộng diện tích các pixel được phân loại là lúa. Sách FAO (2017, mục 5.2.1.1) gọi đây là ước lượng trực tiếp. Phụ lục của sách (Gallego) chỉ ra vấn đề: <Term id="pixel-counting-bias">thiên lệch của đếm pixel</Term> bằng phần **đưa nhầm vào** (pixel không phải lúa bị gọi là lúa) trừ phần **bỏ sót** (lúa bị gọi là không lúa). Không có định lý nào bảo đảm hai phần này triệt tiêu nhau. Pixel lẫn ở bờ ruộng làm thiên lệch nặng thêm. Waldner và Defourny (2017, dẫn trong phụ lục sách) thấy rằng với Landsat-8, chỉ riêng pixel lẫn đã có thể làm lệch hơn 10 % diện tích cây trồng ở phần lớn Nam Phi, kể cả khi pixel thuần được phân loại đúng hoàn toàn.
+
+Cách sửa là đi kiểm tra một **mẫu điểm**. Ghép lớp trên bản đồ với lớp thật tại các điểm đó thành <Term id="confusion-matrix">ma trận nhầm lẫn</Term>. Hàng của ma trận cho <Term id="user-accuracy">độ chính xác người dùng</Term>, cột cho <Term id="producer-accuracy">độ chính xác người sản xuất</Term>. Nếu điểm được chọn theo <Term id="stratified-sample">mẫu phân tầng</Term>, với các lớp bản đồ làm tầng, thì từ ma trận suy ra được diện tích thật và sai số của nó (Olofsson và cs. 2014). Đây chính là "hiệu chỉnh trực tiếp" (direct calibration) trong phụ lục sách FAO.
+
+<Formula label="Diện tích hiệu chỉnh từ mẫu phân tầng" tex="\hat p_{ij} = W_i\,\frac{n_{ij}}{n_{i\cdot}}, \qquad \hat A_j = A_{\text{tot}} \sum_i \hat p_{ij}, \qquad \widehat{SE}(\hat A_j) = A_{\text{tot}} \sqrt{\sum_i W_i^2\,\frac{\frac{n_{ij}}{n_{i\cdot}}\left(1-\frac{n_{ij}}{n_{i\cdot}}\right)}{n_{i\cdot}-1}}" where="
+A_{\text{tot}} :: tổng diện tích bản đồ
+W_i :: tỉ lệ diện tích lớp i trên bản đồ (biết từ bản đồ)
+n_{ij} :: số điểm bản đồ ghi lớp i, tham chiếu là lớp j
+n_{i\cdot} :: tổng số điểm lấy trong lớp bản đồ i
+\hat A_j :: diện tích ước lượng của lớp j, khoảng tin cậy 95 % ≈ ± 1,96 SE
+" />
+
+<Predict client:visible lang="vi"
+  title="Đếm pixel thừa hay thiếu?"
+  q="Giả sử trong 100 điểm bản đồ gọi là lúa có 12 điểm thực ra không phải lúa, và trong 100 điểm bản đồ gọi là không lúa có 9 điểm thực ra là lúa. Ở ĐBSCL năm 2024, đếm pixel thừa hay thiếu?"
+  options={['Thừa', 'Thiếu', 'Gần như đúng, vì 12 và 9 xấp xỉ nhau']} answer={0}
+  why="Thừa khoảng 188 nghìn ha. 12 % của 1.692 nghìn ha 'lúa' là phần đưa nhầm vào, còn 9 % của chỉ 170 nghìn ha 'không lúa' là phần bỏ sót. Tỉ lệ lỗi gần nhau nhưng nhân với hai diện tích rất khác nhau, nên không triệt tiêu." />
+
+<Figure
+  title="Hình 4.6 — Từ ma trận nhầm lẫn đến diện tích lúa đã hiệu chỉnh"
+  try="Giữ ma trận mặc định rồi đổi ĐBSCL ↔ ĐBSH: độ lệch khác nhau thế nào? Tăng số điểm 'bản đồ: Lúa, tham chiếu: Không lúa' từ 12 lên 30: diện tích hiệu chỉnh giảm bao nhiêu? Nhân đôi cả bốn ô: khoảng tin cậy hẹp lại bao nhiêu?"
+  source="Diện tích bản đồ: lớp 'có ≥ 1 vụ' (lúa) và '0 vụ' (không lúa) của bản đồ số vụ 2024 (Hình 4.1), chỉ trong mặt nạ đất canh tác ESA WorldCover 2021, diện tích pixel tính theo vĩ độ. Ma trận mặc định là số minh họa, không phải kết quả khảo sát. Công thức: Olofsson và cs. (2014)."
+>
+  <AreaCorrection client:visible lang="vi" label="Hiệu chỉnh diện tích lúa" />
+</Figure>
+
+Với ma trận minh họa, đếm pixel cho 1.692 nghìn ha, còn ước lượng hiệu chỉnh là 1.504 ± 109 nghìn ha (khoảng tin cậy 95 %). Ở ĐBSH, 469 nghìn ha giảm còn 430 ± 32 nghìn ha. Độ chính xác tổng thể khoảng 88 % trông khá tốt, nhưng diện tích vẫn lệch 11 %. Con số 1.504 gần số thống kê Đông Xuân không chứng minh được gì, vì ma trận là số giả định.
+
+<Predict client:visible lang="vi"
+  title="Có được dùng điểm huấn luyện để kiểm tra không?"
+  q="Để tiết kiệm, có thể dùng lại các điểm đã dùng để chọn ngưỡng hoặc huấn luyện bộ phân loại làm mẫu kiểm tra không?"
+  options={['Được, miễn là đủ nhiều điểm', 'Không, mẫu kiểm tra phải độc lập và chọn ngẫu nhiên', 'Được, nếu các điểm nằm giữa ruộng lớn']} answer={1}
+  why="Không. Phụ lục sách FAO nêu các quy tắc: mẫu kiểm tra phải chọn bằng phương pháp xác suất, không trùng và không tương quan không gian với dữ liệu huấn luyện, và không loại bỏ pixel ở bờ ruộng. Vi phạm các quy tắc này làm ma trận lạc quan và hiệu chỉnh sai hướng." />
+
+<Note kind="key">
+
+Đếm pixel cho diện tích bị lệch, và độ lệch bằng phần đưa nhầm vào trừ phần bỏ sót, không tự triệt tiêu. Muốn có diện tích đáng tin, cần một mẫu kiểm tra chọn ngẫu nhiên theo tầng, rồi tính diện tích hiệu chỉnh kèm khoảng tin cậy. Bản đồ dùng để chỉ ra lúa ở đâu, mẫu dùng để biết có bao nhiêu.
+
+</Note>
+
+<Depth level="advanced" title="Hiệu chỉnh trực tiếp, nghịch đảo và ước lượng hồi quy">
+
+Phụ lục sách FAO so sánh ba cách sửa thiên lệch. **Hiệu chỉnh trực tiếp** (công thức trên) dùng xác suất "lớp thật là j khi bản đồ ghi i", phù hợp khi điểm được chọn theo tầng là các lớp bản đồ. **Hiệu chỉnh nghịch đảo** dùng xác suất "bản đồ ghi i khi lớp thật là j" rồi nghịch đảo ma trận; nó kém ổn định khi ma trận gần suy biến. **Ước lượng hồi quy** dùng các ô mẫu lớn (ví dụ 300 × 300 m hoặc 500 × 500 m) có tỉ lệ cây trồng đo ngoài đồng và tỉ lệ trên bản đồ. Phụ lục đánh giá đây có lẽ là cách an toàn nhất, vì nó ít nhạy với sai lệch vị trí và tự bao gồm pixel lẫn. Chương 5 (Khung mẫu & ước lượng diện tích) sẽ đi sâu vào phương pháp này.
+
+Phụ lục còn cảnh báo một cái bẫy: nếu người phân tích biết trước con số mong đợi (ví dụ số thống kê) và chỉnh bộ phân loại cho tới khi số pixel khớp, thì diện tích đếm được không còn khách quan. Khi đó bản đồ vẫn hữu ích để trả lời "lúa ở đâu", nhưng không còn là một ước lượng diện tích độc lập.
+
+</Depth>
+
+## 4.6 Lúa và môi trường
+
+Số vụ lúa không chỉ là chuyện năng suất. Mỗi thay đổi trên bản đồ Hình 4.1 gắn với nước, phù sa và khí thải.
+
+<Tiles items={[
+  { t: 'Đê bao và vụ thứ ba', d: 'Đê bao cao giữ lũ ngoài ruộng để làm vụ Thu Đông. Vùng ba vụ mở rộng ở thượng nguồn ĐBSCL (Hình 4.1). Lũ và đê bao: Chương 8.' },
+  { t: 'Mất phù sa', d: 'Ruộng không còn nhận nước lũ thì không còn nhận phù sa bồi đắp, phải bù bằng phân bón (Chapman và cs. 2016).' },
+  { t: 'Mặn và lịch xuống giống', d: 'Ở vùng ven biển, vụ Đông Xuân được gieo sớm để gặt trước đỉnh mặn. Lịch mùa vụ (mục 4.3) là công cụ theo dõi. Mặn: Chương 10.' },
+  { t: 'Khí mê-tan', d: 'Ruộng ngập là nguồn phát thải CH₄. Tưới ướt khô xen kẽ (AWD) làm giảm phát thải; radar có thể thấy những đợt ruộng khô giữa vụ. Phát thải: Chương 13.' },
+  { t: 'Chính sách', d: 'Nghị quyết 120/NQ-CP (2017) đổi hướng ĐBSCL sang thích ứng thuận thiên. Đề án 1 triệu ha lúa chất lượng cao, phát thải thấp (QĐ 1490/QĐ-TTg, 2023) cần bản đồ lúa và lịch vụ để giám sát.' },
+]} />
+
+<Predict client:visible lang="vi"
+  title="Ba vụ có luôn tốt hơn hai vụ?"
+  q="Ở vùng ngập lũ thượng nguồn ĐBSCL, chuyển từ 2 vụ (để lũ vào ruộng) sang 3 vụ (đê bao kín) đánh đổi điều gì?"
+  options={['Không đánh đổi gì, chỉ thêm sản lượng', 'Thêm một vụ nhưng mất phù sa và chỗ chứa lũ, tốn phân bón hơn', 'Mất một vụ lúa']} answer={1}
+  why="Thêm một vụ lúa, nhưng ruộng không còn nhận phù sa và không còn làm chỗ chứa nước lũ. Nước lũ bị đẩy sang vùng khác hoặc xuống hạ lưu. Chương 8 xem diện tích ngập đỉnh lũ thay đổi thế nào từ 2016 đến 2025." />
+
+<Note kind="key">
+
+Bản đồ số vụ và lịch mùa vụ là đầu vào cho các chương môi trường: chúng cho biết ở đâu đê bao thay đổi chế độ lũ, ở đâu lịch gieo cần né mặn, ở đâu ruộng ngập phát thải mê-tan.
+
+</Note>
+
+## 4.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Chapman, A. D., Darby, S. E., Hồng, H. M., Tompkins, E. L., & Van, T. P. D. (2016). Adaptation and development trade-offs: fluvial sediment deposition and the sustainability of rice-cropping in An Giang Province, Mekong Delta. *Climatic Change*, 137, 593–608.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. Global Strategy to improve Agricultural and Rural Statistics (GSARS), Rome. Mục 2.5.3, 5.2.1, 5.2.3, 5.2.5 và Phụ lục "Estimating and correcting the bias of pixel counting" (J. Gallego).
+- Huete, A. và cs. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. *Remote Sensing of Environment*, 83, 195–213.
+- Jönsson, P., & Eklundh, L. (2004). TIMESAT — a program for analyzing time-series of satellite sensor data. *Computers & Geosciences*, 30, 833–845.
+- Nguyen, D. B., Gruber, A., & Wagner, W. (2016). Mapping rice extent and cropping scheme in the Mekong Delta using Sentinel-1A data. *Remote Sensing Letters*, 7(12), 1209–1218.
+- Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. *Remote Sensing of Environment*, 148, 42–57.
+- Sakamoto, T. và cs. (2006). Spatio-temporal distribution of rice phenology and cropping systems in the Mekong Delta with special reference to the seasonal water flow of the Mekong and Bassac rivers. *Remote Sensing of Environment*, 100, 1–16.
+- Savitzky, A., & Golay, M. J. E. (1964). Smoothing and differentiation of data by simplified least squares procedures. *Analytical Chemistry*, 36(8), 1627–1639.
+- Tổng cục Thống kê (2024). *Kết quả sản xuất vụ đông xuân năm 2024*. https://www.nso.gov.vn/tin-tuc-thong-ke/2024/07/ket-qua-san-xuat-vu-dong-xuan-nam-2024/
+- Xiao, X. và cs. (2006). Mapping paddy rice agriculture in South and Southeast Asia using multi-temporal MODIS images. *Remote Sensing of Environment*, 100, 95–113.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo, doi:10.5281/zenodo.7254221.
