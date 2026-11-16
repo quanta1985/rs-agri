@@ -52,7 +52,7 @@ def main() -> None:
         meta[name] = {"bbox": bbox, "start": start, "end": end, "scenes": n.getInfo(), "size": im.size,
                       "bands": VIS["bands"], "cs_cdf_min": CS_MIN}
         print(name, im.size, meta[name]["scenes"], "scenes", out.stat().st_size // 1024, "KB")
-    (OUT / "hero.json").write_text(json.dumps(meta, indent=1), "utf-8")
+    (OUT / "hero.json").write_text(json.dumps(meta, indent=1), "utf-8", newline="\n")
 
 
 if __name__ == "__main__":

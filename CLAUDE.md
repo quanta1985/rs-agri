@@ -18,6 +18,14 @@ npm test                                      # node:test on src/lib/*.test.ts (
 npx -y -p typescript@5.9.3 tsc --noEmit -p .  # type check; run AFTER a build/dev (needs .astro/types.d.ts); only node:* errors in tests are expected
 BUILD_ID=x npx astro build                    # parallel build into dist-x/ (gitignored)
 
+npm run dev -- --port 4323                    # then /rs-agri/vi/dev/ = QA gallery of the map islands (dev only, never built)
+
+# data (layer scripts import layerkit.py: run them WITHOUT -I, from the repo root)
+python scripts/data/layerkit.py               # grid self-check (no EE)
+python scripts/data/export_flood_gsw.py       # flood-gsw-{red,mekong}: JRC water occurrence, 250 m
+python scripts/data/export_evi_monthly.py     # evi-2024-{red,mekong}: MOD13Q1 monthly mean EVI 2024, 500 m
+python scripts/data/export_s1_site.py         # s1-angiang-2024: S1 VV dB, 10 m, dry 2024-03-12 + flood 2024-10-14
+python -I scripts/data/export_boundaries.py <adm1.geojson>   # province lines (download geoBoundaries first, see script)
 python -I scripts/data/export_hero.py         # home hero: S2 dry-season composites of both deltas -> public/img/hero-*.webp + hero.json
 ```
 
@@ -31,7 +39,9 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 ### Environment gotchas (Windows)
 
-- `-I` drops the script dir from `sys.path` and ignores `PYTHONIOENCODING`: scripts call `sys.stdout.reconfigure(encoding="utf-8")`. Lab generators (later) must run WITHOUT `-I` (they import `scripts/labkit.py`).
+- `-I` drops the script dir from `sys.path` and ignores `PYTHONIOENCODING`: scripts call `sys.stdout.reconfigure(encoding="utf-8")`. Scripts that import `layerkit.py` (and lab generators later) must run WITHOUT `-I`.
+- Write JSON with `write_text(..., "utf-8", newline="\n")` (Windows otherwise writes CRLF). Do not patch Python string literals with `sed`: it turns `\n` into a real newline. Long multi-line edits: write a small Python script to the scratchpad and run it (bash heredocs with quotes break).
+- Playwright on the console: set `PYTHONIOENCODING=utf-8` before printing Vietnamese HUD text. Use `exact=True` for short button names ("On" also matches "Mekong Delta").
 - Never leave a helper named like a stdlib module in the directory you run Python from.
 - `rasterio` cannot find `proj.db`: do coordinate transforms in Earth Engine.
 - GitHub CLI is not on the bash PATH: `"/c/Program Files/GitHub CLI/gh.exe"` (logged in as `quanta1985`).
@@ -47,6 +57,8 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 - ĐBSH is very cloudy Jan–Apr (spring rice season): use Sentinel-1 there. Clearest optical windows: ĐBSCL Jan–Mar, ĐBSH Oct–Dec.
 - Sentinel-1: only S1A in 2022–2024 (12-day repeat per orbit), S1C from 2025. Average σ0 in linear power, then dB.
 - Export region-scale layers in **EPSG:3857** so MapLibre image quads are exact (no lat/lon warp).
+- `computePixels` with `reduceResolution` fails with "Reprojection output too large" on big requests: `layerkit` fetches at most 512 rows per request. A collection `.mean()` has no default projection: `setDefaultProjection(col.first().projection())` before `reduceResolution`.
+- MODIS EVI in the Red River Delta, Jan-Apr: most 16-day composites fail SummaryQA <= 1 (cloud), so monthly means are patchy; say so wherever they are shown.
 
 ## Architecture
 
@@ -68,7 +80,15 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
   - Content blocks: `<Figure title="Hình n.k — …" try source>`, `<Note kind="key|tip|example|why|warn|myth">`, `<Tiles>`, `<Stats>`, `<Steps>`, `<Predict client:visible …>`, `<Formula label tex where>` / `<M tex>` (`tex`/`where` as plain `"…"` strings, never `{…}`), `<LabLinks>`, `<Depth>`, `**bold**` first use, at most one `<mark>` per section. Scope any `.key` CSS rule (collides with legend/Note/mark).
 - **Islands kept from rs-knowledge**: `MapStage.tsx` (MapLibre GL, Esri imagery / Light Gray basemaps, keyless; NO CARTO; `SOVEREIGN` labels; `onMap` escape hatch for GeoJSON; raster overlays as image sources on a corner `Quad`), `VizUi.tsx` (`StatPanel`, `Pills`, `Slider`, `Key`), `LineChart.tsx`, `Predict.tsx`, `Quiz.tsx`. Not yet copied (copy when needed): `FormulaTable`, `LabIndex` data, `labkit.py`, `WorkedExample`.
 - **Pure math** in `src/lib/` with `.test.ts` each: `raster.ts` (indices, stretch, histogram, Otsu, colormaps), `chart.ts`, `geo.ts` (UTM inverse, quads, lonLat→pixel), `sar.ts` (dB, speckle filter), `change.ts` (OLS, Theil–Sen, breakpoint).
-- **Planned (step 2 of PLAN.md)**: region layer format `public/data/<layer>/meta.json + values.u8z|u16z` (EPSG:3857 grid, scale/offset/nodata, units, palette, time list, provenance), `DeltaMap.tsx` (region/layer picker, time slider, swipe compare, hover value, legend, province lines), `SeriesChart.tsx`, `ThresholdLab.tsx`.
+- **Study areas**: `src/data/regions.json` is the single source for Python (grids) and islands (labels): deltas `red`, `mekong` (bbox = mainland farmland) and 10.24 km sites `namdinh`, `angiang`, `thapmuoi`, `bentre`, `camau`.
+- **Map layer format** (`scripts/data/layerkit.py` writes, `src/lib/layer.ts` reads): `public/data/<id>/meta.json` + `values.binz` (gzip, band-sequential = one band per time step, little-endian `dtype` uint8/uint16/int16; value = raw x scale + offset; raw = nodata means no data). Grid: EPSG:3857, upper-left `origin`, square `res` in Mercator metres, `ground_res_m` = nominal ground size (pixel ground area shrinks by cos^2(lat), see `pixelAreaHa`). Meta also holds bilingual title/units, kind (continuous/classes), palette name + range or classes, `times`, per-step `stats` (valid, mean, p2/p50/p98, min/max in physical units, for prose numbers), `clipped_to`, provenance. Delta layers are clipped to the statistical region outline (nodata over sea, Cambodia, hills). Layer ids: `<topic>-<region>` or `<topic>-<year>-<region>`. Size budget about 2 MB per layer: 250 m single layers, 500 m monthly stacks, 10 m only on sites; uint8 whenever the precision allows (S1 dB in 0.15 dB steps).
+- **Boundaries**: `public/data/boundaries/provinces.json` = 24 provinces of the two GSO regions + one outline per region, from geoBoundaries gbOpen ADM1 (Public Domain, 2008 = 63-province boundaries). Do NOT use GADM for anything published (its licence forbids redistribution).
+- **Map islands**:
+  - `layers.ts`: `loadLayer(id)` / `useLayer(id)` (one cached download per layer per page; never returns a previous id's layer), `loadProvinces()`, `REGIONS`.
+  - `DeltaMap.tsx`: `choices=[{ key, label, ids: { red: '<id>', mekong: '<id>' }, palette?, range?, clearBelow? }]`, optional `region`, `time`, `compare`. Region + layer pills, time slider with play, swipe compare of two time steps (left = "Trái/Left" slider, right = time slider; composed into the image, white divider line as GeoJSON), opacity, HUD with value under the cursor + province name + legend. One MapStage per region+layer (`key`), so each keeps its own view and Reset.
+  - `ThresholdLab.tsx`: `layer`, `below`, `range`, `step`, `maskLabel`, `speckle` (Lee 5x5), `time`. Grey base + Okabe-Ito blue class mask, histogram with Otsu (dashed ochre) and the threshold (white), class area in ha from per-row pixel ground area.
+  - Time series: use `LineChart.tsx` (gaps via `maxGap`, ribbons, spans for events, `Legend`); the planned `SeriesChart` was not needed.
+- **Pure helpers**: `lib/layer.ts` (Mercator, quads, `pixelAt`, `decode*`, `PALETTES` water/evi/gray/viridis/brbg/ylorrd, `colorize` with a per-code LUT, `colorizeValues` for float values, `swipe`, `areaWhere`), `lib/format.ts` (`fmtNum` with the vi decimal comma, `digitsFor`, `fmtTime`).
 
 ## Conventions that matter
 
@@ -84,8 +104,12 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 ## Status
 
-**Step 1 done (2026-11-15): skeleton.** `git init` done, nothing committed yet (no GitHub repo).
+**Step 2 done (2026-11-16): map layer format + islands** (uncommitted until the user asks).
+- `layerkit.py` + 4 real layers (flood-gsw x2, evi-2024 x2, s1-angiang-2024) + province lines + `regions.json`; `lib/layer.ts`, `lib/format.ts` (+ tests), `islands/layers.ts`, `DeltaMap.tsx`, `ThresholdLab.tsx`; QA page `src/pages/[lang]/dev.astro` (dev server only).
+- Checks: 40/40 unit tests, type check clean, build OK (dev page not emitted). QA page vi light 1440 + en dark 390: no console errors, no horizontal overflow; hover value + province, region switch, layer switch, swipe compare, threshold/Otsu/Lee all exercised. Example numbers (not yet in prose): An Giang site 14/10/2024, Otsu -16.5 dB -> 6,045 ha water (57.6 % of the frame); with Lee 5x5 -16.3 dB -> 5,912 ha.
+- Next: step 3 (GEE exports for the Rice, Flood and Salinity chapters).
+
+**Step 1 done (2026-11-15): skeleton.** Committed `ee7e927` (no GitHub repo yet).
 - Copied from rs-knowledge: config, deploy workflow, components (minus `WorkedExample`), layout, pages, i18n, styles, 5 islands, 5 lib modules + 4 test files. Renamed base/repo to `rs-agri`, license CC-BY-NC-4.0.
 - New: 16-chapter roadmap with `PARTS` A–D (ribbon + home generalised from 3 hard-coded parts), new title/tagline/footer, rice-and-water logo (`AppBar.astro` + `public/favicon.svg`, same paths), home hero from real data (`export_hero.py`: Mekong Jan–Mar 2024, 378 S2 scenes; Red River Oct–Dec 2023, 154 scenes; B11/B8/B4).
 - Checks: 26/26 unit tests, type check clean, build OK (only "collection chapters is empty" warnings until the first MDX exists). Home page vi/en × light/dark × 1440/390 px: no console errors, no horizontal overflow.
-- Next: step 2 (region layer format + `DeltaMap`, `SeriesChart`, `ThresholdLab`).

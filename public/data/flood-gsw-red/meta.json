@@ -1,0 +1,54 @@
+{
+ "id": "flood-gsw-red",
+ "region": "red",
+ "title": {
+  "vi": "Tần suất có nước mặt 1984–2021",
+  "en": "Surface-water occurrence 1984–2021"
+ },
+ "units": {
+  "vi": "% số lần quan sát",
+  "en": "% of observations"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "1984–2021"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 268871,
+   "mean": 7.4245,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 93.0,
+   "min": 0.0,
+   "max": 99.5
+  }
+ ],
+ "provenance": {
+  "source": "JRC/GSW1_4/GlobalSurfaceWater (Pekel et al. 2016, Nature 540:418–422), band occurrence",
+  "processing": "mean of 30 m pixels to ~250 m; never-water pixels = 0 %",
+  "attribution": "Source: EC JRC/Google (Copernicus Landsat-derived)",
+  "exported": "2026-11-15T17:08:03+00:00",
+  "script": "scripts/data/export_flood_gsw.py"
+ }
+}

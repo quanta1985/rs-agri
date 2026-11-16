@@ -32,7 +32,7 @@ Sổ tay tương tác song ngữ (vi/en), dựa trên FAO (2017) *Handbook on Re
 - **`DeltaMap.tsx`** (bọc `MapStage`): chọn vùng ĐBSH/ĐBSCL/điểm, chọn lớp, thanh trượt thời gian, so sánh vuốt (swipe) hai lớp/hai năm, hover giá trị + đơn vị, chú giải liên tục/phân lớp, ranh tỉnh, ghi nguồn.
 - **`SeriesChart.tsx`**: chuỗi thời gian nhiều đường + dải phần vị, đánh dấu sự kiện (đợt mặn, lũ), không nối qua khoảng trống > 40 ngày.
 - **`ThresholdLab.tsx`**: ngưỡng tương tác (Otsu/thủ công) trên lớp điểm chi tiết, đếm diện tích theo ngưỡng.
-- Ranh giới hành chính tỉnh: GADM 4.1 cấp 1 (đã gộp tỉnh 2025? cần chốt: dùng ranh 63 tỉnh cũ vì mọi số liệu lịch sử theo ranh cũ, ghi chú sáp nhập 2025).
+- Ranh giới tỉnh: geoBoundaries ADM1 (Public Domain, ranh 2008 = 63 tỉnh cũ, khớp số liệu lịch sử; ghi chú sáp nhập 2025). Không dùng GADM vì giấy phép cấm phân phối lại.
 
 ## 3. Mục lục 16 chương
 
@@ -117,7 +117,7 @@ Mỗi chương: 5–6 mục, hình mở đầu kiểu "hero", 2–3 `<Predict>` 
 ## 6. Lộ trình đợt 1 (theo thứ tự)
 
 1. ✅ (2026-11-15) Khởi tạo repo `rs-agri`: sao khung rs-knowledge, đổi tên/brand/logo, bỏ island Phần A, `npm test` + build sạch.
-2. Định dạng lớp vùng + `DeltaMap`, `SeriesChart`, `ThresholdLab` (+ `src/lib/*.test.ts`).
+2. ✅ (2026-11-16) Định dạng lớp vùng + `DeltaMap`, `ThresholdLab` (+ `src/lib/*.test.ts`). `SeriesChart` không cần: `LineChart` sẵn có đã đủ (ngắt khoảng trống, dải phần vị, sự kiện).
 3. Script GEE `scripts/data/export_{rice,flood,salinity}*.py`, ranh tỉnh, 5 khung điểm.
 4. Viết ch.4, 8, 10 (vi + en), quiz, glossary, số liệu từ `*_numbers.ts`.
 5. Trang chủ + mục lục 16 chương (chương chưa có hiện "sắp có").

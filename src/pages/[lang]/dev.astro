@@ -1,0 +1,26 @@
+---
+// QA gallery of the map islands on real layers. Exists only under `npm run dev` (no static paths in a build).
+import Base from '../../layouts/Base.astro';
+import Figure from '../../components/Figure.astro';
+import DeltaMap from '../../islands/DeltaMap';
+import ThresholdLab from '../../islands/ThresholdLab';
+import { LANGS, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = () => (import.meta.env.DEV ? LANGS.map((lang) => ({ params: { lang } })) : []);
+const lang = Astro.params.lang as Lang;
+---
+<Base lang={lang} title="Dev · figures">
+  <main id="main" class="prose" style="max-width: 1100px; margin: 0 auto; padding: 24px 16px" data-pagefind-ignore>
+    <h1>Dev · figures</h1>
+    <Figure title="Hình 0.1 — DeltaMap: tần suất nước & EVI tháng" source="JRC GSW v1.4; MODIS MOD13Q1 v061">
+      <DeltaMap client:visible lang={lang} label="DeltaMap demo" compare choices={[
+        { key: 'gsw', label: { vi: 'Tần suất nước', en: 'Water occurrence' }, ids: { mekong: 'flood-gsw-mekong', red: 'flood-gsw-red' }, clearBelow: 1 },
+        { key: 'evi', label: { vi: 'EVI 2024', en: 'EVI 2024' }, ids: { mekong: 'evi-2024-mekong', red: 'evi-2024-red' } },
+      ]} />
+    </Figure>
+    <Figure title="Hình 0.2 — ThresholdLab: nước trên ảnh radar An Giang" source="Contains modified Copernicus Sentinel data 2024">
+      <ThresholdLab client:visible lang={lang} label="ThresholdLab demo" layer="s1-angiang-2024" time={1} speckle
+        maskLabel={{ vi: 'Nước', en: 'Water' }} range={[-30, 0]} />
+    </Figure>
+  </main>
+</Base>

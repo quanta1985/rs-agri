@@ -1,0 +1,63 @@
+{
+ "id": "s1-angiang-2024",
+ "region": "angiang",
+ "title": {
+  "vi": "Tán xạ ngược Sentinel-1 VV",
+  "en": "Sentinel-1 VV backscatter"
+ },
+ "units": {
+  "vi": "dB",
+  "en": "dB"
+ },
+ "kind": "continuous",
+ "palette": "gray",
+ "range": [
+  -25,
+  0
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11692242.638,
+  1174999.047
+ ],
+ "res": 10.168662,
+ "ground_res_m": 10,
+ "width": 1024,
+ "height": 1024,
+ "dtype": "uint8",
+ "scale": 0.15,
+ "offset": -35,
+ "nodata": 255,
+ "times": [
+  "2024-03-12",
+  "2024-10-14"
+ ],
+ "stats": [
+  {
+   "valid": 1048576,
+   "mean": -10.2181,
+   "p2": -16.7,
+   "p50": -10.25,
+   "p98": -3.35,
+   "min": -35.0,
+   "max": 3.1
+  },
+  {
+   "valid": 1048576,
+   "mean": -17.3495,
+   "p2": -29.9,
+   "p50": -18.05,
+   "p98": -5.15,
+   "min": -35.0,
+   "max": 3.1
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/S1_GRD IW, VV, relative orbit 26 (sigma0, dB as distributed)",
+  "processing": "no speckle filter; nearest resampling to the 10 m Web Mercator grid",
+  "attribution": "Contains modified Copernicus Sentinel data 2024",
+  "exported": "2026-11-15T16:45:36+00:00",
+  "script": "scripts/data/export_s1_site.py"
+ }
+}

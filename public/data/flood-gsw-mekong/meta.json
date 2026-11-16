@@ -1,0 +1,54 @@
+{
+ "id": "flood-gsw-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Tần suất có nước mặt 1984–2021",
+  "en": "Surface-water occurrence 1984–2021"
+ },
+ "units": {
+  "vi": "% số lần quan sát",
+  "en": "% of observations"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "1984–2021"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 636133,
+   "mean": 15.4845,
+   "p2": 0.0,
+   "p50": 5.5,
+   "p98": 97.5,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "JRC/GSW1_4/GlobalSurfaceWater (Pekel et al. 2016, Nature 540:418–422), band occurrence",
+  "processing": "mean of 30 m pixels to ~250 m; never-water pixels = 0 %",
+  "attribution": "Source: EC JRC/Google (Copernicus Landsat-derived)",
+  "exported": "2026-11-15T17:08:38+00:00",
+  "script": "scripts/data/export_flood_gsw.py"
+ }
+}
