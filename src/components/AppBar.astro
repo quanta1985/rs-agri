@@ -33,8 +33,8 @@ const refItems = [
   { href: url(`${lang}/`), label: vi ? 'Trang chủ' : 'Home', icon: icons.home },
   { href: url(`${lang}/glossary/`), label: t(lang, 'glossary'), icon: icons.book },
   { href: url(`${lang}/search/`), label: t(lang, 'search'), icon: icons.search },
-  { href: url(`${lang}/labs/`), label: vi ? 'Bài thực hành' : 'Labs', icon: icons.code },
-  { href: url(`${lang}/reference/`), label: vi ? 'Công thức' : 'Formulas', icon: icons.sigma },
+  { href: url(`${lang}/labs/`), label: vi ? 'Bài thực hành' : 'Labs', icon: icons.code, slug: 'labs' },
+  { href: url(`${lang}/reference/`), label: vi ? 'Công thức' : 'Formulas', icon: icons.sigma, slug: 'reference' },
 ];
 ---
 <header class="appbar">
@@ -72,7 +72,9 @@ const refItems = [
     ))}
     <div class="rb-panel" role="tabpanel" id="rbp-ref" aria-labelledby="rbt-ref" hidden>
       <div class="rb-group">
-        <div class="rb-items">{refItems.map((r) => <a class="rb-btn" href={r.href}><Fragment set:html={Icon(r.icon)} />{r.label}</a>)}</div>
+        <div class="rb-items">{refItems.map((r) => !r.slug || ready.has(`${lang}/${r.slug}`)
+          ? <a class="rb-btn" href={r.href}><Fragment set:html={Icon(r.icon)} />{r.label}</a>
+          : <span class="rb-btn planned" title={`${r.label} · ${t(lang, 'planned')}`}><Fragment set:html={Icon(r.icon)} />{r.label}</span>)}</div>
         <span class="rb-cap">{t(lang, 'depthRef')}</span>
       </div>
     </div>

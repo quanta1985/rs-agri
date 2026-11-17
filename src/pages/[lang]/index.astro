@@ -16,7 +16,7 @@ const nQuiz = quizzes.reduce((s, q) => s + q.default.length, 0);
 const first = CHAPTERS.find((c) => byId.has(`${lang}/${c.slug}`));
 const pad = (n: number) => String(n).padStart(2, '0');
 const stats: [string, string][] = [
-  [String(CHAPTERS.length), vi ? 'chương' : 'chapters'],
+  [`${CHAPTERS.filter((c) => byId.has(`${lang}/${c.slug}`)).length}/${CHAPTERS.length}`, vi ? 'chương đã viết' : 'chapters written'],
   [String(nFigures), vi ? 'mô phỏng & bản đồ' : 'simulations & maps'],
   [String(nQuiz), vi ? 'câu hỏi ôn tập' : 'review questions'],
 ];
@@ -26,11 +26,11 @@ const stats: [string, string][] = [
     <section class="home-hero">
       <div>
         <p class="mono-label">{vi ? 'Sổ tay tương tác · Song ngữ Việt – Anh' : 'Interactive handbook · Vietnamese – English'}</p>
-        <h1>{vi ? <>Viễn thám nông nghiệp <>Viễn thám cho nông nghiệp<br />& môi trường hai châu thổ</> : <>Remote sensing for agriculture<br />& environment in two deltas</> môi trường hai châu thổ</> : <>Remote sensing for agriculture <>Viễn thám cho nông nghiệp<br />& môi trường hai châu thổ</> : <>Remote sensing for agriculture<br />& environment in two deltas</> environment in two deltas</>}</h1>
+        <h1>{vi ? <>Viễn thám cho nông nghiệp<br />&amp; môi trường hai châu thổ</> : <>Remote sensing for agriculture<br />&amp; environment in two deltas</>}</h1>
         <p class="lead">{t(lang, 'tagline')}</p>
         <div class="cta">
           {first && <a class="btn primary" href={url(`${lang}/${first.slug}/`)}>{vi ? 'Bắt đầu đọc' : 'Start reading'}</a>}
-          <a class="btn" href={url(`${lang}/labs/`)}>{vi ? 'Bài thực hành' : 'Labs'}</a>
+          {byId.has(`${lang}/labs`) && <a class="btn" href={url(`${lang}/labs/`)}>{vi ? 'Bài thực hành' : 'Labs'}</a>}
           <a class="btn" href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a>
         </div>
         <dl class="home-stats">{stats.map(([v, k]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
@@ -62,7 +62,7 @@ const stats: [string, string][] = [
               </a>
             ) : (
               <div class="card planned" aria-disabled="true">
-                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)} · {t(lang, 'planned')}</span><strong>{c.title[lang]}</strong>
+                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)} · {t(lang, 'planned')}</span><strong>{c.title[lang]}</strong>{c.blurb && <p>{c.blurb[lang]}</p>}
               </div>
             );
           })}

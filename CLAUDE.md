@@ -114,13 +114,20 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 ## Status
 
-**Step 4 done (2026-11-16): chapters 4 `rice`, 8 `flood`, 10 `salinity` in vi + en** (uncommitted until the user asks).
+**Step 5 done (2026-11-17): home page + 16-chapter table of contents** (uncommitted until the user asks).
+- Home h1 fixed (step 1 had garbled duplicated text: a `sed` replacement containing `&`, which sed reads as "the matched text"; never put `&` in a sed replacement).
+- `ChapterInfo.blurb?` (bilingual one-liner from PLAN) shown on the home card of a chapter until its MDX exists; written chapters show their frontmatter `summary`. Planned cards: dashed border, transparent background, 3-line clamp (no global opacity, keeps text contrast).
+- Home stats: "3/16 chương đã viết" (ready/total) instead of "16 chương". "Bài thực hành" CTA only when the `labs` chapter exists; in the ribbon's Reference tab, Labs and Formulas are greyed "planned" items until `labs` / `reference` exist (no more 404 links).
+- Checks: 45/45 tests, type check clean, build OK (13 planned cards); Playwright home vi/en x light/dark x 1440/390: no console errors, overflow 0, every internal link returns 200.
+- Next: step 6 (labs for ch.4, 8, 10).
+
+**Step 4 done (2026-11-16): chapters 4 `rice`, 8 `flood`, 10 `salinity` in vi + en.** Committed `bfe6bc0`.
 - Each: MDX (sections n.1-n.6 + Ôn tập + references), `src/data/quiz/<slug>.json`, `src/data/glossary/<slug>.json` (ids owned per chapter; `<Term>` only uses the chapter's own ids), `scripts/<slug>_numbers.ts` (prints every number in the prose; salinity ~25 s).
 - New islands: `RiceSeries` (S2/S1 point series, 40-day gaps), `AreaCorrection` (2x2 confusion matrix -> bias-corrected area on the real 2024 map; default matrix illustrative; needs >= 2 points per map class), `FloodArea` (`view="months"|"years"`, region/province picker), `IntrusionChart` (published 4 g/L lengths, hollow = mid-season value), `SalinityMechanism` (illustrative, % change only, L ~ Q^-1/3). Pure math: `lib/accuracy.ts` (Olofsson et al. 2014 `estimateArea`, test reproduces the paper's example).
 - Published numbers cited in the chapters: GSO winter-spring 2024 rice area (Mekong 1,487.7, Red 471.4 thousand ha); Yagi damage (Cục Thủy lợi 8/9/2024, MARD 15/9/2024, GSO 7/10/2024); salinity 2015-16 per estuary (Nguyễn Ngọc Anh 2017), 2019-20 (Tổng cục Thủy lợi 20/6/2020, MARD 2020), 2023-24 (Cục Thủy lợi 23/2/2024, Đài KTTV Nam Bộ 22/3/2024); Triet et al. 2017, Kondolf et al. 2022, Park et al. 2022 (Ambio 51:691), Cái Lớn-Cái Bé dates. Gaps stated in the figures: per-estuary peaks only verified for 2016; no GSO 2016 regional rice area; Yagi per-province figures only for Thái Bình, Hà Nội, Bắc Ninh, Nam Định.
 - Key data results: Mekong 3+ rice crops 25 -> 35 % of farmland (2016 -> 2024), Red River "no rice detected" 15 -> 29 %; pixel count 1,692 vs GSO 1,487.7 thousand ha (+14 %); Mekong peak-month water mean 496 thousand ha (max 2017 604, min 2021 395); Yagi new water 51,501 ha (23,430 on cropland, ~19,900 on 2024 rice cells); dry-season EVI anomaly <= -0.05 on 22.7 / 31.1 / 18.6 % of the Mekong delta in 2016 / 2020 / 2024, stronger inland than on the coast (so not a salinity map); Bến Tre DW crops 19.0 -> 6.0 % (to trees), Cà Mau DW water/flooded vegetation flip on shrimp-mangrove farms.
 - Checks: 45/45 tests, type check clean, full build OK (6 chapter pages), Playwright vi/en light/dark 1440/390 on every figure: no console errors, overflow 0. code-reviewer: no CRITICAL/HIGH; fixed: AreaCorrection guard for < 2 points per class (SE was understated / estimate silently wrong), `estimateArea` throws on empty map, confusion inputs styled, wrong frame-size print removed.
-- Open: DeltaMap HUD shows Vietnamese province names on the en pages; Ch. 5/11/13 referenced in prose but not written; labs (step 6) not linked yet.
+- Open: DeltaMap HUD shows Vietnamese province names on the en pages; Ch. 5/11/13 referenced in prose (plain text, no links) but not written; labs (step 6) not linked yet.
 
 **Step 3 done (2026-11-16): GEE exports for the Rice, Flood and Salinity chapters.** Committed `7e67ed3`.
 - `layerkit.py` split into `fetch_raw` / `to_values` / `to_raw` / `write_layer` (numpy processing between fetch and write; `export_layer` = both) + `max_rows`.

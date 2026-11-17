@@ -120,7 +120,7 @@ Mỗi chương: 5–6 mục, hình mở đầu kiểu "hero", 2–3 `<Predict>` 
 2. ✅ (2026-11-16) Định dạng lớp vùng + `DeltaMap`, `ThresholdLab` (+ `src/lib/*.test.ts`). `SeriesChart` không cần: `LineChart` sẵn có đã đủ (ngắt khoảng trống, dải phần vị, sự kiện).
 3. ✅ (2026-11-16) Script GEE `export_rice.py`, `export_rice_site.py`, `export_flood.py`, `export_salinity.py` (ranh tỉnh + 5 khung điểm đã có từ bước 2). Khác kế hoạch: số vụ lúa ĐBSH lấy từ Sentinel-1 (MODIS chỉ 7–12 % quan sát tốt tháng 6–7); Dynamic World so 2018↔2024 (2016 thiếu ảnh ở Cà Mau); ô chuỗi thời gian An Giang là ruộng 2 vụ + để lũ (chọn tự động theo biên độ VH lớn nhất); 10.3 chỉ làm ĐBSCL.
 4. ✅ (2026-11-16) Viết ch.4, 8, 10 (vi + en), quiz, glossary, số liệu từ `*_numbers.ts`. Khác kế hoạch: ma trận nhầm lẫn 4.5 là số minh họa (chưa có điểm kiểm tra thật) áp lên diện tích bản đồ thật; chiều dài mặn theo cửa sông chỉ xác minh đủ cho 2016; 10.5 ở Bến Tre là lúa → vườn cây, không phải lúa → tôm.
-5. Trang chủ + mục lục 16 chương (chương chưa có hiện "sắp có").
+5. ✅ (2026-11-17) Trang chủ + mục lục 16 chương (chương chưa có hiện "sắp có" kèm một dòng mô tả nội dung dự kiến; thống kê "3/16 chương đã viết"; link Bài thực hành/Công thức ẩn tới khi có chương; sửa tiêu đề h1 bị lặp chữ từ bước 1).
 6. Lab cho 3 chương.
 7. Kiểm tra Playwright (vi/en, sáng/tối, 1600/390 px), `code-reviewer`.
 8. Anh/chị duyệt → đợt 2.
