@@ -18,6 +18,7 @@ import Formula from '../../../components/Formula.astro';
 import Stats from '../../../components/Stats.astro';
 import Tiles from '../../../components/Tiles.astro';
 import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import DeltaMap from '../../../islands/DeltaMap.tsx';
 import ThresholdLab from '../../../islands/ThresholdLab.tsx';
 import RiceSeries from '../../../islands/RiceSeries.tsx';
@@ -306,6 +307,10 @@ The number of rice crops is not only about output. Each change on the Figure 4.1
 Maps of cropping intensity and crop calendars feed the environment chapters: they show where dykes change the flood regime, where sowing has to dodge salinity and where flooded paddies emit methane.
 
 </Note>
+
+**Lab.** Lab 4 repeats the chapter's steps on the An Giang frame: counting seasons from MODIS EVI, plotting the Sentinel-2 and Sentinel-1 series of a field block, computing the start of season, mapping rice with an Otsu threshold on the VH range and estimating the bias-corrected area.
+
+<LabLinks notebook="labs/rice_seasons.ipynb" gee="labs/rice_seasons.js" />
 
 ## 4.7 Review
 

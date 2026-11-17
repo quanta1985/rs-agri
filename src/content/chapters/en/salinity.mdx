@@ -17,6 +17,7 @@ import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
 import Formula from '../../../components/Formula.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Predict from '../../../islands/Predict.tsx';
 import SalinityMechanism from '../../../islands/SalinityMechanism.tsx';
 import IntrusionChart from '../../../islands/IntrusionChart.tsx';
@@ -309,6 +310,10 @@ A <Term id="sluice-gate">salinity-control sluice</Term> closes when the tide bri
 There is no single fix. Forecasts and crop calendars cut damage fastest and cheapest; large sluices protect wide areas but must be run well; changing what is farmed is the long-term answer. Remote sensing helps track calendars, water in canals and land use, but it does not replace salinity gauges.
 
 </Note>
+
+**Lab.** The Python notebook and the GEE script recompute the 2020 dry-season EVI anomaly for coastal and inland provinces, NDVI and the salinity index SI at Ben Tre (showing that NDSI = −NDVI), Dynamic World land cover 2018 and 2024 at Ben Tre and Ca Mau, and plot the published intrusion lengths.
+
+<LabLinks notebook="labs/salinity_indicators.ipynb" gee="labs/salinity_indicators.js" />
 
 ## 10.7 Review
 

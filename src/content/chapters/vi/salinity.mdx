@@ -17,6 +17,7 @@ import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
 import Formula from '../../../components/Formula.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Predict from '../../../islands/Predict.tsx';
 import SalinityMechanism from '../../../islands/SalinityMechanism.tsx';
 import IntrusionChart from '../../../islands/IntrusionChart.tsx';
@@ -309,6 +310,10 @@ Một <Term id="sluice-gate">cống ngăn mặn</Term> đóng khi triều đưa 
 Không có giải pháp duy nhất. Dự báo và lịch thời vụ giảm thiệt hại nhanh nhất và rẻ nhất; cống lớn bảo vệ vùng rộng nhưng cần vận hành tốt; chuyển đổi sản xuất là giải pháp dài hạn. Viễn thám giúp theo dõi lịch vụ, nước trong kênh và sử dụng đất, nhưng không thay được trạm đo mặn.
 
 </Note>
+
+**Thực hành.** Notebook Python và script GEE tính lại dị thường EVI mùa khô 2020 cho vùng ven biển và nội đồng, NDVI và chỉ số mặn SI ở Bến Tre (kèm chứng minh NDSI = −NDVI), lớp phủ Dynamic World 2018 và 2024 ở Bến Tre, Cà Mau, rồi vẽ chiều dài xâm nhập mặn theo số liệu công bố.
+
+<LabLinks notebook="labs/salinity_indicators.ipynb" gee="labs/salinity_indicators.js" />
 
 ## 10.7 Ôn tập
 

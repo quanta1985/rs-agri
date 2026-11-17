@@ -18,6 +18,7 @@ import Formula from '../../../components/Formula.astro';
 import Stats from '../../../components/Stats.astro';
 import Tiles from '../../../components/Tiles.astro';
 import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import DeltaMap from '../../../islands/DeltaMap.tsx';
 import ThresholdLab from '../../../islands/ThresholdLab.tsx';
 import RiceSeries from '../../../islands/RiceSeries.tsx';
@@ -306,6 +307,10 @@ Số vụ lúa không chỉ là chuyện năng suất. Mỗi thay đổi trên b
 Bản đồ số vụ và lịch mùa vụ là đầu vào cho các chương môi trường: chúng cho biết ở đâu đê bao thay đổi chế độ lũ, ở đâu lịch gieo cần né mặn, ở đâu ruộng ngập phát thải mê-tan.
 
 </Note>
+
+**Thực hành.** Bài thực hành 4 làm lại các bước của chương trên khung An Giang: đếm số vụ từ EVI MODIS, vẽ chuỗi Sentinel-2 và Sentinel-1 của ô ruộng, tính ngày bắt đầu vụ, lập bản đồ lúa bằng ngưỡng Otsu trên biên độ VH và ước lượng diện tích đã hiệu chỉnh thiên lệch.
+
+<LabLinks notebook="labs/rice_seasons.ipynb" gee="labs/rice_seasons.js" />
 
 ## 4.7 Ôn tập
 
