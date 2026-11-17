@@ -65,8 +65,11 @@ var mndwi = s2.normalizedDifference(['B3', 'B11']).updateMask(s2.select('cs_cdf'
 var vv = ee.ImageCollection('COPERNICUS/S1_GRD').filterBounds(AG).filterDate('2024-10-26', '2024-10-27')
   .filter(ee.Filter.eq('instrumentMode', 'IW')).filter(ee.Filter.eq('relativeOrbitNumber_start', 26))
   .mosaic().select('VV');
-var tM = otsu(mndwi, AG, -0.8, 0.8, 10);
-var tV = otsu(vv, AG, -30, 0, 10);
+// Đổi ngày mà không có ảnh thì mosaic() rỗng và báo lỗi band: in .size() trước. / A date with no scene gives an empty
+// mosaic() and a band error: print the collection .size() first.
+var roundTo = function (x, step) { return ee.Number(x).divide(step).round().multiply(step); };
+var tM = roundTo(otsu(mndwi, AG, -0.8, 0.8, 10), 0.02);   // làm tròn như notebook và Hình 8.2 / rounded as in the notebook and Fig. 8.2
+var tV = roundTo(otsu(vv, AG, -30, 0, 10), 0.25);
 print('2. Otsu MNDWI', tM, 'Otsu VV (dB)', tV);
 var wM = mndwi.gt(ee.Image.constant(tM));
 var wV = vv.lt(ee.Image.constant(tV));

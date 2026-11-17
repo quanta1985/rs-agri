@@ -54,10 +54,12 @@ var toPower = function (im) {   // dB -> công suất tuyến tính / linear pow
   return im.select('VH').multiply(Math.log(10) / 10).exp().copyProperties(im, ['system:time_start']);
 };
 var vhSeries = s1.filterBounds(BOX).filterDate('2023-09-01', '2025-01-01').map(function (im) {
-  var p = toPower(im).reduceRegion(ee.Reducer.mean(), BOX, 10).getNumber('VH');
-  return ee.Feature(null, {'system:time_start': im.get('system:time_start'), VH_dB: p.log10().multiply(10)});
+  var p = toPower(im).reduceRegion(ee.Reducer.mean(), BOX, 10).get('VH');   // null if the scene only grazes BOX
+  return ee.Feature(null, {date: ee.Date(im.get('system:time_start')).format('YYYY-MM-dd'), VH: p});
+}).filter(ee.Filter.notNull(['VH'])).map(function (f) {
+  return f.set('VH_dB', ee.Number(f.get('VH')).log10().multiply(10));   // mean in power, then dB
 });
-print(ui.Chart.feature.byFeature(vhSeries, 'system:time_start', 'VH_dB')
+print(ui.Chart.feature.byFeature(vhSeries, 'date', 'VH_dB')
   .setOptions({title: 'Sentinel-1 VH (dB), orbit 26, ô 500 m / 500 m block', pointSize: 4, lineWidth: 1}));
 
 // ---------- 3. Ngày bắt đầu vụ / Start of season ----------

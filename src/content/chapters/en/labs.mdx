@@ -14,7 +14,7 @@ import LabIndex from '../../../components/LabIndex.astro';
 
 ## 15.1 List of labs
 
-Each chapter has one lab in two forms: a **Python notebook** that runs on Google Colab and a **JavaScript script** to paste into the Earth Engine Code Editor. A lab repeats the chapter's calculations on real data, fetched live from Earth Engine, so you can change the place, the year or the threshold yourself. The list below is built from the `labs/` folder every time the site is built.
+Labs exist so far for Chapters 4, 8 and 10; the other chapters get theirs when they are written. Each lab comes in two forms: a **Python notebook** that runs on Google Colab and a **JavaScript script** to paste into the Earth Engine Code Editor. A lab repeats the chapter's calculations on real data, fetched live from Earth Engine, so you can change the place, the year or the threshold yourself. The list below is built from the `labs/` folder every time the site is built.
 
 <LabIndex />
 
@@ -73,6 +73,6 @@ Then open the notebook in Jupyter and set `PROJECT` as on Colab.
 
 <Note kind="tip">
 
-Every notebook was run end to end before publication. If a lab fails, the Earth Engine dataset has probably changed version: check the Earth Engine Data Catalog.
+Every Python notebook was run end to end before publication; the JavaScript scripts have not been tested in the Code Editor yet, so fall back on the notebook if one fails. If a notebook fails, the Earth Engine dataset has probably changed version: check the Earth Engine Data Catalog.
 
 </Note>
