@@ -1,0 +1,141 @@
+---
+title: Two deltas seen from space
+n: 1
+summary: The Red River and Mekong deltas feed almost 40 million people and grow most of Viet Nam's rice, yet they differ in land, water, population density and crop rhythm. This opening chapter compares the two regions on real satellite data, explains what remote sensing does for agricultural statistics according to the FAO 2017 handbook, and shows how to read this handbook.
+objectives:
+  - Compare the two deltas on land cover, population density and rice seasons on one interactive map.
+  - Read a number taken from a satellite map and know where it differs from an official statistic.
+  - Name four things remote sensing does for agricultural statistics (sampling frames, crop maps, area estimation, early warning) and its limits.
+  - Know which chapter covers which environmental factor and how to use the depth levels, prediction questions and labs.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/deltas.json';
+
+Viet Nam has two large deltas, one at each end of the country. **The Red River Delta** in the north has a cool winter, fields behind dykes and a very dense population. **The Mekong Delta** in the south is warm all year, lives with the Mekong flood pulse and is invaded by salt water every dry season. This handbook uses both regions as the example for every method: each figure shows real satellite data from the two deltas, not an illustration.
+
+<Stats items={[
+  { v: '2.13', u: 'million ha', l: 'area of the Red River Delta region (11 provinces, 2008 boundaries); Mekong: 3.99 million ha (13 provinces)' },
+  { v: '22.5', u: 'million people', l: 'Red River Delta population, census of 1 April 2019; Mekong: 17.3 million' },
+  { v: '49', u: '%', l: 'of the Mekong Delta is cropland in ESA WorldCover 2021 (Red River: 32 %)' },
+  { v: '957', u: 'people/km²', l: 'Red River Delta density on the GHSL 2020 grid, more than twice the Mekong (441)' },
+]} caption="Area and land cover from ESA WorldCover 2021 inside the region outline; density from GHS-POP 2020; population from the 2019 census. Computed by scripts/deltas_numbers.ts." />
+
+## 1.1 Two deltas on one map
+
+Figure 1.1 puts three data layers of the two regions side by side. The first is <Term id="land-cover">land cover</Term> from **ESA WorldCover 2021**, made from Sentinel-1 and Sentinel-2 images at 10 m. The second is the <Term id="gridded-population">gridded population</Term> density of the GHSL. The third is the number of rice crops per year from Chapter 4.
+
+<Predict client:visible lang="en"
+  title="Which delta is more built up?"
+  q="According to ESA WorldCover 2021, what share of the Red River Delta region is built-up land (houses, roads, industrial zones)?"
+  slider={{ min: 0, max: 40, step: 1, unit: '%' }} answer={12} tol={3}
+  why="About 12 %, nearly three times the Mekong Delta (4.4 %). The Red River Delta holds Ha Noi, Hai Phong and the industrial zones along highways 5 and 18, and its villages are dense and compact. In the Mekong Delta houses run in thin ribbons along canals, often among orchards, so the map files many of them under tree cover." />
+
+<Figure
+  title="Figure 1.1 — Land cover, population density and rice seasons of the two deltas"
+  try="Switch between the Red River and Mekong deltas on the 'Land cover' layer. How much of each region is pink (cropland)? Then choose 'Population density' and hover over a village in Thai Binh and a canal-side hamlet in Can Tho."
+  source="ESA WorldCover 10 m 2021 v200 (Zanaga et al., 2022), most frequent class in each ~250 m cell; GHS-POP R2023A for 2020 (Schiavina et al., 2023), people/km², averaged to ~250 m cells, colour scale capped at 3,000; rice seasons 2024 from Chapter 4 (MODIS EVI in the Mekong, Sentinel-1 VH in the Red River Delta). Clipped to the region outline (geoBoundaries ADM1, 2008 boundaries). Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="en" label="Two deltas: land cover, population, rice seasons" region="red" time={1} choices={[
+    { key: 'lc', label: { vi: 'Lớp phủ đất 2021', en: 'Land cover 2021' }, ids: { red: 'lc-wc2021-red', mekong: 'lc-wc2021-mekong' } },
+    { key: 'pop', label: { vi: 'Mật độ dân số 2020', en: 'Population density 2020' }, ids: { red: 'pop-2020-red', mekong: 'pop-2020-mekong' } },
+    { key: 'rice', label: { vi: 'Số vụ lúa', en: 'Rice seasons' }, ids: { red: 'rice-seasons-red', mekong: 'rice-seasons-mekong' } },
+  ]} />
+</Figure>
+
+Three things stand out on the map:
+
+- **The Red River Delta has more tree cover than expected (37 %).** It is not farmland but the forested hills of Quang Ninh, Ba Vi and Tam Dao and the limestone karst of Ninh Binh: the statistical region "Red River Delta" includes provinces with hills. The delta proper is the low land in the middle.
+- **26 % of the Mekong Delta is tree cover.** Most of it is fruit and coconut orchards in Ben Tre, Tien Giang and Vinh Long, plus the U Minh melaleuca forest and the Ca Mau mangroves. Orchards are farmland, but WorldCover files them as trees because the canopy covers the ground. A land-cover map describes **what covers the ground**, not **how people use the land**.
+- **The two regions differ sharply in people.** The mean density of the Red River Delta is more than twice the Mekong's. Each hectare of paddy there feeds more people.
+
+<Note kind="warn">
+
+At ~250 m each cell carries only the most common class of its 625 pixels of 10 m. Small and thin classes (canal-side villages, roads, ditches) are swallowed by their surroundings on the map. The shares in this chapter are therefore computed on a 30 m grid (sampled from the 10 m map), not by counting 250 m cells.
+
+</Note>
+
+## 1.2 Satellite numbers and statistical numbers
+
+A gridded map lets you add up population or area inside any boundary. But it is a **model product**, not a count. <Term id="gridded-population">GHS-POP</Term> spreads the population of each administrative unit over 100 m cells according to the building area and volume seen from space.
+
+<Predict client:visible lang="en"
+  title="How close is the grid to the census?"
+  q="Summing the GHS-POP 2020 grid inside the Red River Delta gives about 20.4 million people. The census of 1 April 2019 counted 22.5 million. How far off is the grid?"
+  options={['About the same (under 2 % off)', 'About 10 % lower', 'About 10 % higher']} answer={1}
+  why="About 10 % lower. In the Mekong Delta the grid is about 2 % above the census instead. Different allocation models and different years (2019 and 2020) explain part of it; the rest is the grid's own error. For official totals use the statistics; use the grid to see where people live inside a province." />
+
+This lesson comes back throughout the handbook. The rice area counted from the satellite map in Chapter 4 is about 14 % above the General Statistics Office figure. The water map after typhoon Yagi in Chapter 8 is ten times smaller than the reported damage. A satellite number means something only when you say **what it measures**, **at which resolution**, and **compared with what**.
+
+<Note kind="key">
+
+Satellite maps do not replace official statistics. They tell **where**, **when** and **how things change**, everywhere, regularly and cheaply. A correct area or production figure needs the map combined with a field reference sample (Chapter 4 section 4.5, Chapter 5).
+
+</Note>
+
+## 1.3 What remote sensing does for agricultural statistics
+
+The FAO (2017) handbook this one builds on was written for statistical agencies. It points to four places where remote sensing helps most:
+
+<Tiles items={[
+  { t: 'Sampling frames', d: 'Land-cover maps help split the territory into strata and pick survey points or segments; less fieldwork where there are no fields.' },
+  { t: 'Crop maps', d: 'Classifying seasonal image series shows which field grows what (Chapters 3, 4).' },
+  { t: 'Area estimation', d: 'Map plus reference sample gives an area with a confidence interval and corrects pixel-counting bias (Chapter 5).' },
+  { t: 'Early warning, yield', d: 'Vegetation-index and weather series follow the season and warn early of drought, flood, salinity (Chapters 6–10).' },
+]} caption="After FAO (2017), Overview and Chapters 8–9." />
+
+The book also stresses that the largest cost is **not the imagery**. Landsat, Sentinel and MODIS are free, and cloud processing needs almost no hardware. What costs is **people**: a team that knows GIS, image analysis, statistics, agronomy and meteorology (FAO, 2017, section 9.1). Chapter 2 deals with data and costs in detail.
+
+<Depth level="advanced" title="Why agricultural statistics needs both surveys and satellites">
+
+A field survey is right at the surveyed points but slow and expensive. A satellite map covers everything but has classification errors. The FAO standard is to treat a **probability sample** in the field as the truth and to use the map as an **auxiliary variable** that reduces the error: stratify by the map, then use a regression estimator or a confusion-matrix correction. With a good map, the same precision needs far fewer survey points. With a poor map the estimate is still unbiased; it just gains nothing. Chapter 5 simulates this on the real rice map.
+
+</Depth>
+
+## 1.4 Environment as the backbone of the handbook
+
+The FAO book focuses on crop area and yield. This handbook keeps that part (Part B) but centres on the **natural factors** that decide farming in the two deltas (Part C):
+
+<Tiles items={[
+  { t: 'Climate (Ch. 7)', d: 'Rain, temperature, land surface temperature, evapotranspiration; the dry seasons of 2016, 2020, 2024.' },
+  { t: 'Water and floods (Ch. 8)', d: 'The Mekong flood pulse, high dykes, storm waterlogging in the Red River Delta.' },
+  { t: 'Drought (Ch. 9)', d: 'Vegetation health indices, soil moisture, standardized precipitation index.' },
+  { t: 'Salinity (Ch. 10)', d: 'Dry-season salt intrusion, what satellites see and what they miss.' },
+  { t: 'Soil, terrain (Ch. 11)', d: 'Acid sulphate soils, elevation, subsidence, sea-level rise.' },
+  { t: 'Coast, emissions (Ch. 12–13)', d: 'Shrimp–rice, mangroves, erosion; straw burning, methane.' },
+]} sum="Chapter 14 combines these layers into a multi-hazard map." />
+
+<Predict client:visible lang="en"
+  title="Which threat is greatest?"
+  q="For Mekong Delta farmland, which threat do you think will be hardest to reverse over the next few decades?"
+  options={['An unusually large flood', 'Land subsidence plus sea-level rise', 'One severe salinity drought']} answer={1}
+  why="Floods and salinity droughts are events: fields recover after a season or two. Subsidence (on average about 1.6 cm a year, over 2.5 cm in many places, mostly from groundwater pumping; Minderhoud et al., 2017) plus sea-level rise accumulates and does not come back. The delta stands only about 0.8 m above sea level on average (Minderhoud et al., 2019). Chapter 11 covers this." />
+
+## 1.5 How to use this handbook
+
+- **Depth.** The *View* tab of the toolbar has three levels: *Basic* (default, hides the technical boxes), *Advanced* (shows every box) and *Reference* (keeps only headings and look-up tables, for quick revision). On a first reading, stay on Basic.
+- **Prediction questions.** Most figures come after a question. Guess first, then read the answer: it is the best way to remember.
+- **Interactive figures.** Each figure has a *Try* line suggesting what to do and a *Source* line with the data, image dates and processing. Every number in the text can be recomputed with the scripts in `scripts/`.
+- **Labs.** Chapter 15 has Python notebooks (run on Google Colab) and Earth Engine scripts that run on real data.
+- **Background.** Spectral principles, vegetation indices, radar and image classification are not rewritten here. To revise them, see the <a href="https://quanta1985.github.io/rs-knowledge/en/">Remote Sensing & GIS</a> handbook.
+
+## 1.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Central Population and Housing Census Steering Committee (2019). *Results of the Population and Housing Census at 0:00 on 1 April 2019*. Statistical Publishing House, Ha Noi.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. Global Strategy to improve Agricultural and Rural Statistics (GSARS), Rome.
+- Minderhoud, P. S. J., Erkens, G., Pham, V. H., Bui, V. T., Erban, L., Kooi, H., & Stouthamer, E. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12, 064006. https://doi.org/10.1088/1748-9326/aa7146
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- Schiavina, M., Freire, S., Carioli, A., & MacManus, K. (2023). *GHS-POP R2023A — GHS population grid multitemporal (1975–2030)*. European Commission, Joint Research Centre. https://doi.org/10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE
+- Zanaga, D. et al. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

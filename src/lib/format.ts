@@ -19,3 +19,7 @@ export const fmtTime = (lang: Lang, s: string): string => {
   const name = new Date(Date.UTC(+y, +mo - 1, 1)).toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' });
   return d ? `${+d} ${name} ${y}` : `${name} ${y}`;
 };
+
+/** Vietnamese place name for the page language: English pages drop the diacritics ("Đồng Tháp" -> "Dong Thap"). */
+export const placeName = (lang: Lang, s: string): string =>
+  lang === 'vi' ? s : s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/Đ/g, 'D').replace(/đ/g, 'd');

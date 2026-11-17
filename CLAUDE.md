@@ -29,6 +29,8 @@ python scripts/data/export_rice.py            # rice-seasons-{red,mekong} (2016,
 python scripts/data/export_rice_site.py       # rice-dvh-{angiang,namdinh} (S1 seasonal VH range) + rice-series-{angiang,namdinh}.json
 python scripts/data/export_flood.py [season|monthly|yagi|mndwi]   # ch.8 layers + flood-s1-area-mekong.json, flood-yagi-red.json
 python scripts/data/export_salinity.py [anomaly|indices|landuse]  # ch.10 layers: sal-evianom-mekong, sal-{ndvi,si}-bentre-2024, dw-{bentre,camau}
+python scripts/data/export_deltas.py [landcover|pop|stats|clearsky|purity|volume]  # ch.1-2: lc-wc2021-*, pop-2020-*, deltas-stats.json, data-{clearsky,purity,volume}.json (clearsky ~15 min)
+node scripts/<slug>_numbers.ts               # prints every number a chapter quotes (deltas, data, rice, flood, salinity)
 cd scripts && python build_lab_<slug>.py [--run]   # labs/<slug>_*.ipynb (Colab); --run executes all code cells (EE auth); rice|flood|salinity
 python -I scripts/data/export_boundaries.py <adm1.geojson>   # province lines (download geoBoundaries first, see script)
 python -I scripts/data/export_hero.py         # home hero: S2 dry-season composites of both deltas -> public/img/hero-*.webp + hero.json
@@ -59,7 +61,7 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 - Cloud Score+: `GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED`, `.linkCollection(cs, ['cs_cdf'])`, keep `cs_cdf >= 0.6`.
 - `S2_SR_HARMONIZED`: reflectance = DN / 10000. MODIS MOD09/MOD13: × 0.0001. Landsat C2 L2: DN × 0.0000275 − 0.2.
-- ĐBSH is very cloudy Jan–Apr (spring rice season): use Sentinel-1 there. Clearest optical windows: ĐBSCL Jan–Mar, ĐBSH Oct–Dec.
+- ĐBSH is very cloudy Jan–Apr (spring rice season): use Sentinel-1 there. Clearest optical windows: ĐBSCL Dec–Apr (~43 % of S2 overpasses usable at An Giang); ĐBSH Jan–Apr is worst (~10 %). By Cloud Score+ cs_cdf >= 0.6 the ĐBSH peaks in Jun–Jul, but part of that is haze the rule lets through (bright B2); MODIS SummaryQA disagrees. Nam Dinh and Ben Tre frames get 2x S2 overpasses (orbit overlap): compare sites by usable/looks.
 - Sentinel-1: only S1A in 2022–2024 (12-day repeat per orbit), S1C from 2025. Average σ0 in linear power, then dB.
 - Export region-scale layers in **EPSG:3857** so MapLibre image quads are exact (no lat/lon warp).
 - `computePixels` with `reduceResolution` fails with "Reprojection output too large" on big requests: `layerkit` fetches at most 512 rows per request. A collection `.mean()` has no default projection: `setDefaultProjection(col.first().projection())` before `reduceResolution`.
@@ -70,6 +72,8 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 - `Image.clip()` with a lon/lat outline fails on MODIS sinusoidal stacks ("Unable to transform edge"): fetch with `clip=False` and mask locally (the cropland cache is clipped).
 - `ee.Image(10).pow(img)` renames the bands to `constant`: convert dB with `img.multiply(ln(10)/10).exp()`.
 - Dynamic World 2016-17 has ~2 clear labels a year at Ca Mau (Sentinel-2A only): use 2018 as the early year.
+- Sentinel-1B never imaged the Nam Dinh frame (S1A only, orbits 55/91/128); at the Mekong sites S1B gave ~30 of ~90 dates a year until Dec 2021.
+- GHS-POP puts people only on built-up cells: at 250 m most paddy cells are ~0 people/km² (median 131 in the Red River region), villages are red. Region totals: GHSL 2020 is 9.7 % below the 2019 census in the Red River Delta, 1.9 % above in the Mekong.
 
 ## Architecture
 
@@ -99,7 +103,8 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
   - `DeltaMap.tsx`: `choices=[{ key, label, ids: { red: '<id>', mekong: '<id>' }, palette?, range?, clearBelow? }]`, optional `region`, `time`, `compare`. Region + layer pills, time slider with play, swipe compare of two time steps (left = "Trái/Left" slider, right = time slider; composed into the image, white divider line as GeoJSON), opacity, HUD with value under the cursor + province name + legend. One MapStage per region+layer (`key`), so each keeps its own view and Reset.
   - `ThresholdLab.tsx`: `layer`, `below`, `range`, `step`, `maskLabel`, `speckle` (Lee 5x5), `time`. Grey base + Okabe-Ito blue class mask, histogram with Otsu (dashed ochre) and the threshold (white), class area in ha from per-row pixel ground area.
   - Time series: use `LineChart.tsx` (gaps via `maxGap`, ribbons, spans for events, `Legend`); the planned `SeriesChart` was not needed.
-- **Pure helpers**: `lib/accuracy.ts` (stratified area estimator), `lib/layer.ts` (Mercator, quads, `pixelAt`, `decode*`, `PALETTES` water/evi/gray/viridis/brbg/ylorrd, `colorize` with a per-code LUT, `colorizeValues` for float values, `swipe`, `areaWhere`), `lib/format.ts` (`fmtNum` with the vi decimal comma, `digitsFor`, `fmtTime`).
+- Chapter 2 islands: `ClearSky.tsx` (`view="s2"` usable Sentinel-2 days per month at the five sites, `view="s1"` Sentinel-1 days per year; data-clearsky.json), `PixelPurity.tsx` (share of pure cells by cell size, log x axis; data-purity.json).
+- **Pure helpers**: `lib/accuracy.ts` (stratified area estimator), `lib/layer.ts` (Mercator, quads, `pixelAt`, `decode*`, `PALETTES` water/evi/gray/viridis/brbg/ylorrd, `colorize` with a per-code LUT, `colorizeValues` for float values, `swipe`, `areaWhere`), `lib/format.ts` (`fmtNum` with the vi decimal comma, `digitsFor`, `fmtTime`, `placeName`: Vietnamese place names without diacritics on en pages, used by the DeltaMap HUD and FloodArea).
 
 ## Conventions that matter
 
@@ -115,14 +120,27 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 ## Status
 
-**Step 6 done (2026-11-17): labs for ch.4, 8, 10 + chapter 15 `labs`** (uncommitted until the user asks).
+**Step 9 done (2026-11-17): batch 2 starts, Part A = ch.1 `deltas` + ch.2 `data`** (uncommitted until the user asks; step 7 also still uncommitted).
+- PLAN.md section 6b = batch-2 roadmap (steps 9-16).
+- Data (`export_deltas.py`): `lc-wc2021-{red,mekong}` (WorldCover v200 mode to 250 m), `pop-2020-{red,mekong}` (GHS-POP 2020 people/km², uint16), `deltas-stats.json` (30 m WorldCover areas + GHSL 2000/2020 inside the outlines: Red 2.13 M ha, tree 37.4 / crop 31.9 / built 12.0 %; Mekong 3.99 M ha, crop 49.0 / tree 25.9 / built 4.4 %), `data-clearsky.json` (S2 + Cloud Score+ usable days per month 2019-2024, S1 dates per year 2015-2025, five sites), `data-purity.json` (WorldCover pure-cell share at 10-500 m), `data-volume.json` (2024 scene counts per delta).
+- Chapters vi + en, quiz, glossary (ch.1 owns land-cover, gridded-population, agri-statistics, sampling-frame; ch.2 owns spatial-resolution, revisit, mixed-pixel, cloud-score, reference-data), `scripts/{deltas,data}_numbers.ts`. Census 2019 regional totals are cited (Red 22,543,607; Mekong 17,273,630).
+- Fixed the open item "DeltaMap HUD shows Vietnamese province names on en pages" (`placeName`).
+- Checks: 46/46 tests, tsc clean, build OK (14 pages), Playwright home/deltas/data/flood x vi/en x light/dark x 1440/390: no console errors, overflow 0, all islands hydrate; en HUD shows "Ha Noi".
+- code-reviewer: no CRITICAL/HIGH, every prose number matches the numbers scripts. Fixed: sites compared by usable share of overpasses (Nam Dinh, Ben Tre get 2x S2 passes), Cloud Score+ haze caveat for the Nam Dinh Jun-Jul peak (spot-checked: some passing days have B2 ~0.15), unsupported "cities eat farmland faster" dropped, Ca Mau 33/72 empty months, "sampled at 30 m" wording, ClearSky readout labels, script docstring.
+
+**Step 7 done (2026-11-17): final check of batch 1** (uncommitted until the user asks).
+- Playwright sweep on the production build (preview :4322, Pagefind index 10 pages): 7 pages (home, rice, flood, salinity, labs, glossary, search) x vi/en x light/dark x 1600/390, scrolling every page so all `client:visible` islands hydrate: 0 console errors, 0 unhydrated islands (17/15/17 islands on rice/flood/salinity), 0 overflow, 0 broken images, 14 internal links all 200; search "phù sa" -> 5 results, "salinity" -> 4; depth basic/advanced/ref switches.
+- code-reviewer over steps 5-6: no CRITICAL/HIGH. Fixed: rice JS VH chart (date strings on the x axis, scenes with no valid pixel dropped before log10; re-run in Python EE: 37 dates, min -29.48 dB on 2023-11-13 = notebook), flood JS Otsu thresholds rounded like the notebook (0.02 / 0.25 dB) + empty-date warning, labs chapter no longer claims a lab per chapter and says the JS scripts are untested, ch.7/9 blurbs say "dry seasons of 2016, 2020, 2024" (2019-20 is not a clear El Niño year).
+- Not fixed (LOW, noted): exact-match province-name filters in the flood/salinity JS fail opaquely if a dataset renames a province.
+- Next: step 8 = the author reviews batch 1, then batch 2 (remaining chapters) and deploy on request.
+
+**Step 6 done (2026-11-17): labs for ch.4, 8, 10 + chapter 15 `labs`.** Committed `1d2b820`.
 - `scripts/labkit.py` (from rs-knowledge; now writes LF) + `scripts/build_lab_{rice,flood,salinity}.py` -> `labs/rice_seasons`, `labs/flood_water`, `labs/salinity_indicators` (`.ipynb` Colab + hand-written `.js` GEE Code Editor script each). Notebooks are bilingual, first code cell `PROJECT = 'YOUR-CLOUD-PROJECT-ID'`, no outputs saved.
 - `--run` passes for all three (about 20 s / 21 s / 40-55 s locally). Lab numbers vs chapter: rice Otsu 9 dB, 5,975 vs 5,934 ha (web layer stores 0.1 dB steps), Olofsson 1,504 +/- 109 identical; flood MNDWI 5,855 ha identical, VV -15.25 dB / 6,206 ha vs -15.5 / 5,980 (0.15 dB storage steps), An Giang peak ~10 % lower (100 m on EE boundaries vs 250 m cells); salinity EVI anomaly 30.3 vs 31.1 % (0.0025 deg grid, GAUL 2015 provinces), r = -0.79 vs -0.80, Dynamic World shares within 0.1 pt. Each notebook states its differences from the chapter.
 - Flood lab: Yagi section uses a Nho Quan - Gia Vien (Ninh Binh) frame, not Nam Dinh (only 19 ha new water on cropland there: heading rice brightens the radar).
 - Chapters link their lab with `**Thực hành.** / **Lab.**` + `<LabLinks notebook gee />` just before the review section. Chapter 15 `labs` (vi + en) = `<LabIndex />` + setup guide; the home "Labs" CTA and ribbon item now appear.
 - Checks: 45/45 tests, build OK (labs page emitted), `node --check` on the JS, no project id / emails in labs; Playwright labs + chapter pages vi/en x light/dark x 1440/390: no console errors, overflow 0, LabIndex lists 3 labs.
 - Untested: the `.js` scripts in the Code Editor (cores re-run in Python EE with matching numbers; `ui.Chart` and map layers not tried). Salinity lab uses FAO GAUL 2015 (deprecated in EE; prints a warning). Colab / GitHub links 404 until the `quanta1985/rs-agri` repo exists and is pushed.
-- Next: step 7 (Playwright pass over everything + `code-reviewer`).
 
 **Step 5 done (2026-11-17): home page + 16-chapter table of contents.** Committed `7697f31`.
 - Home h1 fixed (step 1 had garbled duplicated text: a `sed` replacement containing `&`, which sed reads as "the matched text"; never put `&` in a sed replacement).

@@ -1,0 +1,54 @@
+{
+ "id": "pop-2020-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Mật độ dân số 2020 (GHSL)",
+  "en": "Population density 2020 (GHSL)"
+ },
+ "units": {
+  "vi": "người/km²",
+  "en": "people/km²"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  3000
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint16",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 65535,
+ "times": [
+  "2020"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 636133,
+   "mean": 462.1297,
+   "p2": 0.0,
+   "p50": 48.0,
+   "p98": 3920.0,
+   "min": 0.0,
+   "max": 65534.0
+  }
+ ],
+ "provenance": {
+  "source": "JRC/GHSL/P2023A/GHS_POP/2020 band population_count (100 m, Mollweide)",
+  "processing": "people per 100 m cell / cell area -> people per km², mean to ~250 m",
+  "attribution": "GHS-POP R2023A (Schiavina et al. 2023, European Commission JRC), CC BY 4.0",
+  "exported": "2026-11-17T09:12:24+00:00",
+  "script": "scripts/data/export_deltas.py"
+ }
+}

@@ -1,0 +1,194 @@
+---
+title: Dữ liệu mở, mây và chi phí
+n: 2
+summary: Ảnh vệ tinh miễn phí đủ cho phần lớn công việc nông nghiệp ở hai châu thổ, nhưng mây, kích thước thửa ruộng và khối lượng dữ liệu đặt ra giới hạn. Chương này so sánh các cảm biến, đếm số ngày Sentinel-2 dùng được ở năm điểm nghiên cứu, cho thấy pixel lớn trộn các lớp phủ ra sao, ước tính chi phí ảnh thương mại và khối lượng ảnh một năm, và lý do xử lý trên đám mây.
+objectives:
+  - Chọn cảm biến (Sentinel-2, Landsat, Sentinel-1, MODIS, ảnh độ phân giải rất cao) theo độ phân giải, tần suất chụp, mây và chi phí.
+  - Đọc số ngày Sentinel-2 dùng được theo tháng ở năm điểm, và giải thích vì sao ĐBSH vụ Xuân phải dùng radar.
+  - Giải thích pixel hỗn hợp và vì sao MODIS 250 m khó dùng ở vùng thửa nhỏ, vườn xen ruộng.
+  - Ước tính chi phí mua ảnh thương mại và khối lượng ảnh miễn phí cho một châu thổ trong một năm.
+  - Kể các lớp dữ liệu tham chiếu cần có trước khi làm thống kê bằng viễn thám.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Depth from '../../../components/Depth.astro';
+import ClearSky from '../../../islands/ClearSky.tsx';
+import PixelPurity from '../../../islands/PixelPurity.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/data.json';
+
+Mười năm trước, một cơ quan thống kê muốn dùng ảnh vệ tinh phải mua ảnh, mua phần mềm, mua máy chủ. Nay ảnh Sentinel, Landsat, MODIS đều miễn phí, và có thể xử lý trên đám mây chỉ với một trình duyệt. Nhưng "miễn phí" không có nghĩa là "đủ": ở hai châu thổ nhiệt đới, mây che phần lớn các ngày chụp, thửa ruộng nhỏ hơn pixel của nhiều cảm biến, và một năm ảnh của một châu thổ nặng hàng nghìn gigabyte. Chương này đặt các con số đó lên bàn.
+
+<Stats items={[
+  { v: '0,5', u: 'ngày/tháng', l: 'ngày Sentinel-2 dùng được ở Nam Định trong tháng 2 (trung bình 2019–2024)' },
+  { v: '10', u: 'ngày/năm', l: 'ngày Sentinel-2 dùng được ở Cà Mau, trên khoảng 72 lần vệ tinh bay qua' },
+  { v: '−37', u: '%', l: 'số ngày có ảnh Sentinel-1 ở An Giang từ 2021 sang 2022, sau khi Sentinel-1B hỏng' },
+  { v: '1,25', u: 'TB', l: 'ảnh Sentinel-1, Sentinel-2 và Landsat chụp ĐBSCL trong năm 2024' },
+]} caption="Tính từ Sentinel-2 + Cloud Score+, Sentinel-1 và danh mục ảnh Earth Engine bằng scripts/data_numbers.ts." />
+
+## 2.1 Ảnh vệ tinh nào cho nông nghiệp
+
+Sổ tay FAO (2017, mục 1.2) chia cảm biến theo hai trục: **quang học hay radar**, và **độ phân giải không gian**. Ranh giới quan trọng nằm ở khoảng 10 m: từ 10 m trở lên phần lớn là ảnh mở, dưới 10 m phần lớn là ảnh thương mại.
+
+<div class="table-wrap">
+
+| Cảm biến | Loại | <Term id="spatial-resolution">Độ phân giải</Term> | <Term id="revisit">Lặp lại</Term> | Từ năm | Giá | Dùng trong sổ tay |
+|---|---|---|---|---|---|---|
+| Sentinel-2 A/B/C | Quang học, 13 kênh | 10 / 20 / 60 m | 5 ngày (2 vệ tinh) | 2015 | Miễn phí | Chỉ số thực vật, nước, mặn (Ch. 4, 8, 10) |
+| Landsat 8/9 | Quang học + nhiệt | 30 m (nhiệt 100 m) | 8 ngày (2 vệ tinh) | 1984 (chuỗi) | Miễn phí | Biến động dài hạn, bờ biển (Ch. 12) |
+| Sentinel-1 A/B/C | Radar băng C | 10 m | 12 ngày (6 ngày khi có 2 vệ tinh) | 2014 | Miễn phí | Lúa, lũ (Ch. 4, 8) |
+| MODIS Terra/Aqua | Quang học + nhiệt | 250 / 500 / 1000 m | Hằng ngày | 2000 | Miễn phí | Chuỗi EVI, nhiệt độ bề mặt (Ch. 4, 7, 9, 10) |
+| WorldView, Pléiades, SPOT, PlanetScope | Quang học | 0,3–5 m | Theo đặt chụp, đến hằng ngày | — | Trả phí | Kiểm tra thực địa, thửa nhỏ |
+
+</div>
+
+Ngoài ra có các bộ dữ liệu "đã nấu sẵn" từ nhiều vệ tinh và mô hình: mưa CHIRPS, tái phân tích ERA5-Land, độ ẩm đất SMAP, lớp phủ WorldCover, Dynamic World. Các chương 7–13 dùng chúng.
+
+<Predict client:visible lang="vi"
+  title="Ảnh nào cho vụ Xuân ở ĐBSH?"
+  q="Bạn cần theo dõi vụ lúa Xuân ở Nam Định, từ lúc đổ ải tháng 1 đến lúc trổ bông tháng 4, ở độ phân giải thửa ruộng. Nguồn ảnh nào đáng tin nhất?"
+  options={['Sentinel-2', 'Landsat 8/9', 'Sentinel-1', 'MODIS']} answer={2}
+  why="Sentinel-1. Tháng 1–4 ở ĐBSH là mùa mưa phùn, trời âm u: ảnh quang học dùng được rất hiếm (mục 2.3). Radar băng C chụp xuyên mây, 10 m, 12 ngày một lần, và nhạy với cả lúc ruộng ngập lẫn lúc lúa lên. MODIS chụp hằng ngày nhưng cũng bị mây, và pixel 250 m quá thô so với thửa ruộng ở đây." />
+
+## 2.2 Độ phân giải và thửa ruộng
+
+Một pixel chỉ có một giá trị. Nếu trong pixel có cả ruộng, vườn và nhà, giá trị đó là hỗn hợp của tất cả: một <Term id="mixed-pixel">pixel hỗn hợp</Term>. Thửa ruộng càng nhỏ và cảnh quan càng xen kẽ thì càng cần pixel nhỏ.
+
+Hình 2.1 đo điều đó trên bản đồ WorldCover 10 m của năm điểm. Với mỗi kích thước ô, ta đếm tỉ lệ ô "thuần", tức một lớp phủ chiếm ít nhất 90 % ô.
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu ô MODIS là ô thuần ở Nam Định?"
+  q="Ở khung Giao Thủy – Hải Hậu (Nam Định), bao nhiêu phần trăm ô 250 m (cỡ pixel MODIS) có một lớp phủ chiếm từ 90 % trở lên?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={49} tol={8}
+  why="Khoảng 49 %: một nửa số ô MODIS ở đây là hỗn hợp ruộng, làng, ao, đầm. Ở An Giang, nơi cánh đồng lúa liền khoảnh, tỉ lệ là 77 %; ở Cà Mau, nơi đầm tôm xen rừng ngập mặn, chỉ 18 %. Với Sentinel-2 (10 m), mỗi pixel là một ô thuần theo định nghĩa, nhưng chính bản đồ 10 m cũng có pixel hỗn hợp ở bờ thửa." />
+
+<Figure
+  title="Hình 2.1 — Tỉ lệ ô thuần một lớp phủ theo kích thước ô, năm điểm nghiên cứu"
+  try="Rê chuột lên mốc 30 m (Landsat) và 250 m (MODIS). Điểm nào giữ được nhiều ô thuần nhất khi ô lớn lên? Mở bảng số liệu để xem tỉ lệ đất trồng trọt của từng khung."
+  source="ESA WorldCover 10 m 2021 v200 trên năm khung 10,24 km; gộp 2×2 … 50×50 pixel; ô thuần = một lớp ≥ 90 % số pixel. Đây là độ thuần về lớp phủ đất, không phải kích thước thửa: hai thửa lúa liền nhau vẫn cùng một lớp."
+>
+  <PixelPurity client:visible lang="vi" />
+</Figure>
+
+Sổ tay FAO (2017, mục 9.3) làm phép tính tương tự cho cả thế giới, dựa trên bản đồ cỡ thửa ruộng của Fritz và cs. (2015). Ở châu Á, ảnh cỡ MODIS chỉ phù hợp với khoảng 6 % diện tích canh tác, Landsat 19 %, Sentinel-1 và 2 khoảng 67 %. Việt Nam nằm trong nhóm thửa rất nhỏ, nên **10 m là mức tối thiểu** cho bản đồ cây trồng; MODIS chỉ hợp để theo dõi xu thế trên vùng rộng, như ở Chương 4 và 10.
+
+<Note kind="key">
+
+Độ phân giải cần chọn theo **kích thước vật cần thấy** và **câu hỏi cần trả lời**. Theo dõi một vùng lúa cả tỉnh qua 20 năm: MODIS 250 m là đủ và có chuỗi dài. Đếm diện tích lúa của một xã: cần 10 m trở xuống.
+
+</Note>
+
+## 2.3 Mây ở hai châu thổ
+
+Ảnh quang học chỉ có ích khi trời quang. Hình 2.2 đếm, cho từng tháng từ 2019 đến 2024, số ngày Sentinel-2 chụp qua mỗi khung và số ngày **dùng được**: ảnh phủ ít nhất 95 % khung và ít nhất 80 % trong đó không mây theo <Term id="cloud-score">Cloud Score+</Term>.
+
+<Predict client:visible lang="vi"
+  title="Tháng 2 ở Nam Định có mấy ngày ảnh tốt?"
+  q="Khung Nam Định nằm ở chỗ hai quỹ đạo Sentinel-2 chồng nhau, nên tháng 2 vệ tinh bay qua khoảng 11 lần. Trung bình 2019–2024, bao nhiêu ngày trong số đó dùng được?"
+  slider={{ min: 0, max: 11, step: 0.5, unit: 'ngày' }} answer={0.5} tol={1}
+  why="Chỉ khoảng 0,5 ngày: trung bình hai năm mới có một ngày tháng 2 dùng được. Mưa phùn và mây tầng thấp phủ ĐBSH suốt tháng 1–4, đúng lúc gieo cấy vụ Xuân. Tháng 6–7 có nhiều ngày qua ngưỡng nhất (4,5–4,8 ngày), nhưng một phần trong số đó là mây mỏng và mù mà quy tắc Cloud Score+ ở đây cho qua (xem dưới Hình 2.2)." />
+
+<Figure
+  title="Hình 2.2 — Số ngày Sentinel-2 mỗi tháng và số ngày dùng được, năm điểm, 2019–2024"
+  try="Chọn Nam Định rồi An Giang: tháng nào trong năm có nhiều ngày dùng được nhất ở mỗi nơi? Dải màu cho thấy năm ít nhất và năm nhiều nhất: có tháng nào mà năm tệ nhất không có lấy một ngày?"
+  source="COPERNICUS/S2_SR_HARMONIZED và Cloud Score+ (GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED), khung 10,24 km, 1/2019–12/2024. Mỗi ngày ghép các tile; 'có ảnh' = phủ ≥ 50 % khung; 'dùng được' = phủ ≥ 95 % khung và ≥ 80 % số pixel có cs_cdf ≥ 0,6 (tính ở 60 m). Có dữ liệu Copernicus Sentinel đã xử lý."
+>
+  <ClearSky client:visible lang="vi" view="s2" site="namdinh" />
+</Figure>
+
+Hai châu thổ có mùa mây ngược nhau:
+
+- **ĐBSH**: tháng 1–4 trung bình chỉ 1,2 ngày dùng được mỗi tháng, tức khoảng 10 % số lần vệ tinh bay qua, đúng thời gian vụ Xuân. Từ tháng 5 đến 11 khá hơn, khoảng 3–5 ngày mỗi tháng.
+- **ĐBSCL**: mùa khô (tháng 12–4) là mùa ảnh. An Giang và Tháp Mười có khoảng 2,5 ngày mỗi tháng, tức 43 % số lần bay qua; mùa mưa (tháng 5–11) chỉ còn khoảng 1 ngày. Trong cả chuỗi 72 tháng, An Giang, Tháp Mười và Bến Tre có 15–18 tháng không có ngày nào dùng được, hầu hết rơi vào mùa mưa.
+- **Cà Mau** khó nhất: khoảng 10 ngày dùng được cả năm, mùa mưa chưa tới nửa ngày mỗi tháng, và 33 trong 72 tháng không có ngày nào.
+
+Khi so các điểm, nhớ rằng Nam Định và Bến Tre nằm ở chỗ hai quỹ đạo Sentinel-2 chồng nhau nên được chụp gấp đôi (khoảng 12 lần mỗi tháng, so với 6 lần ở ba điểm còn lại). Bến Tre mùa khô có gần 4 ngày dùng được mỗi tháng không phải vì trời quang hơn An Giang (33 % so với 43 % số lần bay qua), mà vì được chụp nhiều hơn.
+
+Quy tắc "dùng được" ở đây (Cloud Score+ cs_cdf ≥ 0,6) cho qua một phần mây mỏng và mù. Một số ngày tháng 6–7 ở Nam Định qua ngưỡng dù ảnh có kênh xanh lam sáng bất thường, dấu hiệu của mù. Chuỗi MODIS ở Chương 4 dùng tiêu chí chất lượng khắt khe hơn và thấy rất ít quan sát tốt trong tháng 6–7. Con số "ngày dùng được" vì vậy luôn phụ thuộc quy tắc lọc mây.
+
+Các con số này phụ thuộc định nghĩa "dùng được". Đòi 80 % quang đãng trên cả khung 10 km là khắt khe. Nếu ghép nhiều ngày thành ảnh tổng hợp theo tháng hay theo mùa (như các chương sau làm), mùa khô vẫn có ảnh sạch. Nhưng muốn bắt một giai đoạn ngắn như lúc cấy hay lúc trổ bông trong mùa mưa thì chỉ có radar.
+
+<Note kind="key">
+
+Trước khi chọn ảnh quang học, hãy đếm số ngày quang đãng thật ở đúng nơi, đúng mùa. Lịch chụp 5 ngày một lần trên giấy có thể chỉ còn một ngày dùng được mỗi tháng.
+
+</Note>
+
+## 2.4 Radar không sợ mây, nhưng có thể mất vệ tinh
+
+Sentinel-1 chụp xuyên mây, ngày cũng như đêm. Nhưng tần suất chụp phụ thuộc số vệ tinh đang hoạt động. Sentinel-1B hỏng ngày 23/12/2021 và không phục hồi; từ đó đến khi Sentinel-1C hoạt động năm 2025, mỗi nơi chỉ còn một ảnh mỗi 12 ngày trên mỗi quỹ đạo.
+
+<Figure
+  title="Hình 2.3 — Số ngày có ảnh Sentinel-1 mỗi năm ở năm điểm, 2015–2025"
+  try="Tìm năm số ngày giảm mạnh. Điểm nào có nhiều ngày hơn hẳn các điểm khác, và vì sao (gợi ý: khung nằm ở chỗ hai quỹ đạo chồng nhau)?"
+  source="COPERNICUS/S1_GRD, chế độ IW, mọi quỹ đạo lên/xuống; đếm số ngày có ít nhất một cảnh chạm khung 10,24 km. Có dữ liệu Copernicus Sentinel đã xử lý."
+>
+  <ClearSky client:visible lang="vi" view="s1" />
+</Figure>
+
+Ở bốn điểm ĐBSCL, số ngày có ảnh giảm 27–37 % từ 2021 sang 2022 (An Giang 92 → 58 ngày), rồi tăng lại năm 2025 khi có Sentinel-1C. Nam Định gần như không đổi: Sentinel-1B chưa từng chụp khung này, mọi ảnh ở đây đều của Sentinel-1A trên ba quỹ đạo. Bến Tre có nhiều ngày nhất (khoảng 120 ngày một năm trước 2022) vì nằm ở chỗ nhiều quỹ đạo chồng nhau. Hai năm 2015–2016 ít ảnh vì kế hoạch chụp mới bắt đầu.
+
+Số ngày ở đây gộp mọi quỹ đạo. Khi so sánh hai ảnh (phát hiện nước, theo dõi lúa), nên dùng ảnh **cùng quỹ đạo** để góc chụp giống nhau, nên khoảng cách thật giữa hai ảnh so được là 12 ngày, không phải vài ngày.
+
+## 2.5 Ảnh thương mại: khi nào đáng mua
+
+Ảnh độ phân giải rất cao (dưới 5 m) vẫn phải mua. Theo sổ tay FAO, giá phụ thuộc rất nhiều yếu tố: ảnh lưu trữ hay chụp theo đặt hàng, cần gấp hay không, góc chụp, mức xử lý, diện tích tối thiểu, và nhất là **giấy phép**. Phần lớn ảnh thương mại được bán quyền sử dụng chứ không bán ảnh; có giấy phép còn ràng buộc cả sản phẩm làm ra từ ảnh (FAO, 2017, mục 1.2.1). Giá niêm yết dao động bốn bậc độ lớn, từ 0,01 đến 145 USD/km².
+
+<Predict client:visible lang="vi"
+  title="Một lần phủ ảnh WorldView cho ĐBSCL giá bao nhiêu?"
+  q="Sách FAO lấy giá tham khảo WorldView (31 cm) là 20 USD/km². Vùng ĐBSCL rộng khoảng 39.900 km². Một lần phủ kín cả vùng tốn khoảng bao nhiêu?"
+  options={['Khoảng 8 nghìn USD', 'Khoảng 80 nghìn USD', 'Khoảng 800 nghìn USD', 'Khoảng 8 triệu USD']} answer={2}
+  why="Khoảng 800 nghìn USD (39.865 km² × 20 USD), cho **một** lần chụp, giá năm 2016, chưa tính mây phải chụp lại. Theo dõi mùa vụ cần hàng chục lần một năm. Vì vậy ảnh rất chi tiết chỉ dùng cho các ô mẫu nhỏ (kiểm tra bản đồ, ước tính diện tích theo mẫu), còn phủ vùng dùng Sentinel miễn phí." />
+
+<Depth level="advanced" title="Dùng ảnh mở để mua ảnh thương mại ít hơn">
+
+Sách FAO gợi ý ba cách tiết kiệm: (1) dùng Sentinel-2 và bản đồ lớp phủ để **chọn ô mẫu** rồi chỉ mua ảnh rất chi tiết cho các ô đó; (2) mua **ảnh lưu trữ** thay vì đặt chụp gấp, vì ảnh lưu trữ rẻ nhất; (3) gửi cùng một kịch bản cho nhiều nhà cung cấp để so giá, nhất là với giấy phép dùng chung cho nhiều cơ quan. Sách cũng khuyên kiểm tra kỹ giấy phép: có loại giấy phép "lan truyền" khiến bản đồ phân loại làm từ ảnh cũng không được chia sẻ tự do.
+
+</Depth>
+
+## 2.6 Xử lý trên đám mây
+
+Sổ tay FAO (2017, mục 1.5) tính thử cho Hàn Quốc (95.000 km²): khoảng 2 TB ảnh Sentinel-1, Sentinel-2 và Landsat-8 mỗi năm. Hình dưới làm phép tính tương tự cho hai châu thổ năm 2024, với cùng kích thước ảnh mà sách dùng.
+
+<div class="table-wrap">
+
+| Năm 2024 | Sentinel-2 (tile L1C, ~0,5 GB) | Sentinel-1 (cảnh GRD, ~1 GB) | Landsat 8 + 9 (cảnh, ~1 GB) | Tổng |
+|---|---|---|---|---|
+| ĐBSH (10 tile MGRS) | 891 tile ≈ 446 GB | 180 ≈ 180 GB | 193 ≈ 193 GB | **≈ 0,82 TB** |
+| ĐBSCL (13 tile MGRS) | 1.329 tile ≈ 665 GB | 288 ≈ 288 GB | 299 ≈ 299 GB | **≈ 1,25 TB** |
+
+</div>
+
+Số ảnh đếm trong danh mục Earth Engine (mọi ảnh chạm ranh vùng, kể cả ảnh chỉ phủ một phần); kích thước mỗi ảnh theo FAO (2017, mục 1.5).
+
+Với khối lượng ấy, tải về máy và xử lý cục bộ không còn hợp lý cho một nhóm nhỏ. Các nền tảng như **Google Earth Engine** giữ sẵn toàn bộ kho ảnh cạnh máy tính, nên người dùng chỉ gửi đoạn mã và nhận về kết quả: một con số, một biểu đồ, một bản đồ đã thu nhỏ. Toàn bộ dữ liệu trong sổ tay này được tính theo cách đó (thư mục `scripts/data/`).
+
+<Note kind="warn">
+
+Đám mây có giá của nó. Người dùng không kiểm soát hết quy trình: bộ dữ liệu có thể đổi phiên bản (ví dụ bộ ranh giới FAO GAUL 2015 đã bị Earth Engine đánh dấu lỗi thời), điều khoản sử dụng có thể đổi, và dữ liệu riêng phải tải lên nền tảng. Ghi lại phiên bản dữ liệu và ngày xử lý cho mọi kết quả, như dòng *Nguồn* dưới mỗi hình.
+
+</Note>
+
+## 2.7 Dữ liệu tham chiếu
+
+Ảnh vệ tinh chưa đủ để làm thống kê. Sách FAO (mục 1.4) liệt kê các lớp <Term id="reference-data">dữ liệu tham chiếu</Term> cần có từ đầu: mô hình độ cao, bản đồ địa hình, lớp phủ, bản đồ đất, địa chính và ranh giới hành chính. Ở Việt Nam có thêm hai điểm cần lưu ý:
+
+- **Ranh giới hành chính thay đổi.** Năm 2025, 63 tỉnh được sáp nhập thành 34 đơn vị. Số liệu thống kê trước đó gắn với ranh cũ, nên sổ tay dùng ranh 63 tỉnh (geoBoundaries, năm 2008) cho số liệu lịch sử. Bộ ranh GADM phổ biến không được dùng vì giấy phép cấm phân phối lại.
+- **Điểm kiểm tra thực địa.** Mọi bản đồ phân loại cần một mẫu điểm có nhãn đúng để đo độ chính xác và hiệu chỉnh diện tích (Chương 4 mục 4.5). Điểm có thể lấy bằng đi thực địa, giải đoán ảnh rất chi tiết, hoặc ảnh UAV.
+
+## 2.8 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Brown, C. F. và cs. (2022). Dynamic World, near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251. https://doi.org/10.1038/s41597-022-01307-4
+- ESA (03/08/2022). Mission ends for Copernicus Sentinel-1B satellite. Thông cáo của Cơ quan Vũ trụ châu Âu.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Mục 1.2, 1.4, 1.5, 9.1, 9.3.
+- Fritz, S. và cs. (2015). Mapping global cropland and field size. *Global Change Biology*, 21(5), 1980–1992. https://doi.org/10.1111/gcb.12838
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

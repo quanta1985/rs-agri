@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GeoJSONSource, Map as MlMap } from 'maplibre-gl';
 import type { Lang } from '../i18n/ui';
 import { colorize, frameOf, layerBounds, layerQuad, mercToLonLat, pixelAt, rampCss, swipe, swipeCut, decode, type PaletteName } from '../lib/layer';
-import { digitsFor, fmtNum, fmtTime } from '../lib/format';
+import { digitsFor, fmtNum, fmtTime, placeName } from '../lib/format';
 import { REGIONS, loadProvinces, useLayer } from './layers';
 import MapStage from './MapStage';
 import { Key, Pills, Slider, StatPanel } from './VizUi';
@@ -121,7 +121,7 @@ export default function DeltaMap({ lang, label, choices, region: region0, time: 
     const text = Number.isNaN(v) ? T.nodata : cls ?? `${fmtNum(lang, v, digits)} ${units}`;
     return [
       { k: `${T.value}${nT > 1 ? ` · ${fmtTime(lang, meta.times[showT])}` : ''}`, v: text, tone: 'accent' as const },
-      ...(hover.prov ? [{ k: T.province, v: hover.prov }] : []),
+      ...(hover.prov ? [{ k: T.province, v: placeName(lang, hover.prov) }] : []),
       { k: T.at, v: `${fmtNum(lang, hover.lat, 3)}° N, ${fmtNum(lang, hover.lon, 3)}° E` },
     ];
   })();

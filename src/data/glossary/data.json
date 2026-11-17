@@ -1,0 +1,17 @@
+[
+ { "id": "spatial-resolution", "vi": "Độ phân giải không gian", "en": "Spatial resolution",
+   "def": { "vi": "Kích thước trên mặt đất của một pixel ảnh, ví dụ 10 m với Sentinel-2. Vật nhỏ hơn vài pixel thì khó nhận ra.",
+            "en": "The ground size of one image pixel, e.g. 10 m for Sentinel-2. Objects smaller than a few pixels are hard to make out." } },
+ { "id": "revisit", "vi": "Chu kỳ lặp lại", "en": "Revisit time",
+   "def": { "vi": "Khoảng thời gian giữa hai lần vệ tinh chụp lại cùng một nơi. Nhiều vệ tinh giống nhau bay lệch pha thì chu kỳ ngắn lại (Sentinel-2A và 2B: 5 ngày).",
+            "en": "The time between two images of the same place. Identical satellites flying out of phase shorten it (Sentinel-2A and 2B: 5 days)." } },
+ { "id": "mixed-pixel", "vi": "Pixel hỗn hợp", "en": "Mixed pixel",
+   "def": { "vi": "Pixel chứa nhiều loại lớp phủ (ruộng, vườn, nhà, nước); giá trị của nó là hỗn hợp nên khó xếp vào một lớp. Pixel càng lớn so với thửa ruộng thì càng nhiều pixel hỗn hợp.",
+            "en": "A pixel holding several cover types (paddy, orchard, houses, water); its value is a blend and hard to assign to one class. The larger the pixel relative to the fields, the more mixed pixels." } },
+ { "id": "cloud-score", "vi": "Cloud Score+", "en": "Cloud Score+",
+   "def": { "vi": "Bộ chỉ số chất lượng cho từng pixel Sentinel-2 (0 = mây/bóng mây, 1 = quang đãng), do Google tạo bằng học máy. Sổ tay giữ pixel có cs_cdf ≥ 0,6.",
+            "en": "A per-pixel quality score for Sentinel-2 (0 = cloud or shadow, 1 = clear) produced by Google with machine learning. The handbook keeps pixels with cs_cdf ≥ 0.6." } },
+ { "id": "reference-data", "vi": "Dữ liệu tham chiếu", "en": "Reference data",
+   "def": { "vi": "Các lớp nền cần cho thống kê bằng viễn thám (độ cao, ranh giới, lớp phủ, đất, địa chính) và các điểm có nhãn đúng dùng để kiểm tra bản đồ.",
+            "en": "The base layers needed for remote-sensing statistics (elevation, boundaries, land cover, soils, cadastre) and the correctly labelled points used to check a map." } }
+]

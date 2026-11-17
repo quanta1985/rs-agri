@@ -1,0 +1,121 @@
+{
+ "id": "lc-wc2021-red",
+ "region": "red",
+ "title": {
+  "vi": "Lớp phủ đất ESA WorldCover 2021",
+  "en": "ESA WorldCover 2021 land cover"
+ },
+ "units": null,
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 10,
+   "color": "#006400",
+   "label": {
+    "vi": "Cây gỗ",
+    "en": "Tree cover"
+   }
+  },
+  {
+   "v": 20,
+   "color": "#ffbb22",
+   "label": {
+    "vi": "Cây bụi",
+    "en": "Shrubland"
+   }
+  },
+  {
+   "v": 30,
+   "color": "#ffff4c",
+   "label": {
+    "vi": "Cỏ",
+    "en": "Grassland"
+   }
+  },
+  {
+   "v": 40,
+   "color": "#f096ff",
+   "label": {
+    "vi": "Đất trồng trọt",
+    "en": "Cropland"
+   }
+  },
+  {
+   "v": 50,
+   "color": "#fa0000",
+   "label": {
+    "vi": "Xây dựng",
+    "en": "Built-up"
+   }
+  },
+  {
+   "v": 60,
+   "color": "#b4b4b4",
+   "label": {
+    "vi": "Đất trống",
+    "en": "Bare / sparse"
+   }
+  },
+  {
+   "v": 80,
+   "color": "#0064c8",
+   "label": {
+    "vi": "Mặt nước",
+    "en": "Permanent water"
+   }
+  },
+  {
+   "v": 90,
+   "color": "#0096a0",
+   "label": {
+    "vi": "Đất ngập nước",
+    "en": "Herbaceous wetland"
+   }
+  },
+  {
+   "v": 95,
+   "color": "#00cf75",
+   "label": {
+    "vi": "Rừng ngập mặn",
+    "en": "Mangroves"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2021"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 268871,
+   "mean": 35.7372,
+   "p2": 10.0,
+   "p50": 40.0,
+   "p98": 80.0,
+   "min": 10.0,
+   "max": 95.0
+  }
+ ],
+ "provenance": {
+  "source": "ESA/WorldCover/v200 band Map (Sentinel-1 + Sentinel-2, 10 m)",
+  "processing": "most frequent 10 m class in each ~250 m cell (small classes such as village ribbons and canals disappear)",
+  "attribution": "ESA WorldCover 10 m 2021 v200 (Zanaga et al. 2022), CC BY 4.0",
+  "exported": "2026-11-17T09:08:19+00:00",
+  "script": "scripts/data/export_deltas.py"
+ }
+}

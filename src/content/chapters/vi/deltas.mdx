@@ -1,0 +1,141 @@
+---
+title: Hai châu thổ nhìn từ vệ tinh
+n: 1
+summary: Đồng bằng sông Hồng và đồng bằng sông Cửu Long nuôi gần 40 triệu người và làm ra phần lớn lúa gạo của Việt Nam, nhưng khác nhau về đất, nước, mật độ dân và nhịp mùa vụ. Chương mở đầu so sánh hai vùng trên dữ liệu vệ tinh thật, nói viễn thám giúp gì cho thống kê nông nghiệp theo sổ tay FAO 2017, và giới thiệu cách đọc sổ tay này.
+objectives:
+  - So sánh hai châu thổ về lớp phủ đất, mật độ dân và số vụ lúa trên cùng một bản đồ tương tác.
+  - Đọc một con số lấy từ bản đồ vệ tinh và biết nó khác số thống kê chính thức ở đâu.
+  - Kể được bốn việc viễn thám làm được cho thống kê nông nghiệp (khung mẫu, bản đồ cây trồng, ước tính diện tích, cảnh báo sớm) và giới hạn của nó.
+  - Biết các yếu tố môi trường được bàn ở chương nào và cách dùng các mức chi tiết, câu hỏi dự đoán và bài thực hành.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/deltas.json';
+
+Việt Nam có hai châu thổ lớn ở hai đầu đất nước. **Đồng bằng sông Hồng (ĐBSH)** ở phía bắc, có mùa đông lạnh, ruộng nằm sau đê và dân cư rất dày. **Đồng bằng sông Cửu Long (ĐBSCL)** ở phía nam, nóng quanh năm, sống theo nhịp lũ Mê Kông và đang bị mặn lấn vào mỗi mùa khô. Sổ tay này dùng hai vùng đó làm ví dụ cho mọi phương pháp: mỗi hình đều là dữ liệu vệ tinh thật của hai châu thổ, không phải ảnh minh họa.
+
+<Stats items={[
+  { v: '2,13', u: 'triệu ha', l: 'diện tích vùng ĐBSH (11 tỉnh, ranh 2008); ĐBSCL: 3,99 triệu ha (13 tỉnh)' },
+  { v: '22,5', u: 'triệu người', l: 'dân số ĐBSH, Tổng điều tra 1/4/2019; ĐBSCL: 17,3 triệu' },
+  { v: '49', u: '%', l: 'diện tích ĐBSCL là đất trồng trọt theo ESA WorldCover 2021 (ĐBSH: 32 %)' },
+  { v: '957', u: 'người/km²', l: 'mật độ dân ĐBSH theo lưới GHSL 2020, hơn gấp đôi ĐBSCL (441)' },
+]} caption="Diện tích và lớp phủ tính từ ESA WorldCover 2021 trong ranh vùng; mật độ từ GHS-POP 2020; dân số từ Tổng điều tra 2019. Tính bằng scripts/deltas_numbers.ts." />
+
+## 1.1 Hai châu thổ trên một bản đồ
+
+Hình 1.1 đặt ba lớp dữ liệu của hai vùng cạnh nhau. Lớp đầu là <Term id="land-cover">lớp phủ đất</Term> của **ESA WorldCover 2021**, lập từ ảnh Sentinel-1 và Sentinel-2 ở 10 m. Lớp thứ hai là <Term id="gridded-population">mật độ dân số dạng lưới</Term> của bộ GHSL. Lớp thứ ba là số vụ lúa mỗi năm, lấy từ Chương 4.
+
+<Predict client:visible lang="vi"
+  title="Vùng nào nhiều đất xây dựng hơn?"
+  q="Theo ESA WorldCover 2021, đất xây dựng (nhà cửa, đường, khu công nghiệp) chiếm bao nhiêu phần trăm diện tích vùng ĐBSH?"
+  slider={{ min: 0, max: 40, step: 1, unit: '%' }} answer={12} tol={3}
+  why="Khoảng 12 %, gần gấp ba ĐBSCL (4,4 %). ĐBSH có Hà Nội, Hải Phòng và các khu công nghiệp dọc quốc lộ 5 và 18; làng xóm ở đây cũng dày và liền khối. Ở ĐBSCL, nhà cửa chạy thành dải mảnh dọc kênh rạch, nhiều chỗ nằm lẫn trong vườn cây nên bản đồ xếp vào lớp cây gỗ." />
+
+<Figure
+  title="Hình 1.1 — Lớp phủ đất, mật độ dân số và số vụ lúa của hai châu thổ"
+  try="Đổi giữa ĐBSH và ĐBSCL ở lớp 'Lớp phủ đất'. Màu hồng (đất trồng trọt) chiếm phần nào của mỗi vùng? Sau đó chọn 'Mật độ dân số': rê chuột lên một làng ở Thái Bình và một ấp ven kênh ở Cần Thơ."
+  source="ESA WorldCover 10 m 2021 v200 (Zanaga và cs., 2022), lớp xuất hiện nhiều nhất trong mỗi ô ~250 m; GHS-POP R2023A năm 2020 (Schiavina và cs., 2023), người/km², trung bình về ô ~250 m, thang màu chặn ở 3.000; số vụ lúa 2024 từ Chương 4 (MODIS EVI ở ĐBSCL, Sentinel-1 VH ở ĐBSH). Cắt theo ranh vùng (geoBoundaries ADM1, ranh 2008). Có dữ liệu Copernicus Sentinel đã xử lý."
+>
+  <DeltaMap client:visible lang="vi" label="Hai châu thổ: lớp phủ, dân số, số vụ lúa" region="red" time={1} choices={[
+    { key: 'lc', label: { vi: 'Lớp phủ đất 2021', en: 'Land cover 2021' }, ids: { red: 'lc-wc2021-red', mekong: 'lc-wc2021-mekong' } },
+    { key: 'pop', label: { vi: 'Mật độ dân số 2020', en: 'Population density 2020' }, ids: { red: 'pop-2020-red', mekong: 'pop-2020-mekong' } },
+    { key: 'rice', label: { vi: 'Số vụ lúa', en: 'Rice seasons' }, ids: { red: 'rice-seasons-red', mekong: 'rice-seasons-mekong' } },
+  ]} />
+</Figure>
+
+Ba điều đáng chú ý trên bản đồ:
+
+- **ĐBSH có nhiều cây gỗ hơn ta nghĩ (37 %).** Đó không phải đồng ruộng mà là rừng đồi Quảng Ninh, Ba Vì, Tam Đảo và núi đá vôi Ninh Bình: vùng thống kê "Đồng bằng sông Hồng" gồm cả các tỉnh có đồi núi. Châu thổ thật chỉ là phần thấp ở giữa.
+- **ĐBSCL có 26 % là cây gỗ.** Phần lớn là vườn cây ăn trái và dừa ở Bến Tre, Tiền Giang, Vĩnh Long, cùng rừng tràm U Minh và rừng ngập mặn Cà Mau. Vườn cây là đất nông nghiệp, nhưng WorldCover xếp nó vào "cây gỗ" vì tán cây che kín mặt đất. Một bản đồ lớp phủ mô tả **cái phủ trên mặt đất**, không phải **cách con người dùng đất**.
+- **Hai vùng khác hẳn về dân.** Mật độ trung bình ĐBSH cao hơn gấp đôi ĐBSCL. Mỗi ha ruộng ở ĐBSH phải nuôi nhiều người hơn.
+
+<Note kind="warn">
+
+Ở mức ~250 m, mỗi ô chỉ mang lớp chiếm nhiều nhất trong 625 pixel 10 m. Các lớp nhỏ và mảnh (làng ven kênh, đường, kênh mương) bị lớp xung quanh nuốt mất trên bản đồ. Vì vậy các tỉ lệ trong chương được tính trên lưới 30 m (lấy mẫu từ bản đồ 10 m), không đếm từ ô 250 m.
+
+</Note>
+
+## 1.2 Con số từ vệ tinh và con số thống kê
+
+Bản đồ lưới cho phép cộng dân số hay diện tích theo bất kỳ ranh giới nào. Nhưng nó là **sản phẩm mô hình**, không phải số đếm. Bộ <Term id="gridded-population">GHS-POP</Term> phân bổ dân số của từng đơn vị hành chính xuống ô 100 m theo diện tích và thể tích nhà mà vệ tinh thấy.
+
+<Predict client:visible lang="vi"
+  title="Lưới dân số khớp Tổng điều tra đến đâu?"
+  q="Cộng lưới GHS-POP 2020 trong ranh ĐBSH được khoảng 20,4 triệu người. Tổng điều tra 1/4/2019 đếm được 22,5 triệu. Lưới lệch bao nhiêu phần trăm?"
+  options={['Gần như khớp (lệch dưới 2 %)', 'Thấp hơn khoảng 10 %', 'Cao hơn khoảng 10 %']} answer={1}
+  why="Thấp hơn khoảng 10 %. Ở ĐBSCL, lưới lại cao hơn Tổng điều tra khoảng 2 %. Hai mô hình phân bổ khác nhau và năm khác nhau (2019 và 2020) giải thích một phần; phần còn lại là sai số của bản thân lưới. Khi cần số chính thức, dùng số thống kê; lưới dùng để biết dân ở đâu bên trong một tỉnh." />
+
+Bài học này lặp lại suốt sổ tay. Diện tích lúa đếm từ bản đồ vệ tinh ở Chương 4 lệch khoảng 14 % so với số của Tổng cục Thống kê. Bản đồ nước sau bão Yagi ở Chương 8 nhỏ hơn số thiệt hại báo cáo cả chục lần. Một con số vệ tinh chỉ có nghĩa khi ta nói rõ nó **đo cái gì**, **ở độ phân giải nào**, và **so với cái gì**.
+
+<Note kind="key">
+
+Bản đồ vệ tinh không thay thế thống kê chính thức. Nó cho biết **ở đâu**, **khi nào** và **thay đổi ra sao**, ở mọi nơi, đều đặn, với chi phí thấp. Muốn có con số diện tích hay sản lượng đúng, phải kết hợp bản đồ với mẫu kiểm tra thực địa (Chương 4 mục 4.5, Chương 5).
+
+</Note>
+
+## 1.3 Viễn thám giúp gì cho thống kê nông nghiệp
+
+Sổ tay của FAO (2017) mà sổ tay này dựa vào được viết cho các cơ quan thống kê. Nó chỉ ra bốn chỗ viễn thám có ích nhất:
+
+<Tiles items={[
+  { t: 'Khung mẫu', d: 'Bản đồ lớp phủ giúp chia vùng (phân tầng) và chọn điểm, ô điều tra; bớt công đi thực địa ở nơi không có ruộng.' },
+  { t: 'Bản đồ cây trồng', d: 'Phân loại chuỗi ảnh theo mùa để biết ruộng nào trồng gì (Chương 3, 4).' },
+  { t: 'Ước tính diện tích', d: 'Bản đồ cộng với mẫu kiểm tra cho diện tích có khoảng tin cậy, sửa thiên lệch đếm pixel (Chương 5).' },
+  { t: 'Cảnh báo sớm, năng suất', d: 'Chuỗi chỉ số thực vật và thời tiết theo dõi mùa vụ, báo sớm hạn, lũ, mặn (Chương 6–10).' },
+]} caption="Theo FAO (2017), phần Tổng quan và Chương 8–9." />
+
+Sách cũng nhắc rằng chi phí lớn nhất **không phải là ảnh**. Ảnh Landsat, Sentinel và MODIS miễn phí, xử lý trên đám mây gần như không tốn phần cứng. Cái tốn là **con người**: một nhóm biết GIS, xử lý ảnh, thống kê, nông học, khí tượng (FAO, 2017, mục 9.1). Chương 2 bàn kỹ chuyện dữ liệu và chi phí.
+
+<Depth level="advanced" title="Vì sao thống kê nông nghiệp cần cả hai: điều tra và vệ tinh">
+
+Điều tra thực địa cho số đúng tại điểm điều tra nhưng tốn kém và chậm. Bản đồ vệ tinh phủ kín mọi nơi nhưng có lỗi phân loại. Cách làm chuẩn của FAO là dùng **mẫu xác suất** trên thực địa làm "sự thật", và dùng bản đồ làm **biến phụ** để giảm sai số: phân tầng theo bản đồ, rồi dùng ước lượng hồi quy hay hiệu chỉnh theo ma trận nhầm lẫn. Khi bản đồ tốt, cùng một độ chính xác cần ít điểm điều tra hơn hẳn. Khi bản đồ kém, ước lượng vẫn không thiên lệch, chỉ là không lợi gì. Chương 5 mô phỏng điều này trên bản đồ lúa thật.
+
+</Depth>
+
+## 1.4 Môi trường là trục của sổ tay
+
+Sách FAO tập trung vào diện tích và năng suất cây trồng. Sổ tay này giữ phần đó (Phần B) nhưng đặt trọng tâm vào **các yếu tố tự nhiên** quyết định nông nghiệp ở hai châu thổ (Phần C):
+
+<Tiles items={[
+  { t: 'Khí hậu (Ch. 7)', d: 'Mưa, nhiệt, nhiệt độ bề mặt, bốc thoát hơi; các mùa khô 2016, 2020, 2024.' },
+  { t: 'Nước và lũ (Ch. 8)', d: 'Nhịp lũ Mê Kông, đê bao, ngập úng sau bão ở ĐBSH.' },
+  { t: 'Hạn (Ch. 9)', d: 'Chỉ số sức khỏe thực vật, độ ẩm đất, chỉ số mưa chuẩn hóa.' },
+  { t: 'Mặn (Ch. 10)', d: 'Xâm nhập mặn mùa khô, điều vệ tinh thấy và không thấy.' },
+  { t: 'Đất, địa hình (Ch. 11)', d: 'Phèn, độ cao, sụt lún, nước biển dâng.' },
+  { t: 'Ven biển, phát thải (Ch. 12–13)', d: 'Tôm–lúa, rừng ngập mặn, xói lở; đốt rơm, khí mê-tan.' },
+]} sum="Chương 14 gộp các lớp này thành bản đồ đa rủi ro." />
+
+<Predict client:visible lang="vi"
+  title="Đâu là mối đe dọa lớn nhất?"
+  q="Với đồng ruộng ĐBSCL, theo bạn mối đe dọa nào sẽ khó đảo ngược nhất trong vài chục năm tới?"
+  options={['Lũ lớn bất thường', 'Sụt lún đất cộng nước biển dâng', 'Một năm hạn mặn nặng']} answer={1}
+  why="Lũ và hạn mặn là các đợt sự kiện: ruộng phục hồi sau một hai mùa. Sụt lún (trung bình khoảng 1,6 cm mỗi năm, nhiều nơi trên 2,5 cm, chủ yếu do khai thác nước ngầm; Minderhoud và cs., 2017) cộng nước biển dâng thì tích lũy và không quay lại được. Châu thổ chỉ cao trung bình khoảng 0,8 m trên mực nước biển (Minderhoud và cs., 2019). Chương 11 bàn chuyện này." />
+
+## 1.5 Cách dùng sổ tay
+
+- **Độ sâu.** Thẻ *Hiển thị* trên thanh công cụ có ba mức: *Cơ bản* (mặc định, ẩn các khung kỹ thuật), *Nâng cao* (hiện đủ mọi khung) và *Tra cứu* (chỉ giữ tiêu đề và các bảng tra, để ôn nhanh). Đọc lần đầu, cứ để mức cơ bản.
+- **Câu hỏi dự đoán.** Trước mỗi hình thường có một câu hỏi. Đoán trước rồi mới xem đáp án: đó là cách nhớ lâu nhất.
+- **Hình tương tác.** Mỗi hình có dòng *Thử* gợi ý việc nên làm, và dòng *Nguồn* ghi dữ liệu, ngày ảnh, cách xử lý. Mọi con số trong bài đều tính lại được bằng script trong thư mục `scripts/`.
+- **Bài thực hành.** Chương 15 có notebook Python (chạy trên Google Colab) và script Earth Engine cho từng chương, chạy trên dữ liệu thật.
+- **Kiến thức nền.** Nguyên lý phổ, chỉ số thực vật, radar, phân loại ảnh không viết lại ở đây. Muốn ôn, xem sổ tay <a href="https://quanta1985.github.io/rs-knowledge/vi/">Viễn thám & GIS</a>.
+
+## 1.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. Global Strategy to improve Agricultural and Rural Statistics (GSARS), Rome.
+- Minderhoud, P. S. J., Erkens, G., Pham, V. H., Bui, V. T., Erban, L., Kooi, H., & Stouthamer, E. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12, 064006. https://doi.org/10.1088/1748-9326/aa7146
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- Schiavina, M., Freire, S., Carioli, A., & MacManus, K. (2023). *GHS-POP R2023A — GHS population grid multitemporal (1975–2030)*. European Commission, Joint Research Centre. https://doi.org/10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE
+- Ban Chỉ đạo Tổng điều tra dân số và nhà ở Trung ương (2019). *Kết quả Tổng điều tra dân số và nhà ở thời điểm 0 giờ ngày 01 tháng 4 năm 2019*. Nhà xuất bản Thống kê, Hà Nội.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

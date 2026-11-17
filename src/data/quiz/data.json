@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Vì sao sổ tay dùng Sentinel-1 chứ không dùng Sentinel-2 để đếm vụ lúa Xuân ở ĐBSH?", "en": "Why does the handbook use Sentinel-1 rather than Sentinel-2 to count spring rice in the Red River Delta?" },
+  "options": [
+   { "vi": "Tháng 1–4 trời âm u, rất ít ngày Sentinel-2 dùng được; radar chụp xuyên mây", "en": "January–April is overcast, so very few Sentinel-2 days are usable; radar sees through cloud" },
+   { "vi": "Sentinel-2 không chụp miền Bắc", "en": "Sentinel-2 does not image the north" },
+   { "vi": "Sentinel-1 có độ phân giải 1 m", "en": "Sentinel-1 has 1 m resolution" },
+   { "vi": "Ảnh Sentinel-2 phải trả phí", "en": "Sentinel-2 imagery must be paid for" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Cả hai đều 10 m và miễn phí. Khác biệt là mây: Hình 2.2 cho thấy số ngày quang đãng ở Nam Định mùa xuân rất ít.", "en": "Both are 10 m and free. The difference is cloud: Figure 2.2 shows how few clear days Nam Dinh gets in spring." }
+ },
+ {
+  "q": { "vi": "Ở khung Cà Mau, chỉ khoảng 18 % ô 250 m là ô thuần một lớp phủ. Điều đó có nghĩa gì với MODIS?", "en": "At the Ca Mau site only about 18 % of 250 m cells are covered by a single class. What does that mean for MODIS?" },
+  "options": [
+   { "vi": "Phần lớn pixel MODIS ở đây trộn đầm tôm, rừng ngập mặn, kênh; khó phân loại từng pixel", "en": "Most MODIS pixels there mix shrimp ponds, mangroves and canals; per-pixel classification is hard" },
+   { "vi": "MODIS không chụp được Cà Mau", "en": "MODIS cannot image Ca Mau" },
+   { "vi": "Cà Mau toàn là ruộng lúa", "en": "Ca Mau is all rice paddy" },
+   { "vi": "Không ảnh hưởng gì vì MODIS chụp hằng ngày", "en": "No effect, because MODIS images daily" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Chụp hằng ngày không bù được pixel quá lớn so với cảnh quan. MODIS vẫn hữu ích cho xu thế vùng rộng, không cho bản đồ thửa.", "en": "Daily imaging does not make up for pixels too large for the landscape. MODIS stays useful for regional trends, not field maps." }
+ },
+ {
+  "q": { "vi": "Giá tham khảo WorldView trong sách FAO là 20 USD/km². Vì sao ảnh rất chi tiết thường chỉ dùng cho các ô mẫu?", "en": "The FAO book quotes WorldView at US$20/km². Why is very-high-resolution imagery usually bought only for sample segments?" },
+  "options": [
+   { "vi": "Phủ cả châu thổ nhiều lần trong mùa vụ tốn hàng triệu USD; ô mẫu đủ để kiểm tra và hiệu chỉnh bản đồ Sentinel", "en": "Covering a whole delta several times a season costs millions; samples are enough to check and correct the Sentinel map" },
+   { "vi": "Vì ảnh rất chi tiết không thấy được lúa", "en": "Because very-high-resolution images cannot see rice" },
+   { "vi": "Vì ảnh rất chi tiết không có kênh màu đỏ", "en": "Because very-high-resolution images have no red band" },
+   { "vi": "Vì luật cấm chụp ảnh rộng hơn 10 km²", "en": "Because the law forbids images wider than 10 km²" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Một lần phủ ĐBSCL đã khoảng 800 nghìn USD. Cách làm hiệu quả: bản đồ toàn vùng từ ảnh mở, ảnh rất chi tiết chỉ cho mẫu kiểm tra.", "en": "One coverage of the Mekong delta is already about US$800,000. The efficient design is a wall-to-wall map from open imagery and very-high-resolution images only for the reference sample." }
+ },
+ {
+  "q": { "vi": "Sentinel-1B hỏng cuối năm 2021. Hậu quả với chuỗi radar 2022–2024 ở các điểm nghiên cứu là gì?", "en": "Sentinel-1B failed at the end of 2021. What did that do to the 2022–2024 radar series at the study sites?" },
+  "options": [
+   { "vi": "Ở các điểm ĐBSCL, số ngày có ảnh mỗi năm giảm khoảng một phần ba", "en": "At the Mekong sites the image days per year fell by about a third" },
+   { "vi": "Không còn ảnh radar nào", "en": "There were no radar images at all" },
+   { "vi": "Ảnh radar bắt đầu bị mây che", "en": "Radar images started to be blocked by cloud" },
+   { "vi": "Độ phân giải giảm từ 10 m xuống 100 m", "en": "Resolution dropped from 10 m to 100 m" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Chỉ còn Sentinel-1A, lặp lại 12 ngày thay vì 6 ngày trên mỗi quỹ đạo, cho tới khi Sentinel-1C hoạt động năm 2025. An Giang giảm từ 92 xuống 58 ngày; Nam Định gần như không đổi vì Sentinel-1B chưa từng chụp khung này (Hình 2.3).", "en": "Only Sentinel-1A was left, with a 12-day instead of 6-day repeat per orbit, until Sentinel-1C started in 2025. An Giang fell from 92 to 58 days; Nam Dinh barely changed because Sentinel-1B never imaged that frame (Figure 2.3)." }
+ }
+]

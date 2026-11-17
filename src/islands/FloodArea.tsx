@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Lang } from '../i18n/ui';
-import { fmtNum } from '../lib/format';
+import { fmtNum, placeName } from '../lib/format';
 import data from '../../public/data/flood-s1-area-mekong.json';
 import LineChart, { Legend, type Series } from './LineChart';
 
@@ -36,7 +36,7 @@ export default function FloodArea({ lang, view = 'months', a = 2018, b = 2024 }:
     <label className="ctl"><span className="ctl-label">{T.area}</span>
       <select value={area} onChange={(e) => setArea(e.target.value)}>
         <option value="all">{T.all}</option>
-        {PROV.map((p) => <option key={p} value={p}>{p}</option>)}
+        {PROV.map((p) => <option key={p} value={p}>{placeName(lang, p)}</option>)}
       </select>
     </label>
   );
@@ -50,11 +50,11 @@ export default function FloodArea({ lang, view = 'months', a = 2018, b = 2024 }:
     const peaks = R.map((r) => Math.max(...r));
     const mean = peaks.reduce((s, v) => s + v, 0) / peaks.length;
     const yi = hx == null ? -1 : YEARS.indexOf(Math.round(hx));
-    const s: Series[] = [{ id: 'peak', label: area === 'all' ? T.all : area, color: C_A, marker: 'circle', points: YEARS.map((y, i) => [y, k(peaks[i])]) }];
+    const s: Series[] = [{ id: 'peak', label: area === 'all' ? T.all : placeName(lang, area), color: C_A, marker: 'circle', points: YEARS.map((y, i) => [y, k(peaks[i])]) }];
     return (
       <div className="viz">
         <div className="controls">{picker}</div>
-        <p className="chart-title">{T.tYears} · {area === 'all' ? T.all : area}</p>
+        <p className="chart-title">{T.tYears} · {area === 'all' ? T.all : placeName(lang, area)}</p>
         <LineChart title={T.tYears} series={s} x={[2015.5, 2025.5]} y={[0, yTop]} xLabel={T.year} yLabel={T.y} xTicks={YEARS}
           yFormat={n0} hline={k(mean)} vline={yi >= 0 ? YEARS[yi] : null} onHover={setHx} height={300} />
         <Legend items={[...s, { id: 'mean', label: `${T.mean} (${n0(k(mean))} ${T.y})`, color: 'currentColor', dash: '4 3', width: 1 }]} />
@@ -75,7 +75,7 @@ export default function FloodArea({ lang, view = 'months', a = 2018, b = 2024 }:
   return (
     <div className="viz">
       <div className="controls">{picker}{yearSel(T.yearA, ya, setYa)}{yearSel(T.yearB, yb, setYb)}</div>
-      <p className="chart-title">{T.tMonths} · {area === 'all' ? T.all : area}</p>
+      <p className="chart-title">{T.tMonths} · {area === 'all' ? T.all : placeName(lang, area)}</p>
       <LineChart title={T.tMonths} series={series} x={[6.7, 12.3]} y={[0, yTop]} xLabel={T.month} yLabel={T.y} xTicks={MONTHS}
         yFormat={n0} vline={mi >= 0 ? MONTHS[mi] : null} onHover={setHx} height={300} />
       <Legend items={[series[series.length - 2], series[series.length - 1], { id: 'rest', label: T.others, color: C_REST, width: 1 }]} />

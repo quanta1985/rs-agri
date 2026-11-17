@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Vì sao ESA WorldCover xếp nhiều vườn cây ăn trái ở Bến Tre vào lớp 'cây gỗ' chứ không phải 'đất trồng trọt'?", "en": "Why does ESA WorldCover put many Ben Tre orchards in 'tree cover' rather than 'cropland'?" },
+  "options": [
+   { "vi": "Bản đồ lớp phủ mô tả cái phủ trên mặt đất; tán cây che kín đất nên là cây gỗ", "en": "A land-cover map describes what covers the ground; the canopy closes over the soil, so it is tree cover" },
+   { "vi": "Vì ảnh Sentinel-2 không chụp được Bến Tre", "en": "Because Sentinel-2 does not image Ben Tre" },
+   { "vi": "Vì vườn cây ở Bến Tre đã bị bỏ hoang", "en": "Because the Ben Tre orchards are abandoned" },
+   { "vi": "Vì WorldCover chỉ có lớp đất trồng trọt cho lúa", "en": "Because WorldCover's cropland class is for rice only" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lớp phủ đất khác sử dụng đất. Vườn cây là đất nông nghiệp theo cách dùng, nhưng từ trên cao chỉ thấy tán cây.", "en": "Land cover is not land use. An orchard is farmland by use, but from above only the canopy is visible." }
+ },
+ {
+  "q": { "vi": "Cộng lưới GHS-POP 2020 trong ranh ĐBSH được 20,4 triệu người, thấp hơn Tổng điều tra 2019 (22,5 triệu). Kết luận nào đúng?", "en": "Summing the GHS-POP 2020 grid inside the Red River Delta gives 20.4 million people, below the 2019 census (22.5 million). Which conclusion is right?" },
+  "options": [
+   { "vi": "Lưới dân số là sản phẩm mô hình; dùng số điều tra khi cần con số chính thức, dùng lưới để biết dân ở đâu", "en": "The grid is a model product; use the census for official totals and the grid to see where people live" },
+   { "vi": "Tổng điều tra đếm sai, nên thay bằng lưới vệ tinh", "en": "The census miscounted and should be replaced by the satellite grid" },
+   { "vi": "Dân số ĐBSH giảm 2 triệu người trong một năm", "en": "The Red River Delta lost 2 million people in a year" },
+   { "vi": "Hai con số đo hai vùng hoàn toàn khác nhau", "en": "The two figures cover entirely different areas" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lưới phân bổ số dân xuống ô theo nhà cửa thấy được; nó có sai số riêng. Ở ĐBSCL lưới lại cao hơn điều tra khoảng 2 %.", "en": "The grid spreads population over cells by visible buildings and has its own error. In the Mekong delta it is about 2 % above the census." }
+ },
+ {
+  "q": { "vi": "Theo sổ tay FAO (2017), phần chi phí lớn nhất khi đưa viễn thám vào thống kê nông nghiệp thường là gì?", "en": "According to the FAO (2017) handbook, what is usually the largest cost of bringing remote sensing into agricultural statistics?" },
+  "options": [
+   { "vi": "Nhân lực có chuyên môn và đào tạo", "en": "Qualified staff and training" },
+   { "vi": "Mua ảnh Sentinel-2", "en": "Buying Sentinel-2 imagery" },
+   { "vi": "Máy chủ lưu trữ ảnh MODIS", "en": "Servers to store MODIS imagery" },
+   { "vi": "Bản quyền phần mềm QGIS", "en": "QGIS software licences" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Ảnh Landsat, Sentinel, MODIS miễn phí, QGIS mã nguồn mở, xử lý có thể làm trên đám mây. Cái tốn là nhóm chuyên gia GIS, xử lý ảnh, thống kê, nông học (FAO 2017, mục 9.1).", "en": "Landsat, Sentinel and MODIS are free, QGIS is open source and processing can run in the cloud. The cost is a team of GIS, image-analysis, statistics and agronomy experts (FAO 2017, section 9.1)." }
+ },
+ {
+  "q": { "vi": "Bản đồ lớp phủ ở Hình 1.1 lấy lớp chiếm nhiều nhất trong mỗi ô 250 m. Điều gì xảy ra với làng xóm chạy thành dải mảnh dọc kênh ở ĐBSCL?", "en": "The Figure 1.1 land-cover map keeps the most common class in each 250 m cell. What happens to the thin village ribbons along Mekong canals?" },
+  "options": [
+   { "vi": "Phần lớn biến mất vào lớp xung quanh (ruộng, vườn)", "en": "Most of them vanish into the surrounding class (paddy, orchard)" },
+   { "vi": "Chúng to ra thành cả ô 250 m", "en": "They grow to fill whole 250 m cells" },
+   { "vi": "Chúng được tô màu riêng", "en": "They get a colour of their own" },
+   { "vi": "Không có gì thay đổi", "en": "Nothing changes" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Một dải nhà rộng 50 m chỉ chiếm một phần nhỏ của ô 250 m, nên ô mang lớp ruộng hay vườn. Vì thế tỉ lệ diện tích được tính trên lưới 30 m, không đếm ô 250 m.", "en": "A 50 m wide strip of houses fills only a small part of a 250 m cell, so the cell takes the paddy or orchard class. That is why area shares are computed on a 30 m grid, not by counting 250 m cells." }
+ }
+]

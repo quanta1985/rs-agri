@@ -1,0 +1,194 @@
+---
+title: Open data, clouds and costs
+n: 2
+summary: Free satellite imagery is enough for most farming work in the two deltas, but clouds, field size and data volume set limits. This chapter compares sensors, counts the usable Sentinel-2 days at the five study sites, shows how large pixels mix land covers, estimates the cost of commercial imagery and the volume of a year of free imagery, and explains why the processing moves to the cloud.
+objectives:
+  - Choose a sensor (Sentinel-2, Landsat, Sentinel-1, MODIS, very-high-resolution imagery) by resolution, revisit, cloud and cost.
+  - Read the usable Sentinel-2 days per month at the five sites, and explain why the Red River Delta spring crop needs radar.
+  - Explain mixed pixels and why 250 m MODIS struggles where fields are small and orchards mix with paddies.
+  - Estimate the cost of buying commercial imagery and the volume of free imagery for one delta in one year.
+  - List the reference data layers needed before doing statistics with remote sensing.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Depth from '../../../components/Depth.astro';
+import ClearSky from '../../../islands/ClearSky.tsx';
+import PixelPurity from '../../../islands/PixelPurity.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/data.json';
+
+Ten years ago, a statistical agency that wanted satellite imagery had to buy images, software and servers. Today Sentinel, Landsat and MODIS are free, and they can be processed in the cloud from a web browser. But "free" does not mean "enough": in two tropical deltas, clouds hide most acquisition days, fields are smaller than the pixels of many sensors, and one year of imagery of one delta weighs thousands of gigabytes. This chapter puts those numbers on the table.
+
+<Stats items={[
+  { v: '0.5', u: 'days/month', l: 'usable Sentinel-2 days at Nam Dinh in February (2019–2024 mean)' },
+  { v: '10', u: 'days/year', l: 'usable Sentinel-2 days at Ca Mau, out of about 72 overpasses' },
+  { v: '−37', u: '%', l: 'Sentinel-1 image days at An Giang from 2021 to 2022, after Sentinel-1B failed' },
+  { v: '1.25', u: 'TB', l: 'of Sentinel-1, Sentinel-2 and Landsat imagery acquired over the Mekong Delta in 2024' },
+]} caption="Computed from Sentinel-2 + Cloud Score+, Sentinel-1 and the Earth Engine catalogue by scripts/data_numbers.ts." />
+
+## 2.1 Which satellite imagery for agriculture
+
+The FAO handbook (2017, section 1.2) sorts sensors along two axes: **optical or radar**, and **spatial resolution**. The key boundary sits around 10 m: from 10 m up most imagery is open, below 10 m most is commercial.
+
+<div class="table-wrap">
+
+| Sensor | Type | <Term id="spatial-resolution">Resolution</Term> | <Term id="revisit">Revisit</Term> | Since | Price | Used in this handbook |
+|---|---|---|---|---|---|---|
+| Sentinel-2 A/B/C | Optical, 13 bands | 10 / 20 / 60 m | 5 days (2 satellites) | 2015 | Free | Vegetation, water and salinity indices (Ch. 4, 8, 10) |
+| Landsat 8/9 | Optical + thermal | 30 m (thermal 100 m) | 8 days (2 satellites) | 1984 (series) | Free | Long-term change, coastlines (Ch. 12) |
+| Sentinel-1 A/B/C | C-band radar | 10 m | 12 days (6 with 2 satellites) | 2014 | Free | Rice, floods (Ch. 4, 8) |
+| MODIS Terra/Aqua | Optical + thermal | 250 / 500 / 1000 m | Daily | 2000 | Free | EVI series, land surface temperature (Ch. 4, 7, 9, 10) |
+| WorldView, Pléiades, SPOT, PlanetScope | Optical | 0.3–5 m | On request, up to daily | — | Paid | Field checks, small plots |
+
+</div>
+
+There are also "ready-made" datasets built from many satellites and models: CHIRPS rainfall, ERA5-Land reanalysis, SMAP soil moisture, WorldCover and Dynamic World land cover. Chapters 7–13 use them.
+
+<Predict client:visible lang="en"
+  title="Which imagery for the spring crop in the Red River Delta?"
+  q="You need to follow the spring rice crop in Nam Dinh at field scale, from field flooding in January to heading in April. Which source is most reliable?"
+  options={['Sentinel-2', 'Landsat 8/9', 'Sentinel-1', 'MODIS']} answer={2}
+  why="Sentinel-1. January–April in the Red River Delta is the season of drizzle and overcast skies: usable optical images are very rare (section 2.3). C-band radar sees through cloud at 10 m every 12 days and responds both to flooded fields and to growing rice. MODIS images daily but is clouded too, and its 250 m pixels are far coarser than the fields." />
+
+## 2.2 Resolution and field size
+
+A pixel holds one value. If the pixel contains paddy, orchard and houses, that value is a blend of them all: a <Term id="mixed-pixel">mixed pixel</Term>. The smaller the fields and the more mixed the landscape, the smaller the pixels must be.
+
+Figure 2.1 measures this on the 10 m WorldCover map of the five sites. For each cell size it counts the share of "pure" cells, where one land-cover class covers at least 90 % of the cell.
+
+<Predict client:visible lang="en"
+  title="How many MODIS cells are pure in Nam Dinh?"
+  q="At the Giao Thuy – Hai Hau site (Nam Dinh), what share of 250 m cells (MODIS pixel size) has one land-cover class covering at least 90 %?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={49} tol={8}
+  why="About 49 %: half the MODIS cells there mix paddy, villages, ponds and lagoons. At An Giang, where rice fields form large blocks, the share is 77 %; at Ca Mau, where shrimp ponds mix with mangroves, only 18 %. At Sentinel-2's 10 m every pixel is pure by definition here, but the 10 m map itself has mixed pixels along field edges." />
+
+<Figure
+  title="Figure 2.1 — Share of cells covered by one land-cover class, by cell size, five study sites"
+  try="Hover over the 30 m (Landsat) and 250 m (MODIS) marks. Which site keeps the most pure cells as the cells grow? Open the data table to see each frame's cropland share."
+  source="ESA WorldCover 10 m 2021 v200 on five 10.24 km frames; blocks of 2×2 … 50×50 pixels; pure cell = one class ≥ 90 % of the pixels. This is land-cover purity, not field size: two adjacent rice fields are still one class."
+>
+  <PixelPurity client:visible lang="en" />
+</Figure>
+
+The FAO handbook (2017, section 9.3) does a similar sum for the whole world, using the field-size map of Fritz et al. (2015). In Asia, MODIS-size imagery suits only about 6 % of cropland, Landsat 19 %, and Sentinel-1 and 2 about 67 %. Viet Nam belongs to the very-small-field group, so **10 m is the minimum** for crop maps; MODIS only suits regional trends, as in Chapters 4 and 10.
+
+<Note kind="key">
+
+Choose the resolution by **the size of what you need to see** and **the question to answer**. Following the rice area of a whole province over 20 years: 250 m MODIS is enough and has a long record. Counting the rice area of one commune: you need 10 m or finer.
+
+</Note>
+
+## 2.3 Clouds over the two deltas
+
+Optical imagery is useful only under clear skies. Figure 2.2 counts, for each month from 2019 to 2024, the days Sentinel-2 passed over each frame and the **usable** days: the image covers at least 95 % of the frame and at least 80 % of it is cloud-free according to <Term id="cloud-score">Cloud Score+</Term>.
+
+<Predict client:visible lang="en"
+  title="How many good February days in Nam Dinh?"
+  q="The Nam Dinh frame sits where two Sentinel-2 orbits overlap, so the satellites pass about 11 times in February. Averaged over 2019–2024, how many of those days are usable?"
+  slider={{ min: 0, max: 11, step: 0.5, unit: 'days' }} answer={0.5} tol={1}
+  why="Only about 0.5 days: one usable February day every two years on average. Drizzle and low cloud cover the Red River Delta through January–April, exactly when the spring crop is planted. June–July pass the threshold most often (4.5–4.8 days), but some of those days are thin cloud and haze that the Cloud Score+ rule used here lets through (see below Figure 2.2)." />
+
+<Figure
+  title="Figure 2.2 — Sentinel-2 days per month and usable days, five sites, 2019–2024"
+  try="Pick Nam Dinh, then An Giang: which month of the year has the most usable days at each? The band shows the worst and best year: is there a month when the worst year had not a single usable day?"
+  source="COPERNICUS/S2_SR_HARMONIZED and Cloud Score+ (GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED), 10.24 km frames, Jan 2019–Dec 2024. Tiles mosaicked per day; 'image' = ≥ 50 % of the frame covered; 'usable' = ≥ 95 % covered and ≥ 80 % of pixels with cs_cdf ≥ 0.6 (computed at 60 m). Contains modified Copernicus Sentinel data."
+>
+  <ClearSky client:visible lang="en" view="s2" site="namdinh" />
+</Figure>
+
+The two deltas have opposite cloud seasons:
+
+- **Red River Delta**: January–April averages only 1.2 usable days a month, about 10 % of the overpasses, exactly the spring crop. May to November is better, about 3–5 days a month.
+- **Mekong Delta**: the dry season (December–April) is the imaging season. An Giang and Thap Muoi get about 2.5 days a month, 43 % of the overpasses; the rainy season (May–November) drops to about 1 day. Over the whole 72-month record An Giang, Thap Muoi and Ben Tre have 15–18 months without a single usable day, almost all in the rainy season.
+- **Ca Mau** is hardest: about 10 usable days a year, under half a day a month in the rainy season, and 33 of the 72 months with none.
+
+When comparing sites, remember that Nam Dinh and Ben Tre sit where two Sentinel-2 orbits overlap and are imaged twice as often (about 12 times a month, against 6 at the other three sites). Ben Tre's nearly 4 usable dry-season days a month do not mean clearer skies than An Giang (33 % against 43 % of overpasses), only more overpasses.
+
+The "usable" rule used here (Cloud Score+ cs_cdf ≥ 0.6) lets some thin cloud and haze through. Some June–July days at Nam Dinh pass it although their blue band is unusually bright, a sign of haze. The MODIS series of Chapter 4 uses a stricter quality rule and finds very few good observations in June–July. A count of "usable days" therefore always depends on the cloud-screening rule.
+
+These numbers depend on the definition of "usable". Requiring 80 % clear sky over a whole 10 km frame is strict. Combining several days into monthly or seasonal composites (as later chapters do) still gives clean images in the dry season. But catching a short stage such as transplanting or heading in the rainy season takes radar.
+
+<Note kind="key">
+
+Before choosing optical imagery, count the real clear days at the right place and season. A 5-day revisit on paper can shrink to one usable day a month.
+
+</Note>
+
+## 2.4 Radar ignores clouds, but satellites can fail
+
+Sentinel-1 sees through cloud, day and night. But how often it images a place depends on how many satellites are working. Sentinel-1B failed on 23 December 2021 and was never recovered; from then until Sentinel-1C started in 2025, each place got one image every 12 days per orbit.
+
+<Figure
+  title="Figure 2.3 — Sentinel-1 days per year at the five sites, 2015–2025"
+  try="Find the year the count drops sharply. Which site gets many more days than the others, and why (hint: the frame sits where two orbits overlap)?"
+  source="COPERNICUS/S1_GRD, IW mode, all ascending and descending orbits; days with at least one scene touching the 10.24 km frame. Contains modified Copernicus Sentinel data."
+>
+  <ClearSky client:visible lang="en" view="s1" />
+</Figure>
+
+At the four Mekong sites the image days fell by 27–37 % from 2021 to 2022 (An Giang 92 → 58 days), then rose again in 2025 with Sentinel-1C. Nam Dinh barely changed: Sentinel-1B never imaged this frame, and every image there comes from Sentinel-1A on three orbits. Ben Tre gets the most days (about 120 a year before 2022) because it sits where several orbits overlap. 2015–2016 have few images because the acquisition plan was just starting.
+
+These counts pool all orbits. Comparing two images (water detection, rice monitoring) should use the **same orbit** so the viewing geometry matches, so the real gap between comparable images is 12 days, not a few.
+
+## 2.5 Commercial imagery: when is it worth buying
+
+Very-high-resolution imagery (under 5 m) still has to be bought. According to the FAO handbook the price depends on many things: archive or new tasking, urgency, viewing angle, processing level, minimum order area, and above all the **licence**. Most commercial imagery is sold as a right of use, not as the image; some licences even restrict what is derived from the image (FAO, 2017, section 1.2.1). List prices span four orders of magnitude, from US$0.01 to US$145 per km².
+
+<Predict client:visible lang="en"
+  title="What does one WorldView coverage of the Mekong Delta cost?"
+  q="The FAO book quotes WorldView (31 cm) at US$20/km². The Mekong Delta region covers about 39,900 km². Roughly what does one full coverage cost?"
+  options={['About US$8 thousand', 'About US$80 thousand', 'About US$800 thousand', 'About US$8 million']} answer={2}
+  why="About US$800 thousand (39,865 km² × US$20) for **one** acquisition, at 2016 prices, before re-shooting cloudy areas. Following a season needs dozens a year. That is why very detailed imagery is kept for small sample segments (map checks, sample-based area estimates) and wall-to-wall coverage uses free Sentinel data." />
+
+<Depth level="advanced" title="Using open imagery to buy less commercial imagery">
+
+The FAO book suggests three savings: (1) use Sentinel-2 and land-cover maps to **choose sample segments** and buy very detailed images only for them; (2) buy **archive** imagery instead of urgent tasking, since archive is cheapest; (3) send the same acquisition scenario to several suppliers to compare offers, especially for licences shared by several agencies. It also warns to read the licence closely: some "viral" licences extend to classification maps made from the images, which then cannot be shared freely.
+
+</Depth>
+
+## 2.6 Processing in the cloud
+
+The FAO handbook (2017, section 1.5) works out the case of the Republic of Korea (95,000 km²): about 2 TB of Sentinel-1, Sentinel-2 and Landsat-8 imagery a year. The table below does the same sum for the two deltas in 2024, with the image sizes the book uses.
+
+<div class="table-wrap">
+
+| 2024 | Sentinel-2 (L1C tile, ~0.5 GB) | Sentinel-1 (GRD scene, ~1 GB) | Landsat 8 + 9 (scene, ~1 GB) | Total |
+|---|---|---|---|---|
+| Red River Delta (10 MGRS tiles) | 891 tiles ≈ 446 GB | 180 ≈ 180 GB | 193 ≈ 193 GB | **≈ 0.82 TB** |
+| Mekong Delta (13 MGRS tiles) | 1,329 tiles ≈ 665 GB | 288 ≈ 288 GB | 299 ≈ 299 GB | **≈ 1.25 TB** |
+
+</div>
+
+Image counts from the Earth Engine catalogue (every image touching the region outline, including partial ones); per-image sizes as in FAO (2017, section 1.5).
+
+At that volume, downloading and processing on local machines no longer makes sense for a small team. Platforms such as **Google Earth Engine** keep the whole archive next to the computers, so users send code and get back results: a number, a chart, a downsampled map. All data in this handbook was computed that way (folder `scripts/data/`).
+
+<Note kind="warn">
+
+The cloud has its price. Users do not control the whole workflow: datasets change version (Earth Engine has marked the FAO GAUL 2015 boundaries as deprecated, for example), terms of use can change, and private data has to be uploaded to the platform. Record the dataset version and processing date of every result, as the *Source* line under each figure does.
+
+</Note>
+
+## 2.7 Reference data
+
+Imagery alone is not enough for statistics. The FAO book (section 1.4) lists the <Term id="reference-data">reference data</Term> layers needed from the start: elevation model, topographic map, land cover, soil map, cadastre and administrative boundaries. In Viet Nam two points need care:
+
+- **Administrative boundaries change.** In 2025 the 63 provinces were merged into 34 units. Earlier statistics refer to the old boundaries, so this handbook uses the 63-province boundaries (geoBoundaries, 2008) for historical data. The popular GADM boundaries are not used because their licence forbids redistribution.
+- **Field reference points.** Every classified map needs a sample of correctly labelled points to measure its accuracy and correct its area (Chapter 4 section 4.5). Points can come from field visits, interpretation of very detailed imagery, or UAV photos.
+
+## 2.8 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Brown, C. F. et al. (2022). Dynamic World, near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251. https://doi.org/10.1038/s41597-022-01307-4
+- ESA (3 August 2022). Mission ends for Copernicus Sentinel-1B satellite. European Space Agency press release.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Sections 1.2, 1.4, 1.5, 9.1, 9.3.
+- Fritz, S. et al. (2015). Mapping global cropland and field size. *Global Change Biology*, 21(5), 1980–1992. https://doi.org/10.1111/gcb.12838
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Zanaga, D. et al. (2022). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221

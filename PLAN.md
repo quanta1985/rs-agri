@@ -122,8 +122,21 @@ Mỗi chương: 5–6 mục, hình mở đầu kiểu "hero", 2–3 `<Predict>` 
 4. ✅ (2026-11-16) Viết ch.4, 8, 10 (vi + en), quiz, glossary, số liệu từ `*_numbers.ts`. Khác kế hoạch: ma trận nhầm lẫn 4.5 là số minh họa (chưa có điểm kiểm tra thật) áp lên diện tích bản đồ thật; chiều dài mặn theo cửa sông chỉ xác minh đủ cho 2016; 10.5 ở Bến Tre là lúa → vườn cây, không phải lúa → tôm.
 5. ✅ (2026-11-17) Trang chủ + mục lục 16 chương (chương chưa có hiện "sắp có" kèm một dòng mô tả nội dung dự kiến; thống kê "3/16 chương đã viết"; link Bài thực hành/Công thức ẩn tới khi có chương; sửa tiêu đề h1 bị lặp chữ từ bước 1).
 6. ✅ (2026-11-17) Lab cho 3 chương (`labs/rice_seasons`, `flood_water`, `salinity_indicators`: notebook Colab + script GEE) và chương 15 `labs`. Khác kế hoạch: phần Yagi của lab lũ dùng khung Nho Quan – Gia Viễn (Ninh Bình) vì khung Nam Định gần như không có nước mới trên ruộng; script JS chưa chạy thử trong Code Editor.
-7. Kiểm tra Playwright (vi/en, sáng/tối, 1600/390 px), `code-reviewer`.
-8. Anh/chị duyệt → đợt 2.
+7. ✅ (2026-11-17) Kiểm tra Playwright trên bản build (7 trang × vi/en × sáng/tối × 1600/390 px: 0 lỗi, 0 tràn, mọi island hydrate, link nội bộ đủ), `code-reviewer` (không CRITICAL/HIGH; đã sửa biểu đồ VH trong script GEE lúa, làm tròn ngưỡng Otsu script lũ, lời giới thiệu chương 15).
+8. ✅ (2026-11-17) Anh/chị duyệt đợt 1 → làm tiếp đợt 2.
+
+## 6b. Lộ trình đợt 2 (13 chương còn lại)
+
+Mỗi bước giống đợt 1: xuất dữ liệu GEE → viết vi + en → quiz, glossary, `*_numbers.ts` → Playwright + `code-reviewer`. Lab cho các chương mới gom vào bước 15.
+
+9. ✅ (2026-11-17) Phần A: ch.1 `deltas` (lớp phủ WorldCover, mật độ dân GHSL, số vụ lúa; thẻ số liệu tính từ dữ liệu) + ch.2 `data` (tỉ lệ ảnh S2 quang đãng theo tháng ở 5 điểm, số cảnh S1 theo năm, tỉ lệ pixel thuần theo độ phân giải; bảng cảm biến, chi phí ảnh theo sách 1.2.1). Sửa HUD bản tiếng Anh hiện tên tỉnh tiếng Việt.
+10. Ch.7 `climate` + ch.9 `drought` (CHIRPS, ERA5-Land, MOD11A2, MOD16A2, SMAP; chung dữ liệu nền).
+11. Ch.11 `soil-terrain` + ch.12 `coast`.
+12. Ch.13 `emissions`.
+13. Phần B: ch.3 `landcover`, ch.5 `area-stats`, ch.6 `yield`.
+14. Ch.14 `risk` (tổng hợp 7–13) + ch.16 `reference`.
+15. Lab cho các chương đợt 2, cập nhật ch.15.
+16. Kiểm tra cuối đợt 2; tạo repo GitHub + deploy khi anh/chị yêu cầu.
 
 ## 7. Rủi ro / việc cần xác minh
 

@@ -1,0 +1,14 @@
+[
+ { "id": "land-cover", "vi": "Lớp phủ đất", "en": "Land cover",
+   "def": { "vi": "Cái phủ trên mặt đất nhìn thấy được: cây, cỏ, nước, nhà, đất trống. Khác với sử dụng đất (con người dùng đất vào việc gì): một vườn cây ăn trái là đất nông nghiệp nhưng có lớp phủ cây gỗ.",
+            "en": "What physically covers the ground: trees, grass, water, buildings, bare soil. Different from land use (what people use the land for): an orchard is farmland but its cover is trees." } },
+ { "id": "gridded-population", "vi": "Dân số dạng lưới", "en": "Gridded population",
+   "def": { "vi": "Bản đồ số người trên mỗi ô lưới đều (ví dụ 100 m), tạo bằng cách phân bổ số dân của từng đơn vị hành chính xuống các ô theo nhà cửa vệ tinh nhìn thấy. Là sản phẩm mô hình, không phải số đếm.",
+            "en": "A map of people per regular grid cell (e.g. 100 m), made by spreading the population of each administrative unit over the cells according to the buildings seen from space. A model product, not a count." } },
+ { "id": "agri-statistics", "vi": "Thống kê nông nghiệp", "en": "Agricultural statistics",
+   "def": { "vi": "Số liệu chính thức về diện tích, năng suất, sản lượng cây trồng, vật nuôi, lao động nông nghiệp, thường lấy từ tổng điều tra và điều tra mẫu.",
+            "en": "Official figures on crop area, yield and production, livestock and farm labour, usually from censuses and sample surveys." } },
+ { "id": "sampling-frame", "vi": "Khung mẫu", "en": "Sampling frame",
+   "def": { "vi": "Danh sách hay bản đồ mọi đơn vị có thể được chọn vào mẫu điều tra (hộ, thửa, ô lưới, điểm). Bản đồ vệ tinh giúp lập khung mẫu theo diện tích và phân tầng nó.",
+            "en": "The list or map of every unit that can be drawn into a survey sample (households, plots, grid cells, points). Satellite maps help build area frames and stratify them." } }
+]

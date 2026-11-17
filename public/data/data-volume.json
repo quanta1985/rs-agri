@@ -1,0 +1,1 @@
+{"year":2024,"regions":{"red":{"s2":891,"s1":180,"landsat":193,"s2_tiles":10},"mekong":{"s2":1329,"s1":288,"landsat":299,"s2_tiles":13}},"provenance":{"source":"image counts in COPERNICUS/S2_HARMONIZED (L1C tiles), COPERNICUS/S1_GRD (IW), LANDSAT/LC08 + LC09 C02 T1_L2 touching the region outline, 2024"}}
