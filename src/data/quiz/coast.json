@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Vì sao không vẽ đường bờ Cà Mau từ một ảnh Landsat duy nhất?", "en": "Why not draw the Ca Mau shoreline from a single Landsat image?" },
+  "options": [
+   { "vi": "Mỗi ảnh chụp ở một mức triều; trên bãi bùn rộng, đường bờ dịch hàng trăm mét giữa triều lên và xuống", "en": "Each image catches one tide stage; on wide mud flats the shoreline shifts hundreds of metres between high and low tide" },
+   { "vi": "Landsat không có kênh hồng ngoại", "en": "Landsat has no infrared band" },
+   { "vi": "Ảnh Landsat chỉ có từ năm 2013", "en": "Landsat images only exist from 2013" },
+   { "vi": "Đường bờ Cà Mau không bao giờ thay đổi", "en": "The Ca Mau shoreline never changes" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lấy tỉ lệ số lần là nước trên mọi ảnh không mây trong năm năm cho ra đường bờ ở mức triều trung vị, ổn định hơn nhiều.", "en": "Taking the share of water looks over all clear images in five years gives a median-tide shoreline, far more stable." }
+ },
+ {
+  "q": { "vi": "Một đoạn bờ dài 10 km mất 330 ha đất trong 33 năm. Đường bờ lùi trung bình bao nhiêu?", "en": "A 10 km stretch of coast lost 330 ha of land in 33 years. How fast did the shoreline retreat on average?" },
+  "options": [
+   { "vi": "10 m/năm", "en": "10 m/yr" },
+   { "vi": "1 m/năm", "en": "1 m/yr" },
+   { "vi": "100 m/năm", "en": "100 m/yr" },
+   { "vi": "33 m/năm", "en": "33 m/yr" }
+  ],
+  "answer": 0,
+  "why": { "vi": "330 ha = 3 300 000 m²; chia cho 10 000 m bờ được 330 m; chia cho 33 năm được 10 m/năm.", "en": "330 ha = 3,300,000 m²; divided by 10,000 m of coast gives 330 m; divided by 33 years gives 10 m/yr." }
+ },
+ {
+  "q": { "vi": "Thống kê chính thức cho thấy rừng ngập mặn ĐBSCL tăng 11 184 ha trong 2015–2020, còn Global Mangrove Watch giảm 474 ha. Giải thích hợp lý nhất?", "en": "Official statistics show Mekong Delta mangroves growing by 11,184 ha over 2015–2020, while Global Mangrove Watch shows a 474 ha drop. The most likely explanation?" },
+  "options": [
+   { "vi": "Thống kê tính đất rừng đã trồng kể cả cây non; vệ tinh chỉ thấy tán đủ dày, và trồng mới phải bù phần bị xói", "en": "Statistics count planted forest land including saplings; the satellite sees only closed canopy, and planting must also offset what erosion removes" },
+   { "vi": "Một trong hai nguồn chắc chắn bịa số", "en": "One of the two sources must be making numbers up" },
+   { "vi": "GMW không có dữ liệu ở Việt Nam", "en": "GMW has no data in Vietnam" },
+   { "vi": "Rừng ngập mặn không nhìn thấy được từ vệ tinh", "en": "Mangroves cannot be seen from space" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Hai nguồn đo hai định nghĩa khác nhau. So sánh chỉ có ý nghĩa khi biết mỗi nguồn đếm cái gì.", "en": "The two sources measure different definitions. Comparing them only makes sense once you know what each one counts." }
+ },
+ {
+  "q": { "vi": "Trên bản đồ thay đổi đất – nước, một mảng lớn trong đất liền Cà Mau đổi từ đất thành nước. Kết luận nào đúng?", "en": "On the land–water change map, a large inland patch of Ca Mau turned from land to water. Which conclusion holds?" },
+  "options": [
+   { "vi": "Phải xem hình dạng: ô lưới vuông vức theo kênh là ao nuôi, không phải biển tràn vào", "en": "Look at the shapes: square cells along canals are ponds, not sea flooding in" },
+   { "vi": "Biển đã tràn sâu 30 km vào đất liền", "en": "The sea has flooded 30 km inland" },
+   { "vi": "Đó chắc chắn là lỗi mây", "en": "It must be a cloud error" },
+   { "vi": "Đất liền đã lún xuống dưới mực nước biển", "en": "The land has sunk below sea level" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Bản đồ chỉ biết đất và nước. Xói bờ và ao mới đều là 'đất thành nước'; vị trí và hình dạng cho biết đó là gì.", "en": "The map only knows land and water. Coastal erosion and new ponds are both 'land to water'; position and shape tell them apart." }
+ }
+]

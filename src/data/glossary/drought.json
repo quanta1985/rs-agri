@@ -1,0 +1,23 @@
+[
+ { "id": "drought-types", "vi": "Các loại hạn", "en": "Types of drought",
+   "def": { "vi": "Hạn khí tượng (thiếu mưa), hạn nông nghiệp (thiếu ẩm cho cây), hạn thủy văn (thiếu nước sông, hồ, nước ngầm) và hạn kinh tế – xã hội (thiếu nước so với nhu cầu). Chúng nối tiếp nhau theo thời gian.",
+            "en": "Meteorological drought (lack of rain), agricultural drought (lack of moisture for crops), hydrological drought (low rivers, lakes, groundwater) and socio-economic drought (water short of demand). They follow one another in time." } },
+ { "id": "spi", "vi": "Chỉ số mưa chuẩn hóa (SPI)", "en": "Standardized Precipitation Index (SPI)",
+   "def": { "vi": "Lượng mưa cộng dồn k tháng, biến đổi qua phân phối thống kê thành số độ lệch chuẩn so với bình thường. SPI ≤ −1 là khô vừa, ≤ −1,5 rất khô, ≤ −2 cực khô (McKee và cs., 1993).",
+            "en": "Rainfall summed over k months, transformed through a fitted distribution into standard deviations from normal. SPI ≤ −1 is moderately dry, ≤ −1.5 severely dry, ≤ −2 extremely dry (McKee et al., 1993)." } },
+ { "id": "vci", "vi": "Chỉ số điều kiện thực vật (VCI)", "en": "Vegetation Condition Index (VCI)",
+   "def": { "vi": "Vị trí của NDVI hiện tại giữa NDVI thấp nhất và cao nhất của cùng thời điểm trong năm qua nhiều năm, từ 0 (tệ nhất) đến 100 (tốt nhất) (Kogan, 1995).",
+            "en": "Where the current NDVI sits between the lowest and highest NDVI of the same time of year over many years, from 0 (worst) to 100 (best) (Kogan, 1995)." } },
+ { "id": "tci", "vi": "Chỉ số điều kiện nhiệt (TCI)", "en": "Temperature Condition Index (TCI)",
+   "def": { "vi": "Như VCI nhưng với nhiệt độ bề mặt, đảo chiều: bề mặt càng nóng so với các năm khác thì TCI càng thấp.",
+            "en": "Like VCI but for surface temperature, reversed: the hotter the surface compared with other years, the lower the TCI." } },
+ { "id": "vhi", "vi": "Chỉ số sức khỏe thực vật (VHI)", "en": "Vegetation Health Index (VHI)",
+   "def": { "vi": "Trung bình của VCI và TCI. Hệ thống ASIS của FAO coi VHI dưới 35 là điểm có nguy cơ hạn.",
+            "en": "The mean of VCI and TCI. FAO's ASIS treats a VHI below 35 as a likely drought pixel." } },
+ { "id": "soil-moisture", "vi": "Độ ẩm đất", "en": "Soil moisture",
+   "def": { "vi": "Lượng nước trong đất, tính bằng m³ nước trên m³ đất. SMAP đo lớp mặt vài cm bằng sóng viba; sản phẩm L4 đồng hóa số đo đó vào mô hình để ước tính cả vùng rễ (0–100 cm), 9 km.",
+            "en": "Water held in the soil, in m³ of water per m³ of soil. SMAP measures the top few cm with microwaves; its L4 product assimilates that into a model to estimate the root zone (0–100 cm) at 9 km." } },
+ { "id": "early-warning", "vi": "Hệ thống cảnh báo sớm", "en": "Early warning system",
+   "def": { "vi": "Chuỗi thu thập dữ liệu, phân tích, dự báo và truyền tin để người ra quyết định hành động trước khi rủi ro thành thảm họa (FAO, 2017, mục 6.2).",
+            "en": "The chain of data collection, analysis, forecasting and communication that lets decision-makers act before a hazard becomes a disaster (FAO, 2017, section 6.2)." } }
+]

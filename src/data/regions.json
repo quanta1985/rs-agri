@@ -1,5 +1,5 @@
 {
-  "_doc": "Single source of study areas for scripts/data/*.py (raster grids) and the islands (labels, pickers). Deltas: bbox = mainland delta farmland (islands such as Phu Quoc and Bach Long Vi and most of Quang Ninh left out), from scripts/data/export_boundaries.py output, rounded by hand. Sites: square frames of size_m ground metres around center.",
+  "_doc": "Single source of study areas for scripts/data/*.py (raster grids) and the islands (labels, pickers). Deltas: bbox = mainland delta farmland (islands such as Phu Quoc and Bach Long Vi and most of Quang Ninh left out), from scripts/data/export_boundaries.py output, rounded by hand. Sites (10 m detail) and frames (larger coastal windows, ch.12): squares of size_m ground metres around center.",
   "regions": {
     "red": { "kind": "delta", "name": { "vi": "ĐB sông Hồng", "en": "Red River Delta" }, "bbox": [105.3, 19.9, 107.05, 21.6] },
     "mekong": { "kind": "delta", "name": { "vi": "ĐB sông Cửu Long", "en": "Mekong Delta" }, "bbox": [104.4, 8.5, 106.85, 11.05] },
@@ -7,6 +7,8 @@
     "angiang": { "kind": "site", "delta": "mekong", "name": { "vi": "Tri Tôn (An Giang)", "en": "Tri Ton (An Giang)" }, "center": [105.08, 10.45], "size_m": 10240 },
     "thapmuoi": { "kind": "site", "delta": "mekong", "name": { "vi": "Tháp Mười (Đồng Tháp)", "en": "Thap Muoi (Dong Thap)" }, "center": [105.83, 10.55], "size_m": 10240 },
     "bentre": { "kind": "site", "delta": "mekong", "name": { "vi": "Giồng Trôm – Ba Tri (Bến Tre)", "en": "Giong Trom – Ba Tri (Ben Tre)" }, "center": [106.5, 10.1], "size_m": 10240 },
-    "camau": { "kind": "site", "delta": "mekong", "name": { "vi": "Năm Căn – Ngọc Hiển (Cà Mau)", "en": "Nam Can – Ngoc Hien (Ca Mau)" }, "center": [105.0, 8.75], "size_m": 10240 }
+    "camau": { "kind": "site", "delta": "mekong", "name": { "vi": "Năm Căn – Ngọc Hiển (Cà Mau)", "en": "Nam Can – Ngoc Hien (Ca Mau)" }, "center": [105.0, 8.75], "size_m": 10240 },
+    "ndcoast": { "kind": "frame", "delta": "red", "name": { "vi": "Bờ biển Nam Định", "en": "Nam Dinh coast" }, "center": [106.40, 20.12], "size_m": 52000 },
+    "cmcoast": { "kind": "frame", "delta": "mekong", "name": { "vi": "Mũi Cà Mau", "en": "Ca Mau Cape" }, "center": [105.03, 8.82], "size_m": 72000 }
   }
 }

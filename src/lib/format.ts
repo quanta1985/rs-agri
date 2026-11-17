@@ -10,8 +10,11 @@ export const fmtNum = (lang: Lang, v: number, digits: number): string =>
 /** Decimal places that resolve one raw step (scale 0.005 -> 3, 0.5 -> 1, 1 -> 0). */
 export const digitsFor = (scale: number): number => Math.max(0, Math.ceil(-Math.log10(scale) - 1e-9));
 
-/** "2024-03" -> "03/2024", "2024-10-14" -> "14/10/2024" (vi) / "14 Oct 2024" (en); other labels unchanged. */
+/** "2024-03" -> "03/2024", "2024-10-14" -> "14/10/2024" (vi) / "14 Oct 2024" (en); calendar month "M03" (a climatology)
+ *  -> "Tháng 3" / "Mar"; other labels unchanged. */
 export const fmtTime = (lang: Lang, s: string): string => {
+  const cm = s.match(/^M(\d{2})$/);
+  if (cm) return lang === 'vi' ? `Tháng ${+cm[1]}` : new Date(Date.UTC(2000, +cm[1] - 1, 1)).toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' });
   const m = s.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
   if (!m) return s;
   const [, y, mo, d] = m;

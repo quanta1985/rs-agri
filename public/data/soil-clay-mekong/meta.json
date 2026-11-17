@@ -1,0 +1,54 @@
+{
+ "id": "soil-clay-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Hàm lượng sét 0–30 cm (SoilGrids)",
+  "en": "Clay content 0–30 cm (SoilGrids)"
+ },
+ "units": {
+  "vi": "%",
+  "en": "%"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  20,
+  60
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "SoilGrids 2.0"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 588554,
+   "mean": 38.3803,
+   "p2": 32.0,
+   "p50": 38.5,
+   "p98": 44.5,
+   "min": 25.5,
+   "max": 49.5
+  }
+ ],
+ "provenance": {
+  "source": "projects/soilgrids-isric/clay_mean, depths 0-5, 5-15, 15-30 cm (predicted mean, 250 m)",
+  "processing": "thickness-weighted mean of the three layers (5:10:15), nearest cell on the 250 m Mercator grid",
+  "attribution": "SoilGrids 2.0 (Poggio et al. 2021, ISRIC), CC BY 4.0",
+  "exported": "2026-11-17T14:00:38+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

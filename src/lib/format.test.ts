@@ -22,6 +22,8 @@ test('fmtTime formats months and days per language, passes other labels through'
   assert.equal(fmtTime('en', '2024-03'), 'Mar 2024');
   assert.equal(fmtTime('en', '2024-10-14'), '14 Oct 2024');
   assert.equal(fmtTime('vi', '1984–2021'), '1984–2021');
+  assert.equal(fmtTime('vi', 'M03'), 'Tháng 3');
+  assert.equal(fmtTime('en', 'M12'), 'Dec');
 });
 
 test('placeName strips Vietnamese diacritics on English pages only', () => {

@@ -1,0 +1,196 @@
+---
+title: Đất, phèn, địa hình, sụt lún và nước biển dâng
+n: 11
+summary: "Hai châu thổ thấp, đất trẻ và đang lún. Chương này đọc bản đồ đất toàn cầu SoilGrids và chỉ ra chỗ nó không thấy đất phèn, so hai mô hình độ cao (Copernicus DEM và DeltaDTM) để thấy cây dừa và mái nhà làm vùng đất cao thêm vài mét, rồi tính bao nhiêu diện tích nằm dưới mỗi mức nước biển khi cộng thêm sụt lún do khai thác nước ngầm."
+objectives:
+  - Đọc bản đồ tính chất đất SoilGrids và biết giới hạn của một bản đồ đất toàn cầu 250 m.
+  - Giải thích vì sao vệ tinh không nhìn thấy đất phèn trực tiếp và nó nhìn thấy những dấu hiệu gì.
+  - Phân biệt mô hình bề mặt (DSM) với mô hình địa hình (DTM) và hiểu vì sao chênh lệch vài mét lại quan trọng ở châu thổ.
+  - Dùng đường cong diện tích – độ cao để ước tính diện tích dưới một mức nước biển và nói rõ các giả định.
+  - So tốc độ sụt lún với tốc độ nước biển dâng và tính mực nước biển dâng tương đối.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import TerrainCurve from '../../../islands/TerrainCurve.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/soil-terrain.json';
+
+Lũ, hạn và mặn ở các chương trước đều diễn ra trên một nền đất cụ thể: phù sa trẻ, nhiều nơi là phèn, và thấp đến mức vài chục centimét cũng quan trọng. Chương này đo nền đất ấy từ vệ tinh và chỉ ra chỗ nào phép đo đáng tin, chỗ nào không.
+
+<Stats items={[
+  { v: '1,6', u: 'triệu ha', l: 'đất phèn ở ĐBSCL, trong đó khoảng 400 000 ha ở Đồng Tháp Mười (Husson, 1998)' },
+  { v: '0,8', u: 'm', l: 'độ cao trung bình ĐBSCL theo số liệu đo đạc mặt đất, so với 2,6 m theo mô hình SRTM (Minderhoud và cs., 2019)' },
+  { v: '60', u: '%', l: 'diện tích đất ĐBSCL thấp hơn 2 m theo DeltaDTM (38 % theo Copernicus DEM)' },
+  { v: '1,1', u: 'cm/năm', l: 'sụt lún trung bình do khai thác nước ngầm ở ĐBSCL, gấp khoảng ba lần tốc độ nước biển dâng toàn cầu (Minderhoud và cs., 2017; IPCC, 2021)' },
+]} caption="Số liệu DeltaDTM và Copernicus DEM tính bằng scripts/soil-terrain_numbers.ts; các số khác trích từ tài liệu ghi bên cạnh." />
+
+## 11.1 Đất của hai châu thổ
+
+Đất hai châu thổ là **phù sa trẻ** sông Hồng và sông Mê Kông bồi trong vài nghìn năm gần đây. Ven các sông lớn là đất phù sa màu mỡ. Ở vùng trũng xa sông, nơi xưa là đầm lầy nước lợ, là **đất phèn**. Ven biển có đất mặn, và ở vài nơi ngập lâu năm có đất than bùn.
+
+Sổ tay FAO (2017, mục 1.4, Bảng 2) xếp **bản đồ đất** vào danh sách lớp dữ liệu tham chiếu cần có trước khi làm thống kê nông nghiệp bằng ảnh vệ tinh, với tỉ lệ tối thiểu 1:100 000, để đánh giá mức thích hợp của đất, rủi ro xói mòn và mặn. Khi không có bản đồ quốc gia mở, nguồn dễ lấy nhất là <Term id="soilgrids">SoilGrids</Term> 2.0 (Poggio và cs., 2021): bản đồ toàn cầu ở 250 m, sáu tầng sâu đến 2 m, giấy phép CC BY 4.0.
+
+Nhưng 250 m tương ứng với bản đồ tỉ lệ khoảng 1:500 000 (quy tắc của Tobler: kích thước ô tính bằng mét bằng mẫu số tỉ lệ chia 2 000), thô hơn mức FAO đề nghị năm lần. Và SoilGrids là **dự đoán** của một mô hình học máy từ các phẫu diện đất có trong cơ sở dữ liệu quốc tế cùng các biến môi trường, không phải số đo.
+
+<Predict client:visible lang="vi"
+  title="SoilGrids có thấy đất phèn không?"
+  q="Đất phèn hoạt động có pH dưới 4. Tháp Mười (Đồng Tháp) nằm giữa vùng đất phèn lớn nhất ĐBSCL. SoilGrids cho pH tầng mặt (0–30 cm) quanh Tháp Mười là bao nhiêu?"
+  options={['Dưới 4', 'Từ 4 đến 5', 'Khoảng 6', 'Trên 7']} answer={2}
+  why="Khoảng 6,05: gần trung tính. Giá trị thấp nhất trong cả ĐBSCL là 4,8, và đúng là nằm ở vùng trũng Đồng Tháp Mười. SoilGrids đặt đúng chỗ chua nhất nhưng làm mượt quá mức: chỉ 11,7 % diện tích ĐBSCL có pH dưới 5,5 và không ô nào dưới 4,5." />
+
+<Figure
+  title="Hình 11.1 — pH, cacbon hữu cơ và hàm lượng sét tầng 0–30 cm theo SoilGrids 2.0"
+  try="Ở lớp pH, tìm vùng nâu nhất (chua nhất) của ĐBSCL. Chuyển sang lớp cacbon hữu cơ: nơi có nhiều cacbon nhất nằm ở đâu, gần sông hay gần biển?"
+  source="ISRIC SoilGrids 2.0 (Poggio và cs., 2021), CC BY 4.0: trung bình có trọng số của ba tầng 0–5, 5–15, 15–30 cm (5 : 10 : 15), ô 250 m gần nhất trên lưới Mercator. Thang màu kéo giãn: pH 5–7, cacbon 15–60 g/kg, sét 30–48 %."
+>
+  <DeltaMap client:visible lang="vi" label="Đất tầng mặt" region="mekong" choices={[
+    { key: 'ph', label: { vi: 'pH', en: 'pH' }, ids: { red: 'soil-ph-red', mekong: 'soil-ph-mekong' }, palette: 'brbg', range: [5, 7] },
+    { key: 'soc', label: { vi: 'Cacbon hữu cơ', en: 'Organic carbon' }, ids: { red: 'soil-soc-red', mekong: 'soil-soc-mekong' }, palette: 'viridis', range: [15, 60] },
+    { key: 'clay', label: { vi: 'Sét', en: 'Clay' }, ids: { red: 'soil-clay-red', mekong: 'soil-clay-mekong' }, palette: 'ylorrd', range: [30, 48] },
+  ]} />
+</Figure>
+
+<Term id="soil-organic-carbon">Cacbon hữu cơ</Term> cao nhất nằm ở bãi bùn ven biển của cả hai vùng (93,5 g/kg ở ĐBSCL, 95,5 g/kg ở ĐBSH, so với trung vị 30,5 và 20 g/kg), nơi lá và rễ cây ngập mặn tích tụ trong bùn ngập triều. Hàm lượng sét ở ĐBSCL gần như đồng đều (trung vị 38,5 %): bản đồ này không phân biệt được bờ sông với vùng trũng, điều mà bất kỳ người nông dân nào cũng biết.
+
+<Note kind="warn">
+
+SoilGrids hữu ích để có một cái nhìn đầu tiên ở nơi không có bản đồ đất. Nó không thay được bản đồ thổ nhưỡng quốc gia, và không dùng được để khoanh đất phèn: những giá trị cực đoan bị làm mượt, vì mô hình chỉ học từ số ít phẫu diện ở châu thổ. Muốn biết ô ruộng nào phèn, phải khoan và đo.
+
+</Note>
+
+## 11.2 Đất phèn: vệ tinh thấy hậu quả, không thấy pyrit
+
+<Term id="acid-sulfate-soil">Đất phèn</Term> chứa pyrit (FeS₂) hình thành dưới rừng ngập mặn và đầm lầy nước lợ xưa. Khi còn ngập nước, pyrit nằm yên. Khi đất khô đi (mùa khô, đào kênh, lên liếp), không khí vào được và pyrit bị oxy hóa thành axit sunfuric:
+
+<Formula label="Oxy hóa pyrit" tex="\mathrm{FeS_2} + \tfrac{15}{4}\,\mathrm{O_2} + \tfrac{7}{2}\,\mathrm{H_2O} \rightarrow \mathrm{Fe(OH)_3} + 2\,\mathrm{H_2SO_4}" where="
+\mathrm{FeS_2} :: pyrit trong lớp trầm tích dưới mặt đất
+\mathrm{H_2SO_4} :: axit sunfuric làm pH xuống dưới 4 và hòa tan nhôm, sắt độc cho cây
+" />
+
+Toàn bộ quá trình này xảy ra dưới mặt đất. Ảnh quang học chỉ thấy lớp mặt vài milimét, radar băng C chỉ xuyên được vài centimét đất ẩm. Vì vậy vệ tinh không đo được pH. Nó chỉ thấy **dấu hiệu**:
+
+<Steps title="Những gì ảnh vệ tinh thấy ở vùng đất phèn" items={[
+  { tag: '1', t: 'Thực vật chỉ thị', d: 'Rừng tràm và đồng cỏ năng mọc được trên đất phèn, nơi lúa khó sống. Bản đồ lớp phủ (Chương 1) cho thấy chúng.' },
+  { tag: '2', t: 'Nước trong bất thường', d: 'Nhôm hòa tan làm phù sa lắng nhanh, nên kênh, ao trên đất phèn trong vắt và có váng sắt màu gỉ, khác hẳn nước sông đục phù sa.' },
+  { tag: '3', t: 'Mùa vụ thất bại', d: 'Ruộng xuống giống rồi không lên xanh, hoặc bị bỏ hoang mùa khô. Chuỗi chỉ số thực vật (Chương 4) ghi lại điều đó, nhưng không nói được nguyên nhân là phèn, mặn hay thiếu nước.' },
+  { tag: '4', t: 'Địa hình và lịch sử ngập', d: 'Đất phèn nằm ở các vùng trũng, ngập sâu và lâu trong mùa lũ (Chương 8). Độ cao và tần suất ngập giúp khoanh vùng có khả năng là phèn để khảo sát thực địa.' },
+]} />
+
+<Note kind="key">
+
+Viễn thám giúp **khoanh vùng nghi ngờ** và **theo dõi hậu quả** của đất phèn, không thay được khoan và đo pH. Một bản đồ đất phèn đáng tin luôn có điểm khảo sát thực địa phía sau.
+
+</Note>
+
+## 11.3 Độ cao: mô hình bề mặt và mô hình địa hình
+
+Mọi mô hình độ cao toàn cầu miễn phí đều đo từ vệ tinh, và hầu hết đo **bề mặt đầu tiên** nhìn thấy. SRTM (năm 2000) và Copernicus DEM (từ vệ tinh TanDEM-X) dùng radar; sóng radar phản xạ từ tán cây, mái nhà. Đó là <Term id="dsm-dtm">mô hình bề mặt (DSM)</Term>. Thứ cần cho bài toán ngập là **mô hình địa hình (DTM)**: mặt đất trần.
+
+Ở vùng núi, sai vài mét chẳng đáng kể. Ở châu thổ, nơi cả vùng chỉ cao một đến hai mét, vài mét là toàn bộ câu chuyện. DeltaDTM (Pronk và cs., 2024) sửa Copernicus DEM bằng số đo lidar từ vệ tinh ICESat-2 và GEDI: bỏ cây, nhà, rồi nội suy lại. Sai số tuyệt đối trung bình của nó ở vùng ven biển thấp dưới 10 m là 0,45 m.
+
+<Predict client:visible lang="vi"
+  title="Vườn dừa cao bao nhiêu?"
+  q="Giồng Trôm (Bến Tre) phủ kín vườn dừa. DeltaDTM cho mặt đất ở đó cao khoảng 1,8 m. Copernicus DEM cho bao nhiêu?"
+  options={['Khoảng 1,8 m, như nhau', 'Khoảng 2,5 m', 'Khoảng 6 m', 'Khoảng 15 m']} answer={2}
+  why="6,0 m (trung bình 1 km quanh điểm): cao hơn mặt đất 4,3 m vì radar dội lại từ tán dừa. Ở Cần Thơ, phần đô thị và vườn cây làm Copernicus cao hơn 2,4 m (4,95 so với 2,57 m); ở ruộng lúa Tháp Mười chỉ 0,7 m (2,89 so với 2,15 m)." />
+
+<Figure
+  title="Hình 11.2 — Độ cao mặt đất (DeltaDTM), độ cao bề mặt (Copernicus DEM) và hiệu của chúng"
+  try="Chọn lớp Hiệu và nhìn ĐBSCL: những dải vàng đỏ chạy dài theo hướng nào? So với bản đồ lớp phủ ở Chương 1."
+  source="DeltaDTM v1.0 (Pronk và cs., 2024, Deltares), CC BY 4.0, cắt ở 10 m; Copernicus DEM GLO-30 bản 2024_1. Cả hai: mét trên geoid EGM2008, trung bình các ô ~30 m trong mỗi ô ~250 m. Được tạo từ Copernicus WorldDEM-30 © DLR e.V. 2010–2014 và © Airbus Defence and Space GmbH 2014–2018, do EU và ESA cung cấp trong chương trình COPERNICUS; các tổ chức phụ trách chương trình Copernicus không chịu trách nhiệm về bất kỳ việc sử dụng nào của Copernicus WorldDEM-30. Hiệu bỏ trống nơi DeltaDTM ≥ 10 m."
+>
+  <DeltaMap client:visible lang="vi" label="Độ cao" region="mekong" choices={[
+    { key: 'dtm', label: { vi: 'DeltaDTM (mặt đất)', en: 'DeltaDTM (ground)' }, ids: { red: 'dem-dtm-red', mekong: 'dem-dtm-mekong' }, range: [0, 6] },
+    { key: 'cop', label: { vi: 'Copernicus DEM (bề mặt)', en: 'Copernicus DEM (surface)' }, ids: { red: 'dem-cop-red', mekong: 'dem-cop-mekong' }, range: [0, 6] },
+    { key: 'diff', label: { vi: 'Hiệu Copernicus − DeltaDTM', en: 'Copernicus − DeltaDTM' }, ids: { red: 'dem-diff-red', mekong: 'dem-diff-mekong' } },
+  ]} />
+</Figure>
+
+Các dải chênh lệch lớn là **giồng cát** và các cù lao ven sông, nơi người ta lập vườn cây ăn trái, dừa và làng. Ruộng lúa trống thì hai mô hình gần nhau.
+
+<Note kind="warn">
+
+**Độ cao so với cái gì?** DeltaDTM và Copernicus DEM tính từ <Term id="vertical-datum">geoid EGM2008</Term>, còn bản đồ địa hình Việt Nam tính từ mực nước biển trung bình tại trạm Hòn Dấu. Minderhoud và cs. (2019) dựng một DEM từ số liệu đo đạc địa hình quốc gia và được độ cao trung bình ĐBSCL là 0,82 m trên mốc Hòn Dấu, trong khi trung vị của DeltaDTM ở đây là 1,9 m. Khoảng cách 1 m ấy vừa do mốc độ cao khác nhau, vừa do sai số còn lại của DeltaDTM; chương này không tách được hai phần. Bài học: trước khi so một DEM với mực nước, phải biết nó dùng mốc nào.
+
+</Note>
+
+## 11.4 Bao nhiêu đất nằm dưới mỗi mức nước
+
+Cộng diện tích các ô thấp hơn mỗi mức độ cao sẽ được một <Term id="hypsometric-curve">đường cong diện tích – độ cao</Term>. Đọc đường ấy ở một mức nước biển là ra diện tích thấp hơn mức đó.
+
+<Figure
+  title="Hình 11.3 — Tỉ lệ diện tích hai châu thổ thấp hơn mỗi mức độ cao, theo hai mô hình"
+  try="Rê chuột đến 1 m rồi 2 m. Ở ĐBSCL, hai mô hình chênh nhau bao nhiêu điểm phần trăm? Vì sao đường Copernicus nằm bên phải?"
+  source="Diện tích ô 30 m cộng theo từng nấc 0,1 m trong ranh giới vùng (geoBoundaries ADM1), trên các ô DeltaDTM có dữ liệu (mặt nước lớn bị bỏ) cho cả hai mô hình. Mét trên geoid EGM2008. Diện tích tính: ĐBSCL 3,48 triệu ha, ĐBSH 1,90 triệu ha."
+>
+  <TerrainCurve client:visible lang="vi" view="curve" />
+</Figure>
+
+Theo DeltaDTM, 60 % đất ĐBSCL thấp hơn 2 m và 92,5 % thấp hơn 3 m; theo Copernicus DEM chỉ 38 % và 65 %. ĐBSH cao hơn nhiều: 10,9 % thấp hơn 2 m (độ cao trung vị khoảng 5,3 m, vì vùng còn gồm cả phần thượng châu thổ quanh Hà Nội).
+
+Ở dưới 1 m, DeltaDTM cho ĐBSCL chỉ 4 %. Minderhoud và cs. (2019), với DEM từ số liệu đo đạc, tính rằng nước biển dâng 1 m sẽ đặt 75 % đồng bằng ĐBSCL dưới mực nước biển, trong khi DEM SRTM chỉ cho 31 %. <mark>Một độ lệch cỡ 1 m trong mô hình độ cao đổi kết luận từ "một phần nhỏ" thành "phần lớn châu thổ".</mark> Đó là lý do mọi bản đồ nước biển dâng phải ghi rõ mô hình độ cao và mốc độ cao nó dùng.
+
+<Note kind="myth">
+
+**"Thấp hơn mực nước biển là sẽ bị ngập."** Không hẳn. Đê biển, đê sông và cống giữ nước ở ngoài; nhiều vùng đất lấn biển ở Hà Lan nằm dưới mực nước biển hàng mét. Nhưng đất càng thấp so với nước thì tiêu nước càng khó, bơm càng tốn, nước mặn càng dễ thấm vào, và một lần vỡ đê càng gây hại lớn. Đường cong trong Hình 11.3 đo **mức phơi nhiễm**, không phải diện tích chắc chắn ngập.
+
+</Note>
+
+## 11.5 Sụt lún: châu thổ chìm nhanh hơn biển dâng
+
+Ở ĐBSCL, <Term id="land-subsidence">sụt lún</Term> chủ yếu do khai thác nước ngầm: khi áp lực nước trong các tầng chứa giảm, các lớp sét xen giữa bị nén lại và mặt đất hạ xuống, không hồi lại được. Erban và cs. (2014) dùng 78 cặp ảnh giao thoa radar ALOS PALSAR giai đoạn 2006–2010 (<Term id="insar">InSAR</Term>) và đo được tốc độ lún khoảng 1–4 cm/năm trên những vùng rộng hàng nghìn km². Minderhoud và cs. (2017) mô hình hóa 25 năm khai thác (1991–2016): đồng bằng đã lún trung bình khoảng 18 cm, tốc độ hiện nay trung bình 1,1 cm/năm, có nơi trên 2,5 cm/năm.
+
+Để so: mực nước biển toàn cầu dâng trung bình 3,7 mm/năm trong 2006–2018 (IPCC, 2021). Thứ quyết định ngập là <Term id="relative-slr">nước biển dâng tương đối</Term>, tức nước dâng cộng đất lún:
+
+<Formula label="Nước biển dâng tương đối" tex="\Delta \mathrm{RSL}(t) = \Delta \mathrm{SL}(t) + S \cdot t" where="
+\Delta \mathrm{SL}(t) :: nước biển dâng tuyệt đối sau t năm (theo kịch bản)
+S :: tốc độ sụt lún tại chỗ (cm/năm)
+t :: số năm tính từ năm gốc
+" />
+
+<Predict client:visible lang="vi"
+  title="Biển dâng hay đất lún?"
+  q="Từ 2025 đến 2050, nếu ĐBSCL tiếp tục lún 1,1 cm/năm và nước biển dâng khoảng 10 cm (Erban và cs., 2014), phần nào lớn hơn?"
+  options={['Nước biển dâng lớn hơn nhiều', 'Gần bằng nhau', 'Sụt lún lớn hơn gần ba lần', 'Sụt lún lớn hơn mười lần']} answer={2}
+  why="Sụt lún: 1,1 × 25 = 27,5 cm, gần gấp ba 10 cm nước biển dâng. Cộng lại, mực nước tương đối dâng khoảng 37,5 cm trong 25 năm. Phần lún là phần con người có thể giảm, bằng cách bớt khai thác nước ngầm." />
+
+<Figure
+  title="Hình 11.4 — Diện tích thấp hơn mực nước biển tương đối theo năm (minh họa)"
+  try="Giữ nước biển dâng 50 cm đến 2100, kéo sụt lún từ 0 lên 1,1 rồi 2,5 cm/năm. Năm nào thì một nửa ĐBSCL nằm dưới mực nước biển tương đối theo DeltaDTM?"
+  source="Minh họa: mực nước tương đối = nước biển dâng tăng đều từ 2025 đến giá trị chọn năm 2100, cộng sụt lún đều khắp vùng; đọc trên đường cong DeltaDTM và Copernicus DEM của Hình 11.3 (geoid EGM2008). Không tính đê, thủy triều, sai số và mốc độ cao của DEM; DEM đo đạc của Minderhoud và cs. (2019) cho đất thấp hơn, nên diện tích thật có thể lớn hơn nhiều."
+>
+  <TerrainCurve client:visible lang="vi" view="future" />
+</Figure>
+
+Minderhoud và cs. (2020) chạy hai nhóm kịch bản khai thác nước ngầm đến 2100: nhóm B (khai thác như xu thế hiện nay) và nhóm M (giảm khai thác). Lún thêm từ 2018 đến 2100 là 68 cm (B1) và khoảng 1 m (B2, 86–110 cm) ở nhóm B, nhưng chỉ 12–39 cm ở nhóm M. Cùng với nước biển dâng trung vị theo RCP 4.5, phần ĐBSCL còn cao hơn mực nước biển vào cuối thế kỷ là 32 % ở kịch bản B1, 44 % ở M1 và 57 % ở M3. Cách khai thác nước ngầm trong vài chục năm tới quyết định gần một phần tư diện tích châu thổ.
+
+<Depth level="advanced" title="Vì sao chương này không tự đo sụt lún">
+
+InSAR cần **pha** của tín hiệu radar. Sentinel-1 trên Google Earth Engine là sản phẩm GRD, chỉ còn cường độ, đã mất pha. Muốn đo lún phải tải ảnh SLC (hàng chục GB mỗi cảnh) và xử lý bằng phần mềm như SNAP, ISCE hay MintPy, hoặc dùng sản phẩm đã xử lý sẵn của các dự án như LiCSAR. Ruộng lúa còn gây thêm khó khăn: mặt ruộng đổi theo mùa vụ nên pha mất tương quan nhanh; người ta phải dựa vào các điểm phản xạ ổn định như nhà, đường, đê (kỹ thuật tán xạ điểm ổn định, PS-InSAR).
+
+</Depth>
+
+## 11.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9, 084010. https://doi.org/10.1088/1748-9326/9/8/084010
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Mục 1.4, Bảng 2.
+- Husson, O. (1998). *Spatio-temporal variability of acid sulphate soils in the Plain of Reeds, Vietnam* (luận án tiến sĩ). Wageningen University. https://doi.org/10.18174/206281
+- IPCC (2021). Summary for Policymakers. Trong *Climate Change 2021: The Physical Science Basis*. Cambridge University Press. Mục A.1.7.
+- Minderhoud, P. S. J., Erkens, G., Pham, V. H., Bui, V. T., Erban, L., Kooi, H., & Stouthamer, E. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12, 064006. https://doi.org/10.1088/1748-9326/aa7146
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- Minderhoud, P. S. J., Middelkoop, H., Erkens, G., & Stouthamer, E. (2020). Groundwater extraction may drown mega-delta: projections of extraction-induced subsidence and elevation of the Mekong delta for the 21st century. *Environmental Research Communications*, 2, 011005. https://doi.org/10.1088/2515-7620/ab5e21
+- Poggio, L., de Sousa, L. M., Batjes, N. H., Heuvelink, G. B. M., Kempen, B., Ribeiro, E., & Rossiter, D. (2021). SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. *SOIL*, 7, 217–240. https://doi.org/10.5194/soil-7-217-2021
+- Pronk, M., Hooijer, A., Eilander, D., Haag, A., de Jong, T., Vousdoukas, M., Vernimmen, R., Ledoux, H., & Eleveld, M. (2024). DeltaDTM: A global coastal digital terrain model. *Scientific Data*, 11, 273. https://doi.org/10.1038/s41597-024-03091-9
+- Tobler, W. (1987). Measuring spatial resolution. *Proceedings of the International Workshop on Geographic Information Systems*, Beijing, 12–16.

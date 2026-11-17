@@ -1,0 +1,23 @@
+[
+ { "id": "climate-normal", "vi": "Giá trị trung bình khí hậu", "en": "Climate normal",
+   "def": { "vi": "Trung bình 30 năm của một biến khí hậu theo từng tháng; Tổ chức Khí tượng Thế giới dùng giai đoạn 1991–2020. Bất thường được tính so với giá trị này.",
+            "en": "The 30-year mean of a climate variable for each month; the World Meteorological Organization uses 1991–2020. Anomalies are measured against it." } },
+ { "id": "chirps", "vi": "CHIRPS", "en": "CHIRPS",
+   "def": { "vi": "Bộ dữ liệu mưa toàn cầu 0,05° (khoảng 5,5 km) từ 1981, ghép ước tính mưa từ ảnh hồng ngoại vệ tinh địa tĩnh với số đo trạm mặt đất.",
+            "en": "A global 0.05° (about 5.5 km) rainfall dataset from 1981 that blends rainfall estimated from geostationary infrared imagery with rain-gauge measurements." } },
+ { "id": "reanalysis", "vi": "Tái phân tích", "en": "Reanalysis",
+   "def": { "vi": "Dữ liệu khí hậu dạng lưới tạo bằng cách chạy lại một mô hình dự báo thời tiết trên quá khứ và đồng hóa mọi quan trắc có được (ví dụ ERA5-Land, 0,1°). Đầy đủ, liên tục nhưng là sản phẩm mô hình.",
+            "en": "Gridded climate data made by re-running a weather-forecast model over the past while assimilating all available observations (e.g. ERA5-Land, 0.1°). Complete and continuous, but a model product." } },
+ { "id": "lst", "vi": "Nhiệt độ bề mặt đất (LST)", "en": "Land surface temperature (LST)",
+   "def": { "vi": "Nhiệt độ của chính mặt đất, tán cây hay mái nhà, đo bằng kênh hồng ngoại nhiệt (ví dụ MODIS 1 km). Khác nhiệt độ không khí: ruộng khô giữa trưa có thể nóng hơn không khí hàng chục độ.",
+            "en": "The temperature of the ground, canopy or roof itself, measured in thermal infrared bands (e.g. MODIS at 1 km). Not air temperature: a dry field at noon can be tens of degrees hotter than the air." } },
+ { "id": "evapotranspiration", "vi": "Bốc thoát hơi", "en": "Evapotranspiration",
+   "def": { "vi": "Lượng nước đi vào khí quyển do bốc hơi từ đất, mặt nước và thoát hơi qua lá. Bốc thoát hơi tiềm năng là lượng sẽ mất nếu nước luôn đủ.",
+            "en": "Water returned to the atmosphere by evaporation from soil and open water and transpiration through leaves. Potential evapotranspiration is what would be lost if water were never short." } },
+ { "id": "enso", "vi": "ENSO (El Niño – Dao động phương Nam)", "en": "ENSO (El Niño–Southern Oscillation)",
+   "def": { "vi": "Dao động nhiệt độ mặt biển và khí áp ở Thái Bình Dương xích đạo. Pha nóng El Niño thường làm mùa khô ở Đông Nam Á ít mưa và nóng hơn; pha lạnh La Niña ngược lại.",
+            "en": "The swing of sea-surface temperature and air pressure in the equatorial Pacific. The warm El Niño phase tends to make South-East Asian dry seasons drier and hotter; the cold La Niña phase the opposite." } },
+ { "id": "oni", "vi": "Chỉ số ONI", "en": "Oceanic Niño Index (ONI)",
+   "def": { "vi": "Bất thường nhiệt độ mặt biển trung bình 3 tháng ở vùng Niño 3.4, do NOAA công bố. Từ +0,5 °C trở lên là El Niño, từ −0,5 °C trở xuống là La Niña.",
+            "en": "The 3-month mean sea-surface temperature anomaly in the Niño 3.4 region, published by NOAA. +0.5 °C or more is El Niño, −0.5 °C or less La Niña." } }
+]

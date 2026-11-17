@@ -1,0 +1,73 @@
+{
+ "id": "coast-change-ndcoast",
+ "region": "ndcoast",
+ "title": {
+  "vi": "Đất và nước 1988–92 so với 2021–25",
+  "en": "Land and water, 1988–92 against 2021–25"
+ },
+ "units": null,
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 1,
+   "color": "#56B4E9",
+   "label": {
+    "vi": "Nước cả hai thời kỳ",
+    "en": "Water in both periods"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#D55E00",
+   "label": {
+    "vi": "Đất → nước (bờ xói, ao mới)",
+    "en": "Land → water (eroded shore, new ponds)"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#009E73",
+   "label": {
+    "vi": "Nước → đất (bãi bồi, ao lấp)",
+    "en": "Water → land (new land, filled ponds)"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11816682.062,
+  2314951.698
+ ],
+ "res": 31.949758,
+ "ground_res_m": 30,
+ "width": 1733,
+ "height": 1733,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "1988-92 → 2021-25"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 3003289,
+   "mean": 0.7316,
+   "p2": 0.0,
+   "p50": 1.0,
+   "p98": 3.0,
+   "min": 0.0,
+   "max": 3.0
+  }
+ ],
+ "provenance": {
+  "source": "Landsat 5/7/8/9 C2 L2, all months, MNDWI = (green - SWIR1) / (green + SWIR1)",
+  "processing": "water = MNDWI > 0 in >= 50 % of clear looks of each period (1988-92, 2021-25); cells with < 5 clear looks in either period left out; land in both periods transparent",
+  "attribution": "Landsat 5/7/8/9 Collection 2 Level-2 courtesy of the U.S. Geological Survey",
+  "exported": "2026-11-17T14:16:57+00:00",
+  "script": "scripts/data/export_coast.py"
+ }
+}

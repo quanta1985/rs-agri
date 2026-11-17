@@ -1,0 +1,73 @@
+{
+ "id": "mangrove-change-ndcoast",
+ "region": "ndcoast",
+ "title": {
+  "vi": "Rừng ngập mặn GMW 1996 và 2020",
+  "en": "GMW mangroves 1996 and 2020"
+ },
+ "units": null,
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 1,
+   "color": "#009E73",
+   "label": {
+    "vi": "Rừng ngập mặn 1996 và 2020",
+    "en": "Mangrove in 1996 and 2020"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#D55E00",
+   "label": {
+    "vi": "Mất sau 1996",
+    "en": "Lost since 1996"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#F0E442",
+   "label": {
+    "vi": "Mới từ 1996",
+    "en": "New since 1996"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11816682.062,
+  2314951.698
+ ],
+ "res": 31.949758,
+ "ground_res_m": 30,
+ "width": 1733,
+ "height": 1733,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "1996 → 2020"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 38434,
+   "mean": 1.5166,
+   "p2": 1.0,
+   "p50": 1.0,
+   "p98": 3.0,
+   "min": 1.0,
+   "max": 3.0
+  }
+ ],
+ "provenance": {
+  "source": "projects/sat-io/open-datasets/GMW/extent/GMW_V3 (25 m, ALOS PALSAR + Landsat), epochs 1996 and 2020",
+  "processing": "nearest 25 m cell on the 30 m Mercator grid",
+  "attribution": "Global Mangrove Watch v3.0 (Bunting et al. 2022), CC BY 4.0",
+  "exported": "2026-11-17T14:20:10+00:00",
+  "script": "scripts/data/export_coast.py"
+ }
+}

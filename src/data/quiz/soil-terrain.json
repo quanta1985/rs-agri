@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Vì sao không dùng SoilGrids để khoanh vùng đất phèn ở ĐBSCL?", "en": "Why not use SoilGrids to map acid sulfate soils in the Mekong Delta?" },
+  "options": [
+   { "vi": "Nó là dự đoán 250 m làm mượt giá trị cực đoan: pH thấp nhất cả vùng chỉ 4,8, trong khi đất phèn hoạt động dưới 4", "en": "It is a 250 m prediction that smooths extremes: its lowest pH in the whole delta is 4.8, while active acid sulfate soils are below 4" },
+   { "vi": "SoilGrids không có dữ liệu cho Việt Nam", "en": "SoilGrids has no data for Vietnam" },
+   { "vi": "SoilGrids chỉ có cacbon, không có pH", "en": "SoilGrids has carbon but no pH" },
+   { "vi": "Đất phèn có pH rất cao nên SoilGrids bỏ qua", "en": "Acid sulfate soils have a very high pH, so SoilGrids ignores them" }
+  ],
+  "answer": 0,
+  "why": { "vi": "SoilGrids đặt chỗ chua nhất đúng ở Đồng Tháp Mười nhưng chỉ 4,8, và không ô nào dưới 4,5. Muốn khoanh đất phèn phải khoan và đo pH.", "en": "SoilGrids puts its most acid cell in the Plain of Reeds, but only at 4.8, and no cell is below 4.5. Mapping acid sulfate soils needs augering and pH measurements." }
+ },
+ {
+  "q": { "vi": "Ở vườn dừa Giồng Trôm (Bến Tre), Copernicus DEM cao hơn DeltaDTM khoảng 4,3 m. Vì sao?", "en": "In the Giong Trom coconut groves (Ben Tre), Copernicus DEM is about 4.3 m higher than DeltaDTM. Why?" },
+  "options": [
+   { "vi": "Copernicus DEM là mô hình bề mặt: radar dội lại từ tán dừa, còn DeltaDTM đã bỏ cây để ra mặt đất", "en": "Copernicus DEM is a surface model: the radar bounces off the palm crowns, while DeltaDTM removes trees to reach the ground" },
+   { "vi": "Bến Tre được đắp cao 4 m sau năm 2015", "en": "Ben Tre was raised 4 m after 2015" },
+   { "vi": "DeltaDTM dùng đơn vị feet", "en": "DeltaDTM is in feet" },
+   { "vi": "Thủy triều lên lúc chụp ảnh", "en": "The tide was high when the image was taken" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Phân biệt DSM và DTM: ở châu thổ chỉ cao 1–2 m, chênh vài mét do cây và nhà làm sai hẳn kết luận về ngập.", "en": "DSM versus DTM: in a delta only 1–2 m high, a few metres of trees and roofs overturn any flooding conclusion." }
+ },
+ {
+  "q": { "vi": "Theo DeltaDTM, 4 % đất ĐBSCL thấp hơn 1 m; theo DEM đo đạc của Minderhoud và cs. (2019), nước biển dâng 1 m đặt 75 % đồng bằng dưới mực nước biển. Bài học chính là gì?", "en": "DeltaDTM puts 4 % of the Mekong Delta below 1 m; with the survey-based DEM of Minderhoud et al. (2019), a 1 m sea-level rise puts 75 % of the plain below sea level. What is the main lesson?" },
+  "options": [
+   { "vi": "Một lệch cỡ 1 m về mô hình hoặc mốc độ cao đổi hẳn kết luận; phải ghi rõ DEM và mốc độ cao", "en": "An offset of about 1 m in the model or vertical datum changes the conclusion completely; always state the DEM and datum" },
+   { "vi": "DeltaDTM luôn đúng, nghiên cứu kia sai", "en": "DeltaDTM is always right and the study is wrong" },
+   { "vi": "Nước biển dâng không ảnh hưởng ĐBSCL", "en": "Sea-level rise does not affect the Mekong Delta" },
+   { "vi": "Hai con số đo hai châu thổ khác nhau", "en": "The two numbers refer to different deltas" }
+  ],
+  "answer": 0,
+  "why": { "vi": "DeltaDTM tính từ geoid EGM2008 và còn sai số trung bình 0,45 m; DEM đo đạc tính từ mốc Hòn Dấu. Trung vị DeltaDTM 1,9 m so với trung bình 0,82 m.", "en": "DeltaDTM refers to the EGM2008 geoid and still has a 0.45 m mean error; the survey DEM refers to the Hon Dau datum. DeltaDTM's median is 1.9 m against a 0.82 m mean." }
+ },
+ {
+  "q": { "vi": "Đất lún 1,1 cm/năm, nước biển dâng 3,7 mm/năm. Sau 25 năm, mực nước biển dâng tương đối khoảng bao nhiêu?", "en": "The ground sinks 1.1 cm/yr and the sea rises 3.7 mm/yr. After 25 years, roughly how much is the relative sea-level rise?" },
+  "options": [
+   { "vi": "Khoảng 37 cm, trong đó gần ba phần tư là do đất lún", "en": "About 37 cm, nearly three quarters of it from subsidence" },
+   { "vi": "Khoảng 9 cm", "en": "About 9 cm" },
+   { "vi": "Khoảng 1,5 cm", "en": "About 1.5 cm" },
+   { "vi": "Bằng 0, vì lún và dâng triệt tiêu nhau", "en": "Zero, because sinking and rising cancel out" }
+  ],
+  "answer": 0,
+  "why": { "vi": "1,1 × 25 = 27,5 cm lún cộng 0,37 × 25 ≈ 9 cm biển dâng ≈ 37 cm. Đất lún và biển dâng cộng vào nhau, không triệt tiêu.", "en": "1.1 × 25 = 27.5 cm of subsidence plus 0.37 × 25 ≈ 9 cm of sea-level rise ≈ 37 cm. Sinking land and rising sea add up; they do not cancel." }
+ }
+]

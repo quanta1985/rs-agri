@@ -1,0 +1,84 @@
+{
+ "id": "vhi-dry-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Chỉ số sức khỏe thực vật VHI, tháng 2–4",
+  "en": "Vegetation Health Index VHI, Feb–Apr"
+ },
+ "units": {
+  "vi": "VHI (0–100)",
+  "en": "VHI (0–100)"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 1014.731803,
+ "ground_res_m": 1000,
+ "width": 269,
+ "height": 285,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2016",
+  "2018",
+  "2020",
+  "2024"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 37944,
+   "mean": 47.4551,
+   "p2": 14.0,
+   "p50": 47.5,
+   "p98": 82.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 37835,
+   "mean": 67.0622,
+   "p2": 32.0,
+   "p50": 68.0,
+   "p98": 95.5,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 38034,
+   "mean": 40.6825,
+   "p2": 3.0,
+   "p50": 41.5,
+   "p98": 77.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 38195,
+   "mean": 53.9233,
+   "p2": 22.0,
+   "p50": 54.0,
+   "p98": 83.5,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "MODIS/061/MOD13Q1 NDVI (monthly max, SummaryQA <= 1) and MODIS/061/MOD11A2 LST_Day_1km (monthly mean, QC good), ~1 km",
+  "processing": "VCI and TCI against the min/max of the same calendar month 2001-2025 (cells with < 10 cloud-free years of that month left out) (Kogan 1995), VHI = (VCI + TCI) / 2, mean of Feb-Apr; every land cover",
+  "attribution": "NASA LP DAAC MODIS Collection 6.1",
+  "exported": "2026-11-17T10:21:22+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

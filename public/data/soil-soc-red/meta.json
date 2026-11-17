@@ -1,0 +1,54 @@
+{
+ "id": "soil-soc-red",
+ "region": "red",
+ "title": {
+  "vi": "Cacbon hữu cơ đất 0–30 cm (SoilGrids)",
+  "en": "Soil organic carbon 0–30 cm (SoilGrids)"
+ },
+ "units": {
+  "vi": "g/kg",
+  "en": "g/kg"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  5,
+  40
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "SoilGrids 2.0"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 232631,
+   "mean": 20.7481,
+   "p2": 14.5,
+   "p50": 20.0,
+   "p98": 33.0,
+   "min": 13.0,
+   "max": 95.5
+  }
+ ],
+ "provenance": {
+  "source": "projects/soilgrids-isric/soc_mean, depths 0-5, 5-15, 15-30 cm (predicted mean, 250 m)",
+  "processing": "thickness-weighted mean of the three layers (5:10:15), nearest cell on the 250 m Mercator grid",
+  "attribution": "SoilGrids 2.0 (Poggio et al. 2021, ISRIC), CC BY 4.0",
+  "exported": "2026-11-17T14:00:23+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

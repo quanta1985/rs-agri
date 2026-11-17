@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Vì sao ở ĐBSCL mùa khô, thiếu mưa (hạn khí tượng) chưa chắc là hạn nông nghiệp?", "en": "Why is a lack of rain (meteorological drought) in the Mekong dry season not necessarily agricultural drought?" },
+  "options": [
+   { "vi": "Lúa mùa khô sống nhờ nước sông; khi sông thấp và mặn vào thì lúa mới bị hại", "en": "Dry-season rice lives on river water; it suffers when rivers run low and salt moves in" },
+   { "vi": "Lúa không cần nước trong mùa khô", "en": "Rice needs no water in the dry season" },
+   { "vi": "Mùa khô ĐBSCL luôn mưa nhiều", "en": "The Mekong dry season is always rainy" },
+   { "vi": "Vì đất ĐBSCL không bao giờ khô", "en": "Because Mekong soils never dry out" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Ở châu thổ, hạn thủy văn cộng mặn mới là thứ hại lúa. Năm 2020 mưa tháng 2–4 gần bình thường mà VHI thấp nhất.", "en": "In the delta, hydrological drought plus salinity is what harms rice. In 2020 Feb–Apr rain was near normal yet VHI was the lowest." }
+ },
+ {
+  "q": { "vi": "SPI-3 tháng 2–4/2016 ở ĐBSCL là −1,89. Điều đó có nghĩa gì?", "en": "The Feb–Apr 2016 SPI-3 in the Mekong Delta was −1.89. What does that mean?" },
+  "options": [
+   { "vi": "Lượng mưa 3 tháng thuộc loại rất khô, hiếm gặp so với khí hậu 1991–2020", "en": "The 3-month rain was severely dry, rare for the 1991–2020 climate" },
+   { "vi": "Mưa ít hơn 1,89 mm so với bình thường", "en": "Rain was 1.89 mm below normal" },
+   { "vi": "Đất mất 1,89 % độ ẩm", "en": "The soil lost 1.89 % of its moisture" },
+   { "vi": "Nhiệt độ cao hơn 1,89 °C", "en": "Temperature was 1.89 °C higher" }
+  ],
+  "answer": 0,
+  "why": { "vi": "SPI tính bằng độ lệch chuẩn trên thang xác suất: từ −1,5 đến −2 là rất khô.", "en": "SPI is in standard deviations on a probability scale: −1.5 to −2 is severely dry." }
+ },
+ {
+  "q": { "vi": "ĐBSH tháng 2–4/2020 có VHI trung bình 33 trong khi SPI-3 là +1,42. Cách giải thích hợp lý nhất?", "en": "The Red River Delta in Feb–Apr 2020 had a mean VHI of 33 while SPI-3 was +1.42. What is the most likely explanation?" },
+  "options": [
+   { "vi": "Mùa cấy vụ Xuân (ruộng ngập, NDVI thấp), chênh lệch lịch cấy và mây làm VHI thấp, không phải hạn", "en": "Spring transplanting (flooded fields, low NDVI), shifts in planting dates and cloud lowered VHI; it was not drought" },
+   { "vi": "ĐBSH bị hạn nặng nhất lịch sử năm 2020", "en": "The Red River Delta had its worst drought on record in 2020" },
+   { "vi": "CHIRPS đo sai toàn bộ", "en": "CHIRPS was entirely wrong" },
+   { "vi": "VHI không dùng được cho lúa", "en": "VHI cannot be used for rice" }
+  ],
+  "answer": 0,
+  "why": { "vi": "VHI so mỗi pixel với lịch sử của nó; ở ruộng lúa tưới, thời điểm cấy và gặt làm NDVI dao động mạnh. Phải đọc VHI cùng lịch thời vụ.", "en": "VHI compares each pixel with its own history; in irrigated rice, transplanting and harvest dates swing the NDVI. Read VHI together with the crop calendar." }
+ },
+ {
+  "q": { "vi": "Sổ tay FAO nêu mâu thuẫn nào giữa \"sớm\" và \"chắc\" trong cảnh báo sớm?", "en": "What tension between \"early\" and \"sure\" does the FAO handbook point out in early warning?" },
+  "options": [
+   { "vi": "Chờ thêm dữ liệu thì cảnh báo chắc hơn nhưng còn ít thời gian để hành động", "en": "Waiting for more data makes the warning surer but leaves less time to act" },
+   { "vi": "Cảnh báo càng sớm thì càng chính xác", "en": "The earlier the warning, the more accurate it is" },
+   { "vi": "Không có mâu thuẫn nào", "en": "There is no tension" },
+   { "vi": "Dữ liệu vệ tinh luôn đến muộn một năm", "en": "Satellite data always arrives a year late" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Đây là đánh đổi cơ bản của mọi hệ thống cảnh báo sớm (FAO 2017, mục 6.2).", "en": "This is the basic trade-off of every early warning system (FAO 2017, section 6.2)." }
+ }
+]

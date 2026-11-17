@@ -40,9 +40,9 @@ def merc(lon: float, lat: float) -> tuple[float, float]:
 
 
 def grid(region: str, ground_res: float) -> dict:
-    """Snapped EPSG:3857 grid of a region (delta bbox) or site (square frame) at ~ground_res metres."""
+    """Snapped EPSG:3857 grid of a region (delta bbox) or site / frame (square around center) at ~ground_res metres."""
     r = REGIONS[region]
-    if r["kind"] == "site":
+    if r["kind"] in ("site", "frame"):
         lon, lat = r["center"]
         res = ground_res / math.cos(math.radians(lat))
         n = round(r["size_m"] / ground_res)
@@ -100,6 +100,8 @@ def _fetch(img: ee.Image, g: dict, names: list[str], np_dtype, max_rows: int = M
                                          "shearY": 0, "scaleY": -res, "translateY": y1 - r0 * res}}})
         for i, b in enumerate(names):
             out[i, r0:r0 + n] = arr[b]
+        if h > rows:
+            print(f"  rows {r0 + n}/{h}", end=chr(13), flush=True)
     return out
 
 
@@ -127,6 +129,39 @@ def fetch_raw(img: ee.Image, region: str, ground_res: float, *, dtype: str, scal
         img = img.clip(outline)
     enc = _encode(img.rename(names), dtype, scale, offset, nodata)
     return _fetch(enc, grid(region, ground_res), names, DTYPES[dtype][0], max_rows), outline is not None
+
+
+def _chunk_worker(job: tuple) -> np.ndarray:
+    expr, g, names, dtype, rows = job
+    for attempt in range(3):  # a transient EE error should not lose a long export
+        try:
+            return _fetch(ee.deserializer.fromJSON(expr), g, names, DTYPES[dtype][0], rows)
+        except ee.EEException:
+            if attempt == 2:
+                raise
+
+
+def pfetch_raw(img: ee.Image, region: str, ground_res: float, *, dtype: str, scale: float, offset: float = 0.0,
+               nodata: int, clip: bool = True, rows: int = 32, workers: int = 8) -> tuple[np.ndarray, bool]:
+    """fetch_raw with the row chunks requested by `workers` processes at once (heavy per-pixel reductions such as
+    multi-year Landsat stacks, where one request takes minutes). Call it under `if __name__ == "__main__":`."""
+    from concurrent.futures import ProcessPoolExecutor
+    n = img.bandNames().size().getInfo()
+    names = [f"t{i}" for i in range(n)]
+    outline = region_outline(region) if clip else None
+    if outline is not None:
+        img = img.clip(outline)
+    expr = _encode(img.rename(names), dtype, scale, offset, nodata).serialize()
+    g = grid(region, ground_res)
+    jobs = [(expr, {**g, "origin": [g["origin"][0], g["origin"][1] - r0 * g["res"]], "height": min(rows, g["height"] - r0)},
+             names, dtype, rows) for r0 in range(0, g["height"], rows)]
+    parts = []
+    with ProcessPoolExecutor(workers, initializer=init) as ex:
+        for i, part in enumerate(ex.map(_chunk_worker, jobs)):
+            parts.append(part)
+            print(f"  chunk {i + 1}/{len(jobs)}", end=chr(13), flush=True)
+    print()
+    return np.concatenate(parts, axis=1), outline is not None
 
 
 def to_values(raw: np.ndarray, scale: float, offset: float, nodata: int) -> np.ndarray:

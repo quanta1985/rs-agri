@@ -1,0 +1,74 @@
+{
+ "id": "rain-dryanom-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Mưa mùa khô (tháng 12–4) so với trung bình 1991–2020",
+  "en": "Dry-season rainfall (Dec–Apr) against the 1991–2020 mean"
+ },
+ "units": {
+  "vi": "% chênh lệch",
+  "en": "% difference"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  -100,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11618679.14,
+  1237972.799
+ ],
+ "res": 5073.659013,
+ "ground_res_m": 5000,
+ "width": 55,
+ "height": 57,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": -100,
+ "nodata": 255,
+ "times": [
+  "2015–16",
+  "2019–20",
+  "2023–24"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 1713,
+   "mean": -30.1979,
+   "p2": -58.0,
+   "p50": -30.0,
+   "p98": 2.0,
+   "min": -72.0,
+   "max": 11.0
+  },
+  {
+   "valid": 1713,
+   "mean": -40.5114,
+   "p2": -58.0,
+   "p50": -40.0,
+   "p98": -20.0,
+   "min": -61.0,
+   "max": -14.0
+  },
+  {
+   "valid": 1713,
+   "mean": -58.2265,
+   "p2": -73.0,
+   "p50": -58.0,
+   "p98": -37.24,
+   "min": -76.0,
+   "max": -34.0
+  }
+ ],
+ "provenance": {
+  "source": "UCSB-CHG/CHIRPS/PENTAD summed per month",
+  "attribution": "CHIRPS v2.0 (Funk et al. 2015, Scientific Data 2:150066), UCSB Climate Hazards Center",
+  "processing": "Dec-Apr total minus the 1991-2020 mean of the same months, in %",
+  "exported": "2026-11-17T10:21:21+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

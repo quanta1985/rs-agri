@@ -1,0 +1,168 @@
+---
+title: Drought and soil moisture
+n: 9
+summary: "Drought in a delta is not drought in a dry land: rice is irrigated, so a lack of rain does not necessarily mean a lack of water for the crop. This chapter computes three kinds of drought index on real data for both regions (the Standardized Precipitation Index from CHIRPS, the Vegetation Health Index from MODIS as in FAO's ASIS, root-zone soil moisture from SMAP), compares them across the dry seasons of 2016, 2020 and 2024, and discusses how to turn indices into early warning."
+objectives:
+  - Tell meteorological, agricultural and hydrological drought apart and explain why in a delta they do not travel together.
+  - Compute and read SPI-3 from a satellite rainfall series.
+  - Compute VCI, TCI and VHI from NDVI and surface temperature, and know when a low VHI does not mean drought.
+  - Read SMAP L4 root-zone soil moisture and its limits at 9 km.
+  - Describe the three parts of an early warning system according to the FAO handbook, and the tension between "early" and "sure".
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ClimateSeries from '../../../islands/ClimateSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/drought.json';
+
+In 2016 the Mekong Delta had drought and salinity at once. But what does "drought" mean there? Dry-season rain is close to zero anyway, and the winter–spring rice lives on river water, not on rain. This chapter measures drought in three different ways and shows that they tell three different stories.
+
+<Stats items={[
+  { v: '−1.89', u: 'SPI-3', l: 'Standardized Precipitation Index for Feb–Apr 2016 in the Mekong Delta: severely dry (−1.85 in 2024)' },
+  { v: '41', u: '%', l: 'of Mekong Delta cropland with VHI below 35 in Feb–Apr 2020, the highest of the four years compared' },
+  { v: '−0.059', u: 'm³/m³', l: 'root-zone soil moisture in December 2019 against the December mean, the lowest of 2015–2025 (SMAP, Mekong Delta)' },
+  { v: '+1.42', u: 'SPI-3', l: 'Red River Delta Feb–Apr 2020: wetter than normal, yet the VHI was low (section 9.3)' },
+]} caption="Computed from CHIRPS, MODIS and SMAP L4 by scripts/climate_numbers.ts." />
+
+## 9.1 What drought means in a delta
+
+Drought is usually split into <Term id="drought-types">four types</Term> that follow one another (Wilhite and Glantz, 1985): **meteorological** (less rain than normal), **agricultural** (soil short of moisture for crops), **hydrological** (low rivers, lakes and groundwater) and **socio-economic** (water short of demand).
+
+In rain-fed dry lands the four come together. In the two deltas they do not. Mekong dry-season rice draws water from the Tien and Hau rivers; when the Mekong runs low, salt water moves up the rivers, and **hydrological drought plus salinity** is what harms the rice (Chapter 10). In the Red River Delta, upstream reservoirs and pumping stations seldom let a meteorological drought become an agricultural one.
+
+<Note kind="key">
+
+There is no single "drought index". Each index measures one link: rain, plants, soil, river water. To know whether rice is short of water you have to read several indices together and know where the field gets its water.
+
+</Note>
+
+## 9.2 The Standardized Precipitation Index
+
+The <Term id="spi">SPI</Term> (McKee et al., 1993) answers the question: how rare was the recent rainfall for the local climate? Sum the rain over k months (here k = 3), fit a gamma distribution for each calendar month over 1991–2020, then map the cumulative probability onto the standard normal scale.
+
+<Formula label="Standardized Precipitation Index" tex="\mathrm{SPI} = \Phi^{-1}\!\big(q + (1-q)\,G(x)\big)" where="
+x :: 3-month rain total (CHIRPS)
+G :: gamma distribution fitted on 1991–2020, same calendar month
+q :: share of years with zero rain
+\Phi^{-1} :: inverse of the standard normal distribution
+" />
+
+SPI = 0 is normal; −1 to −1.5 moderately dry; −1.5 to −2 severely dry; below −2 extremely dry. Because SPI is a probability, it compares the Mekong Delta (an almost rainless dry season) with the Red River Delta (drizzly winters).
+
+<Predict client:visible lang="en"
+  title="Which dry season was rarest for rain?"
+  q="Compute SPI-3 for February–April in the Mekong Delta. Which of the three dry seasons 2016, 2020, 2024 was driest?"
+  options={['2016', '2020', '2024', 'All the same']} answer={0}
+  why="2016 (SPI −1.89), a hair ahead of 2024 (−1.85). 2020 was almost normal (−0.14): most of that year's missing rain fell short in December–January (Chapter 7). The 2019–20 salinity did not come from local rain." />
+
+<Figure
+  title="Figure 9.1 — Feb–Apr SPI-3 in the dry seasons of 2016, 2020, 2024, both deltas"
+  try="Drag the time slider through 2016, 2020 and 2024 in the Mekong Delta, then switch to the Red River Delta. Do the two regions ever share a colour?"
+  source="CHIRPS v2.0, 3-month rain totals ending in April, ~5 km; gamma distribution fitted separately for each cell and calendar month over 1991–2020 (zero-rain years included), mapped to the standard normal, capped at ±3.5. Brown = dry, green = wet."
+>
+  <DeltaMap client:visible lang="en" label="SPI-3 Feb–Apr" region="mekong" compare choices={[
+    { key: 'spi', label: { vi: 'SPI-3 tháng 2–4', en: 'SPI-3 Feb–Apr' }, ids: { red: 'spi3-red', mekong: 'spi3-mekong' } },
+  ]} />
+</Figure>
+
+In the Mekong Delta both 2016 and 2024 were "severely dry" over almost the whole region (cell medians −1.75 and −1.70). In the Red River Delta the SPI of the same years was positive: +1.51 in 2016, +1.42 in 2020.
+
+## 9.3 Are the plants in drought: VCI, TCI, VHI
+
+Missing rain does not have to mean thirsty plants. To ask the plants directly, Kogan (1995) proposed two indices that compare each pixel with its own history at the same time of year:
+
+<Formula label="Vegetation and temperature condition indices" tex="\mathrm{VCI} = 100\,\frac{\mathrm{NDVI} - \mathrm{NDVI}_{\min}}{\mathrm{NDVI}_{\max} - \mathrm{NDVI}_{\min}}, \quad \mathrm{TCI} = 100\,\frac{T_{\max} - T}{T_{\max} - T_{\min}}, \quad \mathrm{VHI} = \tfrac{1}{2}(\mathrm{VCI} + \mathrm{TCI})" where="
+\mathrm{NDVI}_{\min}, \mathrm{NDVI}_{\max} :: lowest and highest NDVI of the same month over 2001–2025 at that pixel
+T :: MODIS daytime land surface temperature (Chapter 7), same month
+" />
+
+A low <Term id="vci">VCI</Term>: plants are less green than in other years. A low <Term id="tci">TCI</Term>: the ground is hotter than in other years. The <Term id="vhi">VHI</Term> combines the two. FAO's **ASIS** uses VHI at 1 km, treats pixels with VHI below 35 as likely drought, and reports the percentage of each administrative unit's farmland affected (FAO, 2017, section 6.4.2; Van Hoolst et al., 2016). Figure 9.2 does exactly that with MODIS for the Mekong Delta.
+
+<Predict client:visible lang="en"
+  title="Which year were Mekong plants worst off?"
+  q="2023–24 was the driest season for rain (−60 %). Averaged over February–April on Mekong Delta cropland, which year had the lowest VHI among 2016, 2018, 2020 and 2024?"
+  options={['2016', '2018', '2020', '2024']} answer={2}
+  why="2020 (VHI 44; 41 % of cropland below the 35 threshold). 2016 came next (51; 30 %), while 2024 was fairly good (55; 19 %) despite the least rain. Dry-season Mekong rice lives on river water: VHI follows irrigation and salinity (Chapter 10) more than local rain." />
+
+<Figure
+  title="Figure 9.2 — Vegetation Health Index, Feb–Apr, Mekong Delta, 2016, 2018, 2020, 2024"
+  try="Turn on Compare, put 2018 (a normal year) on the left and 2020 on the right. Where is the brown (low VHI): on the coast or inland?"
+  source="MODIS MOD13Q1 NDVI (monthly maximum, SummaryQA ≤ 1) and MOD11A2 daytime land surface temperature (monthly mean, good QC), ~1 km; VCI and TCI against the min/max of the same month 2001–2025 (Kogan, 1995); VHI = (VCI + TCI)/2, mean of Feb–Apr; every land cover. ASIS drought threshold: 35."
+>
+  <DeltaMap client:visible lang="en" label="VHI Feb–Apr" region="mekong" compare time={2} compareTime={1} choices={[
+    { key: 'vhi', label: { vi: 'VHI tháng 2–4', en: 'VHI Feb–Apr' }, ids: { mekong: 'vhi-dry-mekong' } },
+  ]} />
+</Figure>
+
+<Note kind="myth">
+
+**"A low VHI means drought."** Not always. In the Red River Delta, February–April 2020 had a mean VHI of 33 and 60 % of cropland below the 35 threshold, while the SPI-3 was +1.42: wetter than normal. (That figure rests on very few clear days, so it is itself uncertain.) February–April is spring-crop transplanting, when flooded fields have low NDVI; planting a few weeks earlier or later swings the VCI; and cloud leaves gaps. In irrigated rice, a low NDVI can mean a field just transplanted, just harvested, or left fallow because of salt. Read the VHI together with the crop calendar (Chapter 4).
+
+</Note>
+
+## 9.4 Soil moisture from SMAP
+
+NASA's SMAP satellite measures surface <Term id="soil-moisture">soil moisture</Term> with L-band microwaves. Its L4 product assimilates those measurements into a land model to estimate root-zone moisture (0–100 cm) every 3 hours at 9 km (Reichle et al., 2019).
+
+In the Mekong Delta the mean root-zone moisture is 0.285 m³/m³ in April and 0.519 m³/m³ in October. Averaged from December to May, the 2019–20 dry season was the driest: 0.035 m³/m³ below normal (2015–16: 0.028; 2023–24: 0.021). December 2019 was 0.059 m³/m³ below the December mean, the lowest value of the whole 2015–2025 record, after a December with only about a quarter of its usual rain.
+
+<Note kind="warn">
+
+A 9 km SMAP cell in the delta holds flooded paddies, canals, orchards and villages. The L4 model does not know which fields are irrigated. Use it to compare years over the whole region, not to decide when to irrigate one field.
+
+</Note>
+
+## 9.5 Three indices, one picture
+
+<Figure
+  title="Figure 9.3 — SPI-3, cropland VHI and root-zone soil-moisture anomaly, 2015–2025"
+  try="In the Mekong Delta, hover across the three shaded dry seasons: do all three indices drop together? Switch to the Red River Delta and look for months with VHI below the 35 line while the SPI is positive."
+  source="Region means: SPI-3 of the region-mean CHIRPS rain (gamma, 1991–2020); VHI averaged over 1 km cells with ≥ 50 % cropland (WorldCover), months with under 30 % cloud-free cells dropped; SMAP L4 root-zone moisture (NASA/SMAP/SPL4SMGP/008) minus the 2015–2025 mean of the same month. Shading: December to May of 2015–16, 2019–20, 2023–24."
+>
+  <ClimateSeries client:visible lang="en" view="drought" />
+</Figure>
+
+Read together, the three Mekong dry seasons differ clearly:
+
+- **2016**: all three bad. Severely dry rain, dry soil, poor vegetation: the historic drought and salinity year (Chapter 10).
+- **2020**: Feb–Apr rain near normal, but the soil had been the driest of the record since December 2019, and vegetation was the worst. That year salt arrived earlier, lasted 2–2.5 times longer and covered more land than in 2015–16 (Chapter 10). Salinity is the clearest candidate for the poor vegetation, and none of these three indices can measure it.
+- **2024**: rain as dry as 2016, soil less dry, vegetation better, possibly because the rivers still carried enough water for most fields.
+
+## 9.6 From index to early warning
+
+The FAO handbook (2017, section 6.2) describes every <Term id="early-warning">early warning system</Term> as three parts:
+
+<Steps title="Three parts of an early warning system (FAO, 2017)" items={[
+  { tag: '1', t: 'Data collection', d: 'Satellite rain, vegetation indices, soil moisture, river level and salinity, prices, local reports. Timely and reliable.' },
+  { tag: '2', t: 'Analysis and forecasting', d: 'Turn data into indices with clear thresholds (SPI ≤ −1.5, VHI < 35) and seasonal outlooks, such as the ONI for the coming dry season (Chapter 7).' },
+  { tag: '3', t: 'Communication', d: 'The right people, channel and format: bulletins for provinces, planting calendars for farmers, not a map only experts can read.' },
+]} />
+
+The book stresses two tensions. First, **early and sure do not go together**: the longer you wait for data, the surer the warning, but the less time is left to act. Second, **more information is not always better**: recipients may lack the time or skill to read every index, and the key message gets lost. The book also points out that a drought alone does not cause a disaster: the outcome depends on how vulnerable people and farming systems are.
+
+<Depth level="advanced" title="Building an ASIS-style index for a province">
+
+ASIS works in three steps: (1) average VHI over time within the crop cycle at each pixel; (2) count the percentage of farmland pixels with VHI below 35; (3) rank each administrative unit by that percentage. A lab can redo step 2 for each Mekong province in Earth Engine. Fixes needed for a delta: (a) replace the generic "crop cycle" with the real local crop calendar (Chapter 4), since newly transplanted fields have low NDVI without drought; (b) drop months with too few cloud-free images; (c) read it together with salinity data.
+
+</Depth>
+
+## 9.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Sections 6.2, 6.4.2.
+- Kogan, F. N. (1995). Application of vegetation index and brightness temperature for drought detection. *Advances in Space Research*, 15(11), 91–100. https://doi.org/10.1016/0273-1177(95)00079-T
+- McKee, T. B., Doesken, N. J., & Kleist, J. (1993). The relationship of drought frequency and duration to time scales. *Proceedings of the 8th Conference on Applied Climatology*, Anaheim, 179–184.
+- Reichle, R. H. et al. (2019). Version 4 of the SMAP Level-4 soil moisture algorithm and data product. *Journal of Advances in Modeling Earth Systems*, 11, 3106–3130. https://doi.org/10.1029/2019MS001729
+- Van Hoolst, R., Eerens, H., Haesen, D., Royer, A., Bydekerke, L., Rojas, O., Li, Y., & Racionzer, P. (2016). FAO's AVHRR-based Agricultural Stress Index System (ASIS) for global drought monitoring. *International Journal of Remote Sensing*, 37(2), 418–439. https://doi.org/10.1080/01431161.2015.1126378
+- Wilhite, D. A., & Glantz, M. H. (1985). Understanding the drought phenomenon: the role of definitions. *Water International*, 10(3), 111–120.

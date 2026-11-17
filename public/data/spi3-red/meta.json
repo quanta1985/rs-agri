@@ -1,0 +1,74 @@
+{
+ "id": "spi3-red",
+ "region": "red",
+ "title": {
+  "vi": "SPI-3 (tháng 2–4)",
+  "en": "SPI-3 (Feb–Apr)"
+ },
+ "units": {
+  "vi": "SPI",
+  "en": "SPI"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  -2.5,
+  2.5
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11720230.28,
+  2464884.197
+ ],
+ "res": 5346.820383,
+ "ground_res_m": 5000,
+ "width": 37,
+ "height": 39,
+ "dtype": "uint8",
+ "scale": 0.05,
+ "offset": -4,
+ "nodata": 255,
+ "times": [
+  "2016-04",
+  "2020-04",
+  "2024-04"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 753,
+   "mean": 1.3627,
+   "p2": 0.552,
+   "p50": 1.25,
+   "p98": 2.5,
+   "min": 0.2,
+   "max": 2.8
+  },
+  {
+   "valid": 753,
+   "mean": 1.3098,
+   "p2": 0.8,
+   "p50": 1.35,
+   "p98": 1.85,
+   "min": 0.6,
+   "max": 2.0
+  },
+  {
+   "valid": 753,
+   "mean": 0.3833,
+   "p2": -0.45,
+   "p50": 0.35,
+   "p98": 1.0,
+   "min": -1.4,
+   "max": 1.15
+  }
+ ],
+ "provenance": {
+  "source": "UCSB-CHG/CHIRPS/PENTAD summed per month",
+  "attribution": "CHIRPS v2.0 (Funk et al. 2015, Scientific Data 2:150066), UCSB Climate Hazards Center",
+  "processing": "3-month CHIRPS totals ending in April; gamma fit per pixel and calendar month on 1991-2020 (zeros mixed in), transformed to a standard normal",
+  "exported": "2026-11-17T10:21:20+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

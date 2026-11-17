@@ -1,0 +1,168 @@
+---
+title: Hạn hán và độ ẩm đất
+n: 9
+summary: "Hạn ở châu thổ khác hạn ở vùng khô: ruộng lúa được tưới, nên thiếu mưa chưa chắc đã là thiếu nước cho cây. Chương này tính ba loại chỉ số hạn trên dữ liệu thật của hai vùng (chỉ số mưa chuẩn hóa SPI từ CHIRPS, chỉ số sức khỏe thực vật VHI từ MODIS theo cách của hệ thống ASIS của FAO, độ ẩm đất vùng rễ từ SMAP), so chúng trong ba mùa khô 2016, 2020, 2024 và bàn cách biến chỉ số thành cảnh báo sớm."
+objectives:
+  - Phân biệt hạn khí tượng, hạn nông nghiệp, hạn thủy văn và giải thích vì sao ở châu thổ chúng không đi cùng nhau.
+  - Tính và đọc chỉ số SPI-3 từ chuỗi mưa vệ tinh.
+  - Tính VCI, TCI, VHI từ NDVI và nhiệt độ bề mặt, và biết khi nào VHI thấp không có nghĩa là hạn.
+  - Đọc độ ẩm đất vùng rễ của SMAP L4 và giới hạn của nó ở 9 km.
+  - Mô tả ba khâu của một hệ thống cảnh báo sớm theo sổ tay FAO và mâu thuẫn giữa "sớm" và "chắc".
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ClimateSeries from '../../../islands/ClimateSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/drought.json';
+
+Năm 2016, ĐBSCL vừa hạn vừa mặn. Nhưng "hạn" ở đây nghĩa là gì? Mưa mùa khô vốn gần như bằng không, và lúa Đông Xuân sống nhờ nước sông, không nhờ mưa. Chương này đo hạn bằng ba cách khác nhau và cho thấy chúng kể ba câu chuyện khác nhau.
+
+<Stats items={[
+  { v: '−1,89', u: 'SPI-3', l: 'chỉ số mưa chuẩn hóa tháng 2–4/2016 ở ĐBSCL: rất khô (−1,85 năm 2024)' },
+  { v: '41', u: '%', l: 'đất trồng trọt ĐBSCL có VHI dưới 35 trong tháng 2–4/2020, cao nhất trong bốn năm so sánh' },
+  { v: '−0,059', u: 'm³/m³', l: 'độ ẩm đất vùng rễ tháng 12/2019 so với trung bình tháng 12, thấp nhất 2015–2025 (SMAP, ĐBSCL)' },
+  { v: '+1,42', u: 'SPI-3', l: 'ĐBSH tháng 2–4/2020: ẩm hơn bình thường, nhưng VHI lại thấp (mục 9.3)' },
+]} caption="Tính từ CHIRPS, MODIS và SMAP L4 bằng scripts/climate_numbers.ts." />
+
+## 9.1 Hạn là gì, ở châu thổ
+
+Người ta thường chia <Term id="drought-types">bốn loại hạn</Term> nối tiếp nhau (Wilhite và Glantz, 1985): **hạn khí tượng** (mưa ít hơn bình thường), **hạn nông nghiệp** (đất thiếu ẩm cho cây), **hạn thủy văn** (sông, hồ, nước ngầm xuống thấp) và **hạn kinh tế – xã hội** (nước không đủ cho nhu cầu).
+
+Ở vùng khô dựa vào mưa, bốn loại này đi liền nhau. Ở hai châu thổ thì không. Lúa ĐBSCL mùa khô lấy nước từ sông Tiền, sông Hậu; khi dòng Mê Kông thấp, nước mặn theo sông vào, và **hạn thủy văn cộng mặn** mới là thứ làm hại lúa (Chương 10). Ở ĐBSH, hồ chứa thượng nguồn và trạm bơm làm hạn khí tượng ít khi thành hạn nông nghiệp.
+
+<Note kind="key">
+
+Không có một "chỉ số hạn" duy nhất. Mỗi chỉ số đo một mắt xích: mưa, cây, đất, nước sông. Muốn biết lúa có bị hạn không, phải nhìn nhiều chỉ số cùng lúc và hiểu ruộng lấy nước từ đâu.
+
+</Note>
+
+## 9.2 Chỉ số mưa chuẩn hóa SPI
+
+<Term id="spi">SPI</Term> (McKee và cs., 1993) trả lời câu hỏi: lượng mưa vừa qua hiếm đến mức nào so với khí hậu nơi đó? Cộng mưa k tháng (ở đây k = 3), khớp một phân phối gamma cho từng tháng trong năm trên giai đoạn 1991–2020, rồi đổi xác suất tích lũy sang thang chuẩn.
+
+<Formula label="Chỉ số mưa chuẩn hóa" tex="\mathrm{SPI} = \Phi^{-1}\!\big(q + (1-q)\,G(x)\big)" where="
+x :: tổng mưa 3 tháng (CHIRPS)
+G :: hàm phân phối gamma khớp trên 1991–2020, cùng tháng
+q :: tỉ lệ các năm có tổng mưa bằng 0
+\Phi^{-1} :: hàm ngược của phân phối chuẩn tắc
+" />
+
+SPI = 0 là bình thường; −1 đến −1,5 khô vừa; −1,5 đến −2 rất khô; dưới −2 cực khô. Vì SPI tính theo xác suất, nó so sánh được giữa ĐBSCL (mùa khô gần như không mưa) và ĐBSH (mùa đông có mưa phùn).
+
+<Predict client:visible lang="vi"
+  title="Mùa khô nào thiếu mưa nhất về mặt xác suất?"
+  q="Tính SPI-3 cho tháng 2–4 ở ĐBSCL. Năm nào khô nhất trong ba mùa khô 2016, 2020, 2024?"
+  options={['2016', '2020', '2024', 'Ba năm như nhau']} answer={0}
+  why="2016 (SPI −1,89), sát nút với 2024 (−1,85). Năm 2020 gần như bình thường (−0,14): phần lớn mưa thiếu năm ấy rơi vào tháng 12–1 (Chương 7). Đợt mặn 2019–20 không đến từ mưa tại chỗ." />
+
+<Figure
+  title="Hình 9.1 — SPI-3 tháng 2–4 của ba mùa khô 2016, 2020, 2024, hai châu thổ"
+  try="Kéo thanh thời gian qua 2016, 2020, 2024 ở ĐBSCL rồi chuyển sang ĐBSH. Hai vùng có cùng màu ở năm nào không?"
+  source="CHIRPS v2.0, tổng mưa 3 tháng kết thúc tháng 4, ~5 km; phân phối gamma khớp riêng cho từng ô và từng tháng trên 1991–2020 (có tính các năm không mưa), đổi sang thang chuẩn, giới hạn ±3,5. Màu nâu = khô, xanh lục = ẩm."
+>
+  <DeltaMap client:visible lang="vi" label="SPI-3 tháng 2–4" region="mekong" compare choices={[
+    { key: 'spi', label: { vi: 'SPI-3 tháng 2–4', en: 'SPI-3 Feb–Apr' }, ids: { red: 'spi3-red', mekong: 'spi3-mekong' } },
+  ]} />
+</Figure>
+
+Ở ĐBSCL, cả hai mùa 2016 và 2024 đều "rất khô" gần như trên toàn vùng (trung vị các ô −1,75 và −1,70). Ở ĐBSH cùng các năm đó SPI lại dương: 2016 là +1,51, 2020 là +1,42.
+
+## 9.3 Thực vật có bị hạn không: VCI, TCI, VHI
+
+Mưa thiếu chưa chắc cây thiếu nước. Để hỏi thẳng cây, Kogan (1995) đề xuất hai chỉ số so mỗi pixel với chính lịch sử của nó cùng thời điểm trong năm:
+
+<Formula label="Chỉ số điều kiện thực vật và nhiệt" tex="\mathrm{VCI} = 100\,\frac{\mathrm{NDVI} - \mathrm{NDVI}_{\min}}{\mathrm{NDVI}_{\max} - \mathrm{NDVI}_{\min}}, \quad \mathrm{TCI} = 100\,\frac{T_{\max} - T}{T_{\max} - T_{\min}}, \quad \mathrm{VHI} = \tfrac{1}{2}(\mathrm{VCI} + \mathrm{TCI})" where="
+\mathrm{NDVI}_{\min}, \mathrm{NDVI}_{\max} :: NDVI thấp nhất, cao nhất của cùng tháng trong 2001–2025 tại pixel đó
+T :: nhiệt độ bề mặt ban ngày MODIS (Chương 7), cùng tháng
+" />
+
+<Term id="vci">VCI</Term> thấp: cây kém xanh hơn mọi năm. <Term id="tci">TCI</Term> thấp: mặt đất nóng hơn mọi năm. <Term id="vhi">VHI</Term> gộp hai thứ. Hệ thống **ASIS** của FAO dùng VHI ở 1 km, coi pixel có VHI dưới 35 là có nguy cơ hạn, rồi tính phần trăm diện tích nông nghiệp của mỗi đơn vị hành chính bị ảnh hưởng (FAO, 2017, mục 6.4.2; Van Hoolst và cs., 2016). Hình 9.2 làm đúng như vậy với MODIS cho ĐBSCL.
+
+<Predict client:visible lang="vi"
+  title="Năm nào thực vật ĐBSCL tệ nhất?"
+  q="Mùa 2023–24 thiếu mưa nặng nhất (−60 %). Tính trung bình tháng 2–4 trên đất trồng trọt ĐBSCL, năm nào có VHI thấp nhất trong 2016, 2018, 2020, 2024?"
+  options={['2016', '2018', '2020', '2024']} answer={2}
+  why="2020 (VHI 44; 41 % đất trồng trọt dưới ngưỡng 35). 2016 đứng sau (51; 30 %), còn 2024 khá tốt (55; 19 %) dù mưa ít nhất. Lúa ĐBSCL mùa khô sống nhờ nước sông: VHI theo nước tưới và mặn (Chương 10) nhiều hơn theo mưa tại chỗ." />
+
+<Figure
+  title="Hình 9.2 — Chỉ số sức khỏe thực vật VHI tháng 2–4, ĐBSCL, 2016, 2018, 2020, 2024"
+  try="Bật So sánh, đặt 2018 (năm bình thường) bên trái và 2020 bên phải. Vùng nâu (VHI thấp) nằm ở đâu: ven biển hay trong nội đồng?"
+  source="MODIS MOD13Q1 NDVI (giá trị lớn nhất mỗi tháng, SummaryQA ≤ 1) và MOD11A2 nhiệt độ bề mặt ban ngày (trung bình tháng, QC tốt), ~1 km; VCI và TCI so với min/max cùng tháng 2001–2025 (Kogan, 1995); VHI = (VCI + TCI)/2, trung bình tháng 2–4; mọi loại lớp phủ. Ngưỡng hạn của ASIS: 35."
+>
+  <DeltaMap client:visible lang="vi" label="VHI tháng 2–4" region="mekong" compare time={2} compareTime={1} choices={[
+    { key: 'vhi', label: { vi: 'VHI tháng 2–4', en: 'VHI Feb–Apr' }, ids: { mekong: 'vhi-dry-mekong' } },
+  ]} />
+</Figure>
+
+<Note kind="myth">
+
+**"VHI thấp là hạn."** Không phải lúc nào cũng vậy. Ở ĐBSH, tháng 2–4/2020 có VHI trung bình 33 và 60 % đất trồng trọt dưới ngưỡng 35, trong khi SPI-3 là +1,42: ẩm hơn bình thường. (Con số này dựa trên rất ít ngày quang mây, nên bản thân nó cũng kém chắc chắn.) Tháng 2–4 là lúc cấy vụ Xuân, ruộng ngập nước nên NDVI thấp; cấy sớm hay muộn vài tuần là VCI đổi hẳn; và mây che làm thiếu ảnh. Ở vùng lúa tưới, NDVI thấp có thể là ruộng vừa cấy, vừa gặt, hay bị bỏ hoang vì mặn. Phải đọc VHI cùng lịch thời vụ (Chương 4).
+
+</Note>
+
+## 9.4 Độ ẩm đất từ SMAP
+
+Vệ tinh SMAP của NASA đo <Term id="soil-moisture">độ ẩm đất</Term> lớp mặt bằng sóng viba băng L. Sản phẩm L4 đồng hóa số đo đó vào một mô hình mặt đất để ước tính độ ẩm vùng rễ (0–100 cm) mỗi 3 giờ, ở 9 km (Reichle và cs., 2019).
+
+Ở ĐBSCL, độ ẩm vùng rễ trung bình tháng 4 là 0,285 m³/m³ và tháng 10 là 0,519 m³/m³. Tính trung bình tháng 12 đến tháng 5, mùa khô 2019–20 khô nhất: thấp hơn bình thường 0,035 m³/m³ (2015–16: 0,028; 2023–24: 0,021). Tháng 12/2019 thấp hơn trung bình tháng 12 tới 0,059 m³/m³, mức thấp nhất của cả chuỗi 2015–2025, sau một tháng 12 chỉ có khoảng một phần tư lượng mưa thường lệ.
+
+<Note kind="warn">
+
+Một ô SMAP 9 km ở châu thổ chứa ruộng ngập, kênh rạch, vườn cây và làng. Mô hình L4 không biết ruộng nào được tưới. Dùng nó để so năm này với năm khác trên cả vùng, không để quyết định tưới cho một cánh đồng.
+
+</Note>
+
+## 9.5 Ba chỉ số, một bức tranh
+
+<Figure
+  title="Hình 9.3 — SPI-3, VHI đất trồng trọt và độ ẩm đất vùng rễ, 2015–2025"
+  try="Ở ĐBSCL, rê chuột qua ba mùa khô được tô: ba chỉ số có cùng xuống thấp không? Chuyển sang ĐBSH và tìm những tháng VHI dưới đường 35 trong khi SPI dương."
+  source="Trung bình vùng: SPI-3 của mưa CHIRPS trung bình vùng (gamma, 1991–2020); VHI trung bình trên các ô 1 km có ≥ 50 % đất trồng trọt (WorldCover), bỏ tháng có dưới 30 % số ô không mây; độ ẩm vùng rễ SMAP L4 (NASA/SMAP/SPL4SMGP/008) trừ trung bình cùng tháng 2015–2025. Dải tô: tháng 12 đến tháng 5 của 2015–16, 2019–20, 2023–24."
+>
+  <ClimateSeries client:visible lang="vi" view="drought" />
+</Figure>
+
+Đọc ba đường cùng lúc, ba mùa khô của ĐBSCL khác nhau rõ:
+
+- **2016**: cả ba cùng xấu. Mưa rất khô, đất khô, thực vật kém: năm hạn mặn lịch sử (Chương 10).
+- **2020**: mưa tháng 2–4 gần bình thường, nhưng đất đã khô nhất cả chuỗi từ tháng 12/2019, và thực vật tệ nhất. Mặn năm ấy đến sớm hơn, kéo dài gấp 2–2,5 lần và phủ rộng hơn mùa 2015–16 (Chương 10). Mặn là ứng viên rõ nhất cho thực vật kém, và không chỉ số nào trong ba chỉ số này đo được nó.
+- **2024**: mưa khô như 2016, đất khô nhẹ hơn, thực vật khá hơn, có thể vì nước sông còn đủ cho phần lớn ruộng.
+
+## 9.6 Từ chỉ số đến cảnh báo sớm
+
+Sổ tay FAO (2017, mục 6.2) mô tả mọi <Term id="early-warning">hệ thống cảnh báo sớm</Term> gồm ba khâu:
+
+<Steps title="Ba khâu của hệ thống cảnh báo sớm (FAO, 2017)" items={[
+  { tag: '1', t: 'Thu thập dữ liệu', d: 'Mưa vệ tinh, chỉ số thực vật, độ ẩm đất, mực nước và độ mặn sông, giá cả, báo cáo từ địa phương. Đúng lúc và đáng tin.' },
+  { tag: '2', t: 'Phân tích và dự báo', d: 'Biến dữ liệu thành chỉ số có ngưỡng rõ (SPI ≤ −1,5, VHI < 35) và dự báo theo mùa, ví dụ ONI cho mùa khô sắp tới (Chương 7).' },
+  { tag: '3', t: 'Truyền tin', d: 'Đúng người, đúng kênh, đúng dạng: bản tin cho tỉnh, lịch xuống giống cho nông dân, không phải một bản đồ chỉ chuyên gia đọc được.' },
+]} />
+
+Sách nhấn mạnh hai mâu thuẫn. Thứ nhất, **sớm và chắc không đi cùng nhau**: càng chờ thêm dữ liệu thì cảnh báo càng chắc, nhưng thời gian để hành động càng ngắn. Thứ hai, **nhiều thông tin chưa chắc tốt hơn**: người nhận có thể không đủ thời gian hay chuyên môn để đọc mọi chỉ số, và thông điệp chính bị lạc. Sách cũng nhắc rằng hạn tự nó không gây ra thảm họa: hậu quả tùy vào mức dễ tổn thương của người dân và hệ thống sản xuất.
+
+<Depth level="advanced" title="Thử làm một chỉ số kiểu ASIS cho tỉnh">
+
+ASIS làm ba bước: (1) lấy trung bình VHI theo thời gian trong chu kỳ sinh trưởng của cây ở mỗi pixel; (2) đếm phần trăm pixel nông nghiệp có VHI dưới 35; (3) xếp hạng cả đơn vị hành chính theo phần trăm đó. Bài thực hành có thể làm lại bước 2 cho từng tỉnh ĐBSCL trên Earth Engine. Điều cần sửa cho châu thổ: (a) thay "chu kỳ sinh trưởng" chung bằng lịch thời vụ thật của từng vùng (Chương 4), vì ruộng vừa cấy có NDVI thấp mà không hạn; (b) bỏ các tháng quá ít ảnh không mây; (c) đọc kèm số liệu mặn.
+
+</Depth>
+
+## 9.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Mục 6.2, 6.4.2.
+- Kogan, F. N. (1995). Application of vegetation index and brightness temperature for drought detection. *Advances in Space Research*, 15(11), 91–100. https://doi.org/10.1016/0273-1177(95)00079-T
+- McKee, T. B., Doesken, N. J., & Kleist, J. (1993). The relationship of drought frequency and duration to time scales. *Proceedings of the 8th Conference on Applied Climatology*, Anaheim, 179–184.
+- Reichle, R. H. và cs. (2019). Version 4 of the SMAP Level-4 soil moisture algorithm and data product. *Journal of Advances in Modeling Earth Systems*, 11, 3106–3130. https://doi.org/10.1029/2019MS001729
+- Van Hoolst, R., Eerens, H., Haesen, D., Royer, A., Bydekerke, L., Rojas, O., Li, Y., & Racionzer, P. (2016). FAO's AVHRR-based Agricultural Stress Index System (ASIS) for global drought monitoring. *International Journal of Remote Sensing*, 37(2), 418–439. https://doi.org/10.1080/01431161.2015.1126378
+- Wilhite, D. A., & Glantz, M. H. (1985). Understanding the drought phenomenon: the role of definitions. *Water International*, 10(3), 111–120.

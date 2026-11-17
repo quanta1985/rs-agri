@@ -4,7 +4,7 @@ import type { LayerMeta, Raw } from '../lib/layer';
 import regionsDoc from '../data/regions.json';
 
 export type Layer = { meta: LayerMeta; data: Raw };
-export type RegionInfo = { kind: 'delta' | 'site'; name: { vi: string; en: string }; delta?: string };
+export type RegionInfo = { kind: 'delta' | 'site' | 'frame'; name: { vi: string; en: string }; delta?: string };
 export const REGIONS = regionsDoc.regions as Record<string, RegionInfo>;
 
 const DATA = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/data/`;

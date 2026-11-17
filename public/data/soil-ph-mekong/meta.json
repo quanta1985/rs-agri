@@ -1,0 +1,54 @@
+{
+ "id": "soil-ph-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "pH đất tầng mặt 0–30 cm (SoilGrids)",
+  "en": "Topsoil pH 0–30 cm (SoilGrids)"
+ },
+ "units": {
+  "vi": "pH (H₂O)",
+  "en": "pH (H₂O)"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  4.5,
+  7.5
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.05,
+ "offset": 3.0,
+ "nodata": 255,
+ "times": [
+  "SoilGrids 2.0"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 585324,
+   "mean": 5.8361,
+   "p2": 5.3,
+   "p50": 5.8,
+   "p98": 6.45,
+   "min": 4.8,
+   "max": 6.75
+  }
+ ],
+ "provenance": {
+  "source": "projects/soilgrids-isric/phh2o_mean, depths 0-5, 5-15, 15-30 cm (predicted mean, 250 m)",
+  "processing": "thickness-weighted mean of the three layers (5:10:15), nearest cell on the 250 m Mercator grid",
+  "attribution": "SoilGrids 2.0 (Poggio et al. 2021, ISRIC), CC BY 4.0",
+  "exported": "2026-11-17T14:00:19+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

@@ -1,0 +1,74 @@
+{
+ "id": "ponds-dry-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Mặt nước quanh năm mùa khô (ao tôm, sông, kênh)",
+  "en": "Standing water through the dry season (shrimp ponds, rivers, canals)"
+ },
+ "units": {
+  "vi": "% diện tích ô",
+  "en": "% of the cell"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 0.5,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "1993–97",
+  "2003–07",
+  "2021–25"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 636130,
+   "mean": 5.7002,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 636133,
+   "mean": 10.0301,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 636133,
+   "mean": 9.27,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "Landsat 5/7/8/9 C2 L2, January-April of each period",
+  "processing": "share of 30 m cells under water (MNDWI > 0) in >= 75 % of their clear Jan-Apr looks (>= 5 looks), per ~250 m cell",
+  "attribution": "Landsat 5/7/8/9 Collection 2 Level-2 courtesy of the U.S. Geological Survey",
+  "exported": "2026-11-17T14:44:20+00:00",
+  "script": "scripts/data/export_coast.py"
+ }
+}

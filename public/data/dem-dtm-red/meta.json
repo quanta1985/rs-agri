@@ -1,0 +1,54 @@
+{
+ "id": "dem-dtm-red",
+ "region": "red",
+ "title": {
+  "vi": "Độ cao mặt đất DeltaDTM",
+  "en": "DeltaDTM ground elevation"
+ },
+ "units": {
+  "vi": "m trên mực nước biển (EGM2008)",
+  "en": "m above sea level (EGM2008)"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  8
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint16",
+ "scale": 0.01,
+ "offset": -5.0,
+ "nodata": 65535,
+ "times": [
+  "v1.0"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 262521,
+   "mean": 5.3289,
+   "p2": 1.38,
+   "p50": 3.94,
+   "p98": 10.0,
+   "min": -0.61,
+   "max": 10.0
+  }
+ ],
+ "provenance": {
+  "source": "projects/sat-io/open-datasets/DELTARES/deltadtm_v1 (1 arc-second, m above EGM2008, clipped at 10 m)",
+  "processing": "mean of ~30 m cells in each ~250 m cell; 10 = 10 m or higher",
+  "attribution": "DeltaDTM v1.0 (Pronk et al. 2024, Deltares), CC BY 4.0; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the EU and ESA",
+  "exported": "2026-11-17T14:34:13+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

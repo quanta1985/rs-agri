@@ -1,0 +1,74 @@
+{
+ "id": "spi3-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "SPI-3 (tháng 2–4)",
+  "en": "SPI-3 (Feb–Apr)"
+ },
+ "units": {
+  "vi": "SPI",
+  "en": "SPI"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  -2.5,
+  2.5
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11618679.14,
+  1237972.799
+ ],
+ "res": 5073.659013,
+ "ground_res_m": 5000,
+ "width": 55,
+ "height": 57,
+ "dtype": "uint8",
+ "scale": 0.05,
+ "offset": -4,
+ "nodata": 255,
+ "times": [
+  "2016-04",
+  "2020-04",
+  "2024-04"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 1713,
+   "mean": -1.7515,
+   "p2": -2.15,
+   "p50": -1.75,
+   "p98": -1.35,
+   "min": -2.4,
+   "max": -1.2
+  },
+  {
+   "valid": 1713,
+   "mean": -0.184,
+   "p2": -0.6,
+   "p50": -0.2,
+   "p98": 0.25,
+   "min": -0.7,
+   "max": 0.45
+  },
+  {
+   "valid": 1713,
+   "mean": -1.7067,
+   "p2": -2.3,
+   "p50": -1.7,
+   "p98": -1.3,
+   "min": -2.5,
+   "max": -1.2
+  }
+ ],
+ "provenance": {
+  "source": "UCSB-CHG/CHIRPS/PENTAD summed per month",
+  "attribution": "CHIRPS v2.0 (Funk et al. 2015, Scientific Data 2:150066), UCSB Climate Hazards Center",
+  "processing": "3-month CHIRPS totals ending in April; gamma fit per pixel and calendar month on 1991-2020 (zeros mixed in), transformed to a standard normal",
+  "exported": "2026-11-17T10:21:22+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

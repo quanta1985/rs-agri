@@ -1,0 +1,202 @@
+---
+title: "The coast: shrimp–rice, mangroves, erosion"
+n: 12
+summary: "The shores of both deltas do not stand still: in some places they build seaward by tens of metres a year, in others the waves eat tens of metres inland. This chapter draws the shoreline from 38 years of Landsat images at Nam Dinh and the Ca Mau Cape, measures land gained and lost per stretch of coast, compares the global mangrove map with official figures, and counts dry-season shrimp ponds across the Mekong Delta."
+objectives:
+  - Draw a shoreline from the MNDWI water index over many Landsat images and see why the tide makes it waver.
+  - Turn land gained or lost along a stretch of coast into a shoreline shift rate (m/yr).
+  - Read the Global Mangrove Watch maps and explain why they differ from official statistics.
+  - Recognise shrimp ponds on dry-season images and follow their spread over thirty years.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import CoastSeries from '../../../islands/CoastSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/coast.json';
+
+The coast is where land, fresh water, salt water and people meet. Here rice gives way to shrimp, mangroves are cut and replanted, and the shoreline itself moves. Landsat has imaged both deltas since the late 1980s, long enough to see those changes.
+
+<Stats items={[
+  { v: '30', u: 'm/yr', l: 'mean retreat of the East Sea shore of the Ca Mau Cape, 1988–2025 trend (198 ha of land lost a year along 67 km)' },
+  { v: '4,700', u: 'ha', l: 'of new land at the tip of the Ca Mau Cape on the Gulf of Thailand side in 33 years (trend 144 ha/yr)' },
+  { v: '2,200', u: 'ha', l: 'of new land at the Ba Lat mouth (Con Lu, Con Ngan, Nam Dinh) in 33 years (68 ha/yr)' },
+  { v: '−7', u: '%', l: 'Mekong Delta mangrove area in Global Mangrove Watch, 1996 to 2020 (96,100 down to 89,200 ha)' },
+]} caption="Computed from Landsat 5/7/8/9 and Global Mangrove Watch v3 by scripts/coast_numbers.ts." />
+
+## 12.1 Two kinds of coast
+
+The Mekong Delta coast is mostly a **mud coast**: fine Mekong sediment carried by longshore currents builds mud flats, and mangroves advance over them. When sediment runs short, a mud coast retreats fast. Anthony et al. (2015) measured on satellite images that over 2003–2012 more than 50 % of the more than 600 km of Mekong Delta coast was eroding; along the 180 km of East Sea mud coast, nearly 90 % was retreating, at a mean rate that rose from about 6.4 m/yr to over 12.5 m/yr. The authors link this to human activities: upstream dams and river-bed sand mining trap the sediment, leaving the coast in <Term id="sediment-starvation">sediment starvation</Term>.
+
+The Red River Delta coast at Nam Dinh shows both faces. The Ba Lat mouth of the Red River still builds out: over 1998–2008, new land advanced on average about 36 m/yr along 64.3 km of coast, and up to 93 m/yr at Con Ngan – Con Lu (Nguyen Van Thao et al., 2013). Further southwest, the Hai Hau coast was eroding: 9 m/yr on average over 1975–1989, up to 30 m/yr in places (Pham Quang Son and Nguyen Duc Anh, 2016).
+
+## 12.2 Drawing the shoreline from Landsat
+
+The land–water boundary is sharpest in the shortwave infrared, where water absorbs almost all light. The MNDWI water index (Chapter 8) is positive over water and negative over land and vegetation. But every image is taken at some tide stage. Landsat passes at about 10 a.m., at a different tide each time, so on a wide <Term id="tidal-flat">tidal mud flat</Term> the same pixel is sometimes water, sometimes land.
+
+The fix used here: take **every** clear image over five years and count the share of looks in which a pixel is water. A pixel that is water in at least half its looks counts as water. That boundary is a median-tide <Term id="shoreline">shoreline</Term>. Comparing the periods 1988–1992 and 2021–2025 gives a land–water change map.
+
+<Predict client:visible lang="en"
+  title="What is the orange inland Ca Mau?"
+  q="In the Ca Mau Cape frame, 122,600 ha turned from land into water between 1988–92 and 2021–25, mostly deep inland, not on the coast. What is it?"
+  options={['The sea flooding in with sea-level rise', 'Shrimp ponds dug on former rice land and forest', 'Rivers changing course', 'Cloud errors in the Landsat images']} answer={1}
+  why="Shrimp ponds: embanked squares kept under water all year, laid out along the canal grid. On a land–water map they look exactly like an eroding coast, because both are 'land to water'. Read shape and position: a continuous band along the sea is erosion, a grid of cells inland is ponds." />
+
+<Figure
+  title="Figure 12.1 — Land and water, 1988–92 against 2021–25: the Nam Dinh coast and the Ca Mau Cape"
+  try="At the Ca Mau Cape, follow the East Sea shore (southeast), then the Gulf of Thailand shore (west). Which colour dominates on each side? Switch to Nam Dinh and zoom in on the Ba Lat mouth."
+  source="Landsat 5, 7, 8, 9 Collection 2 Level-2 (USGS), all months, cloud, shadow and fill masked. Water = MNDWI = (green − SWIR1)/(green + SWIR1) > 0 in ≥ 50 % of the clear looks of each period (≥ 5 looks); 30 m, Mercator grid. Land in both periods left transparent."
+>
+  <DeltaMap client:visible lang="en" label="Land and water" region="cmcoast" boundaries={false} choices={[
+    { key: 'shore', label: { vi: 'Đất – nước', en: 'Land – water' }, ids: { ndcoast: 'coast-change-ndcoast', cmcoast: 'coast-change-cmcoast' } },
+  ]} />
+</Figure>
+
+<Note kind="warn">
+
+This map knows only **land** and **water**, not why. "Land to water" may be an eroded shore, a newly dug pond or a field flooded longer; "water to land" may be new land, a filled pond or young mangroves closing over a mud flat. Explaining it is the reader's job, from shape, position and field knowledge. The two periods are not balanced either: 1988–92 has only Landsat 5, with fewer images, and both pool all months, so fields flooded long in the rainy season can count as water. Figure 12.5 uses dry-season images only to check the ponds again.
+
+</Note>
+
+## 12.3 Land gained and lost, stretch by stretch
+
+To get numbers, add up the land area each year in a band 1.5 km either side of the old shoreline (or in a frame around a river mouth). Single years swing by hundreds of hectares with the tide and the number of images, so take the **Theil–Sen trend** (Chapter 7) over all well-observed years instead of comparing two years. Dividing the rate of change in area by the length of the stretch gives the mean rate of shoreline shift:
+
+<Formula label="Shoreline shift rate" tex="r = \frac{1}{L}\,\frac{\Delta A}{\Delta t}" where="
+\Delta A / \Delta t :: rate of land gained (positive) or lost (negative), m²/yr (trend); 1 ha = 10,000 m²
+L :: length of the stretch of coast (m)
+" />
+
+<Predict client:visible lang="en"
+  title="How fast does the Ca Mau East Sea shore retreat?"
+  q="Along the 66.6 km of East Sea coast from Dat Mui to Rach Goc, the coastal band lost 198 ha of land a year on average over 1988–2025. How many metres a year did the shoreline retreat on average?"
+  options={['About 3 m', 'About 30 m', 'About 300 m', 'About 3 km']} answer={1}
+  why="198 ha × 10,000 m² / 66,600 m ≈ 29.7 m/yr: nearly 1 km in 33 years. Tran Thi et al. (2014), from maps and images of 1953–2011, found 33.2 m/yr for the same shore." />
+
+<Figure
+  title="Figure 12.2 — Land gained (+) or lost (−) each year per stretch of coast, against 1990"
+  try="Find the line that falls most steadily and the one that rises fastest. Does the Hai Hau line have a clear trend, given how much it swings from year to year?"
+  source="Landsat 5, 7, 8, 9 C2 L2: land = water in < 50 % of the year's clear looks; land area in a band 1.5 km either side of the hand-traced 1988–92 shoreline (Hai Hau, Giao Thuy, Ca Mau East Sea coast) or in a frame around a river mouth (Ba Lat, Ca Mau Cape), minus the Theil–Sen trend value at 1990; dashed lines are the trends, legend numbers in ha/yr. Years with < 95 % of the area imaged clear at least 3 times left out. Year-to-year swings of hundreds of ha come from the tide and the number of images."
+>
+  <CoastSeries client:visible lang="en" view="shore" />
+</Figure>
+
+Three kinds of coast stand out:
+
+- **Steady retreat**: the Ca Mau East Sea coast lost 198 ha a year, about 6,500 ha in 33 years, a shoreline retreat of 29.7 m/yr, close to the 33.2 m/yr of Tran Thi et al. (2014). Behind this stretch the mangrove belt is intact (Figure 12.3), so nearly all the land lost is at the sea edge, not ponds dug within the 1.5 km band.
+- **Building out**: the Gulf of Thailand side of the Cape gained 144 ha a year (about 4,700 ha in 33 years), the Ba Lat mouth 68 ha a year (about 2,200 ha). Tran Thi et al. (2014) measured 40.7 m/yr of accretion on the Gulf of Thailand side of the Cape.
+- **No clear trend**: the 24.6 km Hai Hau band changed by only +10 ha/yr (+4 m/yr), while the swing between consecutive years is typically about 130 ha, and the band also holds inland ponds and salt pans. At this resolution the satellite does not see Hai Hau retreating over 1988–2025. Sea dikes and revetments holding the line may be one reason, but this chapter does not test that; strong erosion has been measured on short stretches such as Hai Ly (−22.6 m/yr over 1998–2008, Nguyen Van Thao et al., 2013).
+
+<Note kind="key">
+
+One image cannot measure a shoreline on a tidal mud coast; many years of images can. The 29.7 m/yr from 38 years of Landsat is close to an independent study that used other data and another period, but it gives only the **mean over the whole stretch**. To find the fastest-retreating spots, measure along transects normal to the coast, as the studies cited here do.
+
+</Note>
+
+## 12.4 Mangroves
+
+<Term id="mangrove">Mangroves</Term> trap mud, damp waves and shield dikes. The global <Term id="gmw">Global Mangrove Watch</Term> map, version 3 (Bunting et al., 2022), has 11 epochs from 1996 to 2020, built from ALOS PALSAR radar and Landsat at 25 m.
+
+<Figure
+  title="Figure 12.3 — Mangroves in Global Mangrove Watch, 1996 and 2020"
+  try="At the Ca Mau Cape, where are the red patches (lost): along the East Sea coast or inland? Compare with the orange of Figure 12.1."
+  source="Global Mangrove Watch v3.0 (Bunting et al., 2022), CC BY 4.0: epochs 1996 and 2020, 25 m, nearest cell on the 30 m grid."
+>
+  <DeltaMap client:visible lang="en" label="Mangroves" region="cmcoast" boundaries={false} choices={[
+    { key: 'gmw', label: { vi: 'Rừng ngập mặn', en: 'Mangroves' }, ids: { ndcoast: 'mangrove-change-ndcoast', cmcoast: 'mangrove-change-cmcoast' } },
+  ]} />
+</Figure>
+
+In the Ca Mau Cape frame, 7,700 ha of the 1996 mangroves were gone by 2020 and 2,300 ha are new. The losses form a continuous band along the East Sea coast, right where the shoreline retreats (Figure 12.1): there the forest was not cut, the ground under it was washed away. New mangroves grow on the new land west of the Cape.
+
+<Predict client:visible lang="en"
+  title="More mangroves or fewer?"
+  q="Official figures put Mekong Delta mangroves at 79,593 ha in 2015 and 90,777 ha in 2020, thanks to planting (Tinh et al., 2022). What does Global Mangrove Watch show for the same period?"
+  options={['Also about 11,000 ha more', 'Almost no change (about 500 ha less)', 'Half as much', 'No data']} answer={1}
+  why="GMW: 89,679 ha in 2015 and 89,205 ha in 2020, 474 ha less. The two sources measure different things: forestry statistics count planted forest land, saplings included; the satellite sees only a dense enough canopy, and trees planted a few years ago on mud flats do not show yet. Planting must also make up for what erosion takes." />
+
+<Figure
+  title="Figure 12.4 — Mangrove area in Global Mangrove Watch, 1996–2020"
+  try="Hover across the years. Do the Mekong Delta line and the Ca Mau Cape frame line move together? And the Red River Delta?"
+  source="Global Mangrove Watch v3.0, area of 25 m mangrove cells inside the region outline (geoBoundaries ADM1) and in the two coastal frames of Figure 12.1. No epochs for 1997–2006 and 2011–2014."
+>
+  <CoastSeries client:visible lang="en" view="mangrove" />
+</Figure>
+
+Mekong Delta mangroves in GMW fell by 7.2 %, from 96,100 ha (1996) to 89,200 ha (2020), mostly before 2010. The GMW epochs are not all built from the same radar data, so part of the difference between 1996 and 2007 may come from the data rather than real change. In the Red River Delta the area held steady, 21,900 ha in 1996 and 21,900 ha in 2020 (lowest 20,000 ha in 2018); the Nam Dinh frame holds about 2,900 ha, mainly on the new land at the Ba Lat mouth.
+
+## 12.5 Shrimp ponds and the switch from rice to shrimp
+
+Many salt-affected rice areas of the Ca Mau peninsula have switched to shrimp farming, or to rice in the rainy season rotated with shrimp in the dry season (Chapter 10). On dry-season images an <Term id="aquaculture-pond">aquaculture pond</Term> is water almost all season, while a winter–spring rice field is flooded only briefly during land preparation. Counting the share of 30 m cells under water in at least three quarters of the January–April looks separates shrimp ponds (with rivers and canals) from rice fields.
+
+<Predict client:visible lang="en"
+  title="Where did the shrimp ponds appear?"
+  q="Add up the standing dry-season water per province. From 1993–97 to 2003–07, which province gained the most?"
+  options={['An Giang', 'Ben Tre', 'Ca Mau', 'Can Tho']} answer={2}
+  why="Ca Mau: from 37.1 to 145.6 thousand ha, nearly four times as much in ten years; Bac Lieu from 14.1 to 56.3 thousand ha. An Giang and Can Tho barely changed: their dry-season water is mostly the Tien and Hau rivers." />
+
+<Figure
+  title="Figure 12.5 — Standing water through the dry season (January–April), Mekong Delta: 1993–97, 2003–07, 2021–25"
+  try="Turn on Compare, with 1993–97 on the left and 2021–25 on the right. Where is the new blue? Did any inland province change?"
+  source="Landsat 5, 7, 8, 9 C2 L2, January–April of each period: 30 m cells with MNDWI > 0 in ≥ 75 % of their clear looks (≥ 5 looks), as a share of each ~250 m cell. Rivers, canals and lakes included; change between periods is mostly aquaculture."
+>
+  <DeltaMap client:visible lang="en" label="Dry-season water" region="mekong" compare time={2} compareTime={0} choices={[
+    { key: 'ponds', label: { vi: 'Mặt nước mùa khô', en: 'Dry-season water' }, ids: { mekong: 'ponds-dry-mekong' }, clearBelow: 2 },
+  ]} />
+  <details slot="caption">
+    <summary>Data table: standing dry-season water per province (thousand ha)</summary>
+    <div class="table-wrap">
+
+| Province | 1993–97 | 2003–07 | 2021–25 |
+|---|---|---|---|
+| Mekong Delta | 226.1 | 398.7 | 368.2 |
+| Ca Mau | 37.1 | 145.6 | 125.4 |
+| Bac Lieu | 14.1 | 56.3 | 41.9 |
+| Kien Giang | 15.9 | 26.5 | 43.9 |
+| Soc Trang | 26.8 | 27.6 | 26.1 |
+| Tra Vinh | 21.5 | 28.3 | 25.3 |
+| Ben Tre | 42.2 | 46.5 | 41.2 |
+| Tien Giang | 17.8 | 17.0 | 16.6 |
+| Long An | 11.7 | 11.2 | 8.5 |
+| Vinh Long | 7.2 | 6.9 | 6.7 |
+| Dong Thap | 12.0 | 12.5 | 13.0 |
+| An Giang | 12.0 | 11.9 | 11.7 |
+| Can Tho | 7.5 | 7.6 | 7.5 |
+| Hau Giang | 0.6 | 0.6 | 0.4 |
+
+    </div>
+  </details>
+</Figure>
+
+Across the Mekong Delta, standing dry-season water grew from 226,100 ha (1993–97) to 398,700 ha (2003–07), then eased to 368,200 ha (2021–25). Nearly all the growth is on the Ca Mau peninsula: Ca Mau added 108,500 ha and Bac Lieu 42,200 ha in the first ten years alone. Both then fell back a little (Ca Mau to 125,400 ha, Bac Lieu to 41,900 ha), while Kien Giang kept growing (15,900 to 43,900 ha). The images cannot say why they fell: ponds switching to rice–shrimp rotation (rice in the field at the end of the dry season), intensive ponds drained between crops, or ponds abandoned. In inland provinces such as An Giang and Can Tho the figure barely changed in thirty years.
+
+<Note kind="key">
+
+The satellite shows clearly **when and where** coastal rice land turned into ponds: a big wave of conversion in Ca Mau and Bac Lieu between the mid-1990s and the mid-2000s. It does not show what is raised in the ponds, how, or whether it pays. For that, the map has to be joined with fisheries statistics and farm surveys.
+
+</Note>
+
+<Depth level="advanced" title="Telling shrimp ponds from rivers and flooded fields">
+
+The 75 % threshold on January–April looks still mixes three things: rivers and big canals (water all year, unchanged between periods), aquaculture ponds (water all year, new) and long-flooded fields (rare in the dry season). Further separation: (1) subtract the JRC permanent water (Chapter 8); (2) shape: ponds are embanked rectangles, clear at 10 m on Sentinel-2; (3) water calendar: rice–shrimp ponds dry out in the rainy season when rice is grown, while intensive shrimp ponds stay flooded all year. A trustworthy aquaculture map still needs checking against provincial statistics.
+
+</Depth>
+
+## 12.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Anthony, E. J., Brunier, G., Besset, M., Goichot, M., Dussouillez, P., & Nguyen, V. L. (2015). Linking rapid erosion of the Mekong River delta to human activities. *Scientific Reports*, 5, 14745. https://doi.org/10.1038/srep14745
+- Bunting, P. et al. (2022). Global Mangrove Extent Change 1996–2020: Global Mangrove Watch Version 3.0. *Remote Sensing*, 14(15), 3657. https://doi.org/10.3390/rs14153657
+- Nguyen Van Thao, Tran Duc Thanh, Saito, Y., & Gouramanis, C. (2013). Monitoring coastline change in the Red River Delta using remotely sensed data. *Journal of Marine Science and Technology*, 13(2), 151–160.
+- Pham Quang Son & Nguyen Duc Anh (2016). Diễn biến xói lở – bồi tụ ven biển Hải Hậu, Nam Định [Coastal erosion and accretion in Hai Hau, Nam Dinh]. *Vietnam Journal of Earth Sciences*, 38(1), 118–130.
+- Tinh, P. H. et al. (2022). Mangrove restoration in Vietnamese Mekong Delta during 2015–2020: Achievements and challenges. *Frontiers in Marine Science*, 9, 1043943. https://doi.org/10.3389/fmars.2022.1043943
+- Tran Thi, V., Tien Thi Xuan, A., Phan Nguyen, H., Dahdouh-Guebas, F., & Koedam, N. (2014). Application of remote sensing and GIS for detection of long-term mangrove shoreline changes in Mui Ca Mau, Vietnam. *Biogeosciences*, 11, 3781–3795. https://doi.org/10.5194/bg-11-3781-2014

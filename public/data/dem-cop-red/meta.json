@@ -1,0 +1,54 @@
+{
+ "id": "dem-cop-red",
+ "region": "red",
+ "title": {
+  "vi": "Độ cao bề mặt Copernicus DEM",
+  "en": "Copernicus DEM surface elevation"
+ },
+ "units": {
+  "vi": "m trên mực nước biển (EGM2008)",
+  "en": "m above sea level (EGM2008)"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  8
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint16",
+ "scale": 0.01,
+ "offset": -5.0,
+ "nodata": 65535,
+ "times": [
+  "2024"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 268871,
+   "mean": 34.04,
+   "p2": 0.07,
+   "p50": 4.51,
+   "p98": 367.42,
+   "min": -5.0,
+   "max": 650.34
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/DEM/GLO30_2024_1 band DEM (1 arc-second, m above EGM2008; X-band radar surface: trees and roofs included)",
+  "processing": "mean of ~30 m cells in each ~250 m cell",
+  "attribution": "Copernicus DEM GLO-30 (2024_1): produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA",
+  "exported": "2026-11-17T14:34:44+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

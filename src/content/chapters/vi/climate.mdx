@@ -1,0 +1,174 @@
+---
+title: Khí hậu nông nghiệp
+n: 7
+summary: Mưa, nhiệt và bốc thoát hơi quyết định lịch thời vụ ở hai châu thổ. Chương này dựng khí hậu trung bình 1991–2020 từ dữ liệu mưa vệ tinh CHIRPS và tái phân tích ERA5-Land, so nhiệt độ không khí với nhiệt độ bề mặt MODIS, rồi xem ba mùa khô 2016, 2020, 2024 và xu thế ấm lên 1981–2025 dưới góc nhìn của El Niño.
+objectives:
+  - Đọc khí hậu trung bình tháng của hai châu thổ và giải thích vì sao lịch thời vụ hai nơi khác nhau.
+  - Phân biệt mưa vệ tinh (CHIRPS), tái phân tích (ERA5-Land) và nhiệt độ bề mặt (MODIS LST), và biết điểm yếu của từng loại.
+  - Đọc cân bằng mưa – bốc thoát hơi theo tháng để biết khi nào ruộng phải dựa vào tưới.
+  - Liên hệ chỉ số ONI với mưa và nhiệt mùa khô ở hai vùng, và giải thích vì sao El Niño tác động hai miền khác nhau.
+  - Ước tính xu thế nhiệt độ bằng phương pháp Theil–Sen và nói rõ giới hạn của dữ liệu tái phân tích.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ClimateSeries from '../../../islands/ClimateSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/climate.json';
+
+Lúa cần nước và nhiệt. Ở ĐBSH, mùa đông lạnh buộc vụ Xuân phải chờ hết rét mới cấy. Ở ĐBSCL nhiệt độ gần như không đổi quanh năm, nên lịch thời vụ do nước quyết định: lũ, mưa và mặn. Chương này đo các yếu tố đó từ vệ tinh và tái phân tích cho cả hai vùng, trong 45 năm.
+
+<Stats items={[
+  { v: '16,4', u: '°C', l: 'nhiệt độ trung bình tháng 1 ở ĐBSH (ĐBSCL: 25,8), 1991–2020' },
+  { v: '9', u: '%', l: 'lượng mưa năm của ĐBSCL rơi vào 5 tháng mùa khô (tháng 12–4)' },
+  { v: '−60', u: '%', l: 'mưa mùa khô 2023–24 ở ĐBSCL so với trung bình 1991–2020' },
+  { v: '+0,19', u: '°C/10 năm', l: 'xu thế nhiệt độ năm ở ĐBSH 1981–2025 theo ERA5-Land (ĐBSCL: +0,13)' },
+]} caption="Trung bình vùng từ CHIRPS và ERA5-Land; tính bằng scripts/climate_numbers.ts." />
+
+## 7.1 Hai kiểu khí hậu
+
+**ĐBSH** có khí hậu nhiệt đới gió mùa với một mùa đông lạnh thật sự. Tháng 1 trung bình chỉ 16,4 °C, tháng 6 lên 28,8 °C: biên độ năm 12,4 °C. Mưa tập trung từ tháng 5 đến tháng 10, nhiều nhất tháng 8 (336 mm); mùa đông khô nhưng hay có mưa phùn, trời âm u (Chương 2).
+
+**ĐBSCL** nóng quanh năm: tháng lạnh nhất 25,8 °C, tháng nóng nhất (tháng 4) 28,6 °C, biên độ chỉ 2,8 °C. Lượng mưa năm gần bằng ĐBSH (1.705 so với 1.698 mm), nhưng phân mùa gay gắt hơn: tháng 12 đến tháng 4 chỉ nhận 9 % lượng mưa cả năm, tháng 2 trung bình 7 mm.
+
+<Predict client:visible lang="vi"
+  title="Tháng nào ĐBSCL mưa nhiều nhất?"
+  q="Theo trung bình 1991–2020 của CHIRPS, tháng nào ĐBSCL có lượng mưa lớn nhất?"
+  options={['Tháng 6', 'Tháng 8', 'Tháng 10', 'Tháng 12']} answer={2}
+  why="Tháng 10, khoảng 278 mm. Mùa mưa ĐBSCL kéo dài và lên đỉnh muộn, trùng với đỉnh lũ Mê Kông (Chương 8). Ở ĐBSH đỉnh mưa là tháng 8 (336 mm)." />
+
+<Figure
+  title="Hình 7.1 — Khí hậu trung bình tháng 1991–2020: mưa, bốc thoát hơi, nhiệt độ"
+  try="So hai vùng: tháng nào lượng mưa (xanh) thấp hơn bốc thoát hơi thực (lục)? Ở biểu đồ dưới, khoảng cách giữa nhiệt độ bề mặt và nhiệt độ không khí lớn nhất vào tháng nào?"
+  source="Trung bình vùng (theo diện tích, trong ranh vùng) của CHIRPS v2.0 (Funk và cs., 2015) và ERA5-Land tháng (Muñoz-Sabater và cs., 2021) trên lưới ~5 km, 1991–2020; nhiệt độ bề mặt ban ngày MODIS MOD11A2 C6.1 trên các ô ≥ 50 % đất trồng trọt (WorldCover), 2001–2024, chỉ ngày quang mây."
+>
+  <ClimateSeries client:visible lang="vi" view="normals" region="red" />
+</Figure>
+
+<Note kind="key">
+
+Hai châu thổ có lượng mưa năm gần như bằng nhau, nhưng ĐBSH bị giới hạn bởi **nhiệt** (mùa đông lạnh), còn ĐBSCL bị giới hạn bởi **nước** (mùa khô gần như không mưa, mùa mưa có lũ). Vì vậy ĐBSH làm hai vụ theo mùa nhiệt, ĐBSCL làm hai đến ba vụ theo nước tưới và lũ (Chương 4).
+
+</Note>
+
+## 7.2 Mưa nhìn từ vệ tinh
+
+Trạm đo mưa ở hai châu thổ thưa và số liệu không mở. Bộ <Term id="chirps">CHIRPS</Term> lấp khoảng trống đó: nó ước tính mưa từ thời gian mây lạnh trên ảnh hồng ngoại vệ tinh địa tĩnh, rồi hiệu chỉnh bằng số đo trạm, ở độ phân giải 0,05° (khoảng 5,5 km) từ năm 1981 (Funk và cs., 2015).
+
+Hình 7.2 có hai lớp. Lớp đầu là lượng mưa trung bình từng tháng; kéo thanh thời gian để thấy mùa mưa đến và đi ở mỗi vùng. Lớp sau là mưa của ba mùa khô 2015–16, 2019–20, 2023–24 so với trung bình (El Niño rất mạnh, yếu và mạnh).
+
+<Figure
+  title="Hình 7.2 — Lượng mưa trung bình tháng 1991–2020 và mưa của ba mùa khô 2016, 2020, 2024"
+  try="Ở lớp 'Mưa trung bình tháng', bấm Chạy và xem mùa mưa lan từ đâu. Chọn lớp 'Mưa mùa khô' rồi so ĐBSCL với ĐBSH ở mùa 2015–16: hai vùng có cùng màu không?"
+  source="CHIRPS v2.0 (UCSB Climate Hazards Center), tổng theo tháng, ~5 km. Mưa mùa khô = tổng tháng 12 đến tháng 4 so với trung bình cùng các tháng 1991–2020, tính bằng %. Cắt theo ranh vùng (geoBoundaries ADM1, ranh 2008)."
+>
+  <DeltaMap client:visible lang="vi" label="Lượng mưa CHIRPS" region="mekong" choices={[
+    { key: 'normal', label: { vi: 'Mưa trung bình tháng', en: 'Mean monthly rain' }, ids: { red: 'rain-normal-red', mekong: 'rain-normal-mekong' } },
+    { key: 'dry', label: { vi: 'Mưa mùa khô so với TB', en: 'Dry-season rain vs mean' }, ids: { red: 'rain-dryanom-red', mekong: 'rain-dryanom-mekong' } },
+  ]} />
+</Figure>
+
+<Note kind="warn">
+
+CHIRPS ở 5 km làm mượt các trận mưa dông cục bộ, và ở ven biển ít trạm hiệu chỉnh hơn. Dùng nó cho trung bình vùng, xu thế theo mùa và so sánh giữa các năm; đừng đọc từng ô như số đo của một trạm.
+
+</Note>
+
+## 7.3 Nhiệt độ không khí và nhiệt độ bề mặt
+
+Hai loại "nhiệt độ" trong chương này đo hai thứ khác nhau.
+
+- **Nhiệt độ không khí ở 2 m** lấy từ <Term id="reanalysis">tái phân tích</Term> ERA5-Land (0,1°, từ 1950). Đó là nhiệt độ mà trạm khí tượng đo và mà cây lúa "cảm" qua không khí.
+- **<Term id="lst">Nhiệt độ bề mặt</Term>** MODIS là nhiệt độ của chính mặt ruộng, tán lá, mái nhà, đo bằng kênh hồng ngoại nhiệt lúc vệ tinh Terra bay qua khoảng 10 giờ 30 sáng, chỉ khi trời quang.
+
+<Predict client:visible lang="vi"
+  title="Ruộng ĐBSCL nóng hơn không khí bao nhiêu?"
+  q="Tháng 4, nhiệt độ bề mặt ban ngày (MODIS) trên đất trồng trọt ĐBSCL cao hơn nhiệt độ không khí trung bình tháng (ERA5-Land) khoảng bao nhiêu độ?"
+  slider={{ min: 0, max: 15, step: 0.5, unit: '°C' }} answer={5} tol={1.5}
+  why="Khoảng 4,9 °C (33,5 so với 28,6 °C). Tháng 3–4 là lúc ruộng vừa thu hoạch vụ Đông Xuân, đất trống phơi nắng lúc gần trưa. Tháng 1, khi lúa đang xanh, chênh lệch chỉ 1,3 °C: tán lá được làm mát nhờ thoát hơi nước." />
+
+Chênh lệch giữa hai loại nhiệt độ cho biết ruộng đang có cây xanh, thoát hơi tốt, hay đang trống và khô. Đó là cơ sở của chỉ số điều kiện nhiệt TCI ở Chương 9. Ở ĐBSH, mùa đông chênh lệch lên 6–8 °C, nhưng một phần là thiên lệch: MODIS chỉ đo được vào những ngày hiếm hoi trời quang, mà ngày quang thường nắng ấm hơn trung bình tháng.
+
+<Depth level="advanced" title="Tái phân tích là gì, và khi nào nên ngờ nó">
+
+ERA5-Land chạy lại mô hình bề mặt đất của ECMWF cho mọi giờ từ 1950, được dẫn dắt bởi khí quyển ERA5, vốn đồng hóa hàng triệu quan trắc từ trạm, bóng thám không, vệ tinh. Kết quả liên tục, không có ô trống do mây. Nhưng nó là **sản phẩm mô hình**: độ phân giải 0,1° (khoảng 11 km) không thấy được ruộng lúa ngập nước hay đô thị; mô hình không biết người dân tưới bao nhiêu; và khi số quan trắc đầu vào thay đổi theo thời gian, xu thế dài hạn có thể lệch. Nên so xu thế ERA5-Land với số đo của trạm khi có thể.
+
+</Depth>
+
+## 7.4 Bốc thoát hơi và cân bằng nước
+
+<Term id="evapotranspiration">Bốc thoát hơi</Term> là lượng nước ruộng trả lại khí quyển. So nó với mưa cho biết tháng nào cây tự đủ nước, tháng nào phải tưới.
+
+Theo ERA5-Land, bốc thoát hơi thực mỗi năm khoảng 1.100 mm ở ĐBSH và 1.265 mm ở ĐBSCL. Ở ĐBSCL, mưa thấp hơn bốc thoát hơi tiềm năng từ tháng 11 đến tháng 5; thiếu hụt lớn nhất tháng 3, khoảng 280 mm. Đó là lúc vụ Đông Xuân trổ bông và chín, sống nhờ nước sông, đúng khi mặn lấn vào (Chương 10).
+
+<Note kind="warn">
+
+ERA5-Land tính bốc thoát hơi tiềm năng như cho một bề mặt luôn đủ ẩm, nên con số tuyệt đối (khoảng 2.000–2.650 mm/năm) cao hơn bốc thoát hơi chuẩn ET₀ theo FAO-56. Ở đây chỉ nên đọc **mùa nào thiếu nước**, không đọc độ lớn của thiếu hụt.
+
+</Note>
+
+## 7.5 El Niño và ba mùa khô 2016, 2020, 2024
+
+<Term id="enso">ENSO</Term> là dao động lớn nhất của khí hậu nhiệt đới. Chỉ số <Term id="oni">ONI</Term> của NOAA đo nó: tháng 12–2 của mùa khô 2015–16 là +2,50 (El Niño rất mạnh), 2019–20 là +0,71 (yếu), 2023–24 là +1,84 (mạnh).
+
+<Predict client:visible lang="vi"
+  title="El Niño có làm cả hai châu thổ khô không?"
+  q="Mùa khô 2015–16 (El Niño rất mạnh), lượng mưa tháng 12–4 ở ĐBSH so với trung bình 1991–2020 thế nào?"
+  options={['Ít hơn nhiều, như ĐBSCL', 'Gần như bình thường', 'Nhiều hơn rõ rệt']} answer={2}
+  why="Nhiều hơn khoảng 48 %, trong khi ĐBSCL thiếu 34 %. El Niño làm mùa khô miền Nam ít mưa và nóng hơn, nhưng mùa đông năm ấy ở miền Bắc lại nhiều mưa hơn thường lệ. Một chỉ số toàn cầu không tác động giống nhau ở hai vùng cách nhau 1.200 km." />
+
+<Figure
+  title="Hình 7.3 — Mưa mùa khô và nhiệt độ tháng 2–4 so với trung bình, 1982–2025, và các năm El Niño"
+  try="Rê chuột lên các năm có dải tô (El Niño): ĐBSCL có luôn thiếu mưa không? Tìm năm nóng nhất của tháng 2–4 ở mỗi vùng."
+  source="Trung bình vùng của CHIRPS (mưa tháng 12 năm trước đến tháng 4) và ERA5-Land (nhiệt độ 2 m, tháng 2–4), so với trung bình 1991–2020. Dải tô: mùa có ONI tháng 12–2 ≥ 1,0 (NOAA CPC, ERSSTv5)."
+>
+  <ClimateSeries client:visible lang="vi" view="dry" />
+</Figure>
+
+Ba mùa khô cho ba bức tranh khác nhau ở ĐBSCL:
+
+- **2015–16**: mưa thiếu 34 %, tháng 2–4 nóng hơn 0,9 °C. Hạn đi cùng mặn lịch sử (Chương 10).
+- **2019–20**: mưa thiếu 38 %, khoảng 70 % lượng thiếu hụt rơi vào tháng 12–1; tháng 2–4 chỉ hơi khô (SPI-3 −0,14, Chương 9). Mưa tại chỗ không giải thích được đợt mặn năm ấy (Chương 10).
+- **2023–24**: mưa thiếu 60 %, ngang các năm khô nhất từ 1981 (1987, 2005); tháng 2–4 nóng nhất kể từ 1981 (+1,3 °C).
+
+<Note kind="warn">
+
+Tháng 8–10/2026, ONI đạt +2,46, cao nhất kể từ mùa 2015–16 (NOAA CPC, số liệu tải ngày 17/11/2026). Từ năm 1950, chỉ ba mùa có ONI tháng 12–2 vượt +2 (1982–83, 1997–98, 2015–16); cả ba lần, mùa khô ĐBSCL thiếu 34–59 % lượng mưa. ENSO không quyết định tất cả, nhưng đó là lý do để theo dõi sát mùa khô 2026–27 bằng các chỉ số ở Chương 9 và 10.
+
+</Note>
+
+## 7.6 Xu thế ấm lên
+
+<Figure
+  title="Hình 7.4 — Nhiệt độ không khí trung bình năm 1981–2025 và xu thế Theil–Sen"
+  try="Năm nào nóng nhất ở mỗi vùng? Đường xu thế của vùng nào dốc hơn?"
+  source="Trung bình vùng của ERA5-Land, nhiệt độ 2 m, trung bình 12 tháng; xu thế Theil–Sen (trung vị độ dốc của mọi cặp năm), tính trong trình duyệt bằng src/lib/change.ts."
+>
+  <ClimateSeries client:visible lang="vi" view="warming" />
+</Figure>
+
+Theo ERA5-Land, nhiệt độ năm tăng khoảng 0,19 °C mỗi 10 năm ở ĐBSH và 0,13 °C ở ĐBSCL trong 1981–2025. Năm nóng nhất là 2019 ở ĐBSH và 2024 ở ĐBSCL. Xu thế dùng phương pháp Theil–Sen (trung vị độ dốc giữa mọi cặp năm), nên một năm El Niño nóng bất thường không kéo lệch đường xu thế như hồi quy bình phương nhỏ nhất.
+
+<Note kind="key">
+
+Một xu thế từ tái phân tích là ước tính, không phải số đo. Trước khi dùng cho quyết định, hãy so với trạm khí tượng gần nhất và nói rõ nguồn, giai đoạn, phương pháp.
+
+</Note>
+
+## 7.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Funk, C. và cs. (2015). The climate hazards infrared precipitation with stations — a new environmental record for monitoring extremes. *Scientific Data*, 2, 150066. https://doi.org/10.1038/sdata.2015.66
+- Muñoz-Sabater, J. và cs. (2021). ERA5-Land: a state-of-the-art global reanalysis dataset for land applications. *Earth System Science Data*, 13, 4349–4383. https://doi.org/10.5194/essd-13-4349-2021
+- NOAA Climate Prediction Center. Oceanic Niño Index (ONI), ERSSTv5. https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt (tải ngày 17/11/2026).
+- Sen, P. K. (1968). Estimates of the regression coefficient based on Kendall's tau. *Journal of the American Statistical Association*, 63(324), 1379–1389.
+- Wan, Z. (2014). New refinements and validation of the collection-6 MODIS land-surface temperature/emissivity product. *Remote Sensing of Environment*, 140, 36–45. https://doi.org/10.1016/j.rse.2013.08.027
+- WMO (2017). *WMO Guidelines on the Calculation of Climate Normals* (WMO-No. 1203). Geneva.

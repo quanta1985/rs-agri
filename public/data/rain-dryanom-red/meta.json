@@ -1,0 +1,74 @@
+{
+ "id": "rain-dryanom-red",
+ "region": "red",
+ "title": {
+  "vi": "Mưa mùa khô (tháng 12–4) so với trung bình 1991–2020",
+  "en": "Dry-season rainfall (Dec–Apr) against the 1991–2020 mean"
+ },
+ "units": {
+  "vi": "% chênh lệch",
+  "en": "% difference"
+ },
+ "kind": "continuous",
+ "palette": "brbg",
+ "range": [
+  -100,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11720230.28,
+  2464884.197
+ ],
+ "res": 5346.820383,
+ "ground_res_m": 5000,
+ "width": 37,
+ "height": 39,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": -100,
+ "nodata": 255,
+ "times": [
+  "2015–16",
+  "2019–20",
+  "2023–24"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 753,
+   "mean": 48.1819,
+   "p2": 29.0,
+   "p50": 47.0,
+   "p98": 75.0,
+   "min": 24.0,
+   "max": 84.0
+  },
+  {
+   "valid": 753,
+   "mean": 33.1368,
+   "p2": 17.0,
+   "p50": 34.0,
+   "p98": 49.0,
+   "min": 12.0,
+   "max": 55.0
+  },
+  {
+   "valid": 753,
+   "mean": 6.6667,
+   "p2": -10.0,
+   "p50": 6.0,
+   "p98": 24.96,
+   "min": -27.0,
+   "max": 32.0
+  }
+ ],
+ "provenance": {
+  "source": "UCSB-CHG/CHIRPS/PENTAD summed per month",
+  "attribution": "CHIRPS v2.0 (Funk et al. 2015, Scientific Data 2:150066), UCSB Climate Hazards Center",
+  "processing": "Dec-Apr total minus the 1991-2020 mean of the same months, in %",
+  "exported": "2026-11-17T10:21:19+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

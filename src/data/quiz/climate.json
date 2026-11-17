@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Lượng mưa năm của hai châu thổ gần bằng nhau (khoảng 1.700 mm). Điều gì giới hạn lịch thời vụ ở mỗi vùng?", "en": "The two deltas get almost the same annual rain (about 1,700 mm). What limits the crop calendar in each?" },
+  "options": [
+   { "vi": "ĐBSH bị giới hạn bởi mùa đông lạnh, ĐBSCL bởi nước (mùa khô, lũ)", "en": "The Red River Delta by its cold winter, the Mekong Delta by water (dry season, flood)" },
+   { "vi": "Cả hai đều bị giới hạn bởi nhiệt độ", "en": "Both are limited by temperature" },
+   { "vi": "Cả hai đều bị giới hạn bởi tổng lượng mưa năm", "en": "Both are limited by total annual rain" },
+   { "vi": "Không có giới hạn nào, có thể cấy lúa quanh năm ở cả hai", "en": "Nothing limits them; rice can be planted year-round in both" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Tháng 1 ở ĐBSH chỉ 16,4 °C; ở ĐBSCL nhiệt độ gần như không đổi nhưng tháng 12–4 chỉ có 9 % lượng mưa năm.", "en": "January in the Red River Delta is only 16.4 °C; the Mekong Delta's temperature barely changes, but December–April gets only 9 % of the year's rain." }
+ },
+ {
+  "q": { "vi": "Vì sao nhiệt độ bề mặt MODIS trên ruộng ĐBSCL tháng 4 cao hơn nhiệt độ không khí khoảng 5 °C, còn tháng 1 chỉ hơn 1,3 °C?", "en": "Why is MODIS surface temperature over Mekong fields about 5 °C above air temperature in April but only 1.3 °C in January?" },
+  "options": [
+   { "vi": "Tháng 4 ruộng vừa thu hoạch, đất trống phơi nắng; tháng 1 lúa xanh thoát hơi nước làm mát tán lá", "en": "In April fields are freshly harvested and bare soil bakes; in January green rice transpires and cools the canopy" },
+   { "vi": "Vì vệ tinh MODIS hỏng vào tháng 4", "en": "Because MODIS malfunctions in April" },
+   { "vi": "Vì ERA5-Land không có số liệu tháng 1", "en": "Because ERA5-Land has no January data" },
+   { "vi": "Vì tháng 1 có nhiều mây hơn tháng 4 ở ĐBSCL", "en": "Because January is cloudier than April in the Mekong Delta" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Chênh lệch nhiệt độ bề mặt – không khí phản ánh tình trạng mặt ruộng; đó là ý tưởng của chỉ số TCI ở Chương 9.", "en": "The surface–air temperature gap reflects the state of the field; that is the idea behind the TCI of Chapter 9." }
+ },
+ {
+  "q": { "vi": "Mùa khô 2015–16 (El Niño rất mạnh), ĐBSCL thiếu 34 % lượng mưa. ĐBSH thì sao?", "en": "In the 2015–16 dry season (very strong El Niño) the Mekong Delta was 34 % short of rain. What about the Red River Delta?" },
+  "options": [
+   { "vi": "Mưa nhiều hơn trung bình khoảng 48 %", "en": "About 48 % more rain than the mean" },
+   { "vi": "Cũng thiếu khoảng 34 %", "en": "Also about 34 % short" },
+   { "vi": "Không có mưa suốt mùa khô", "en": "No rain at all in the dry season" },
+   { "vi": "Không có số liệu", "en": "No data" }
+  ],
+  "answer": 0,
+  "why": { "vi": "El Niño không tác động giống nhau ở mọi nơi: mùa khô miền Nam khô và nóng hơn, nhưng mùa đông năm đó miền Bắc nhiều mưa hơn.", "en": "El Niño does not act the same everywhere: the southern dry season got drier and hotter, but that winter the north was wetter." }
+ },
+ {
+  "q": { "vi": "Vì sao sổ tay dùng phương pháp Theil–Sen thay vì hồi quy bình phương nhỏ nhất để tính xu thế nhiệt độ?", "en": "Why does the handbook use Theil–Sen rather than least squares for the temperature trend?" },
+  "options": [
+   { "vi": "Trung vị độ dốc ít bị một vài năm bất thường (năm El Niño nóng) kéo lệch", "en": "The median slope is barely pulled by a few unusual years (hot El Niño years)" },
+   { "vi": "Theil–Sen luôn cho xu thế lớn hơn", "en": "Theil–Sen always gives a larger trend" },
+   { "vi": "Bình phương nhỏ nhất không dùng được cho nhiệt độ", "en": "Least squares does not work for temperature" },
+   { "vi": "Theil–Sen loại bỏ ảnh hưởng của biến đổi khí hậu", "en": "Theil–Sen removes the effect of climate change" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Theil–Sen là ước lượng bền vững. Dù vậy xu thế từ tái phân tích vẫn nên so với trạm khí tượng.", "en": "Theil–Sen is a robust estimator. Even so, a reanalysis trend should be checked against weather stations." }
+ }
+]

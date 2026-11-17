@@ -130,8 +130,8 @@ Mỗi chương: 5–6 mục, hình mở đầu kiểu "hero", 2–3 `<Predict>` 
 Mỗi bước giống đợt 1: xuất dữ liệu GEE → viết vi + en → quiz, glossary, `*_numbers.ts` → Playwright + `code-reviewer`. Lab cho các chương mới gom vào bước 15.
 
 9. ✅ (2026-11-17) Phần A: ch.1 `deltas` (lớp phủ WorldCover, mật độ dân GHSL, số vụ lúa; thẻ số liệu tính từ dữ liệu) + ch.2 `data` (tỉ lệ ảnh S2 quang đãng theo tháng ở 5 điểm, số cảnh S1 theo năm, tỉ lệ pixel thuần theo độ phân giải; bảng cảm biến, chi phí ảnh theo sách 1.2.1). Sửa HUD bản tiếng Anh hiện tên tỉnh tiếng Việt.
-10. Ch.7 `climate` + ch.9 `drought` (CHIRPS, ERA5-Land, MOD11A2, MOD16A2, SMAP; chung dữ liệu nền).
-11. Ch.11 `soil-terrain` + ch.12 `coast`.
+10. ✅ (2026-11-17) Ch.7 `climate` + ch.9 `drought` (CHIRPS, ERA5-Land, MOD11A2, MOD13Q1, SMAP; chung dữ liệu nền). Khác kế hoạch: bốc thoát hơi lấy từ ERA5-Land (MOD16A2 v061 trên EE chỉ từ 2021); VHI theo cách ASIS của FAO (ngưỡng 35); thêm cảnh báo El Niño 2026 (ONI +2,46).
+11. ✅ (2026-11-17) Ch.11 `soil-terrain` + ch.12 `coast`. Khác kế hoạch: DEM dùng DeltaDTM (CC BY 4.0) thay FABDEM (CC BY-NC-SA); SoilGrids không thấy đất phèn nên chương nói rõ giới hạn; đường bờ, ao tôm tự tính từ Landsat (MNDWI nhiều năm) thay vì Hansen GFC; kịch bản nước biển dâng của Bộ chưa dùng (chưa có văn bản gốc).
 12. Ch.13 `emissions`.
 13. Phần B: ch.3 `landcover`, ch.5 `area-stats`, ch.6 `yield`.
 14. Ch.14 `risk` (tổng hợp 7–13) + ch.16 `reference`.

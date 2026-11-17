@@ -1,0 +1,196 @@
+---
+title: Soils, acid sulfate, terrain, subsidence and sea-level rise
+n: 11
+summary: "Both deltas are low, young and sinking. This chapter reads the global SoilGrids soil map and shows where it misses acid sulfate soils, compares two elevation models (Copernicus DEM and DeltaDTM) to show how coconut palms and roofs add metres to the land, then works out how much area lies below each sea level once subsidence from groundwater pumping is added."
+objectives:
+  - Read the SoilGrids soil property maps and know the limits of a global 250 m soil map.
+  - Explain why satellites cannot see acid sulfate soils directly, and what signs they do see.
+  - Tell a surface model (DSM) from a terrain model (DTM) and see why a few metres matter in a delta.
+  - Use a hypsometric curve to estimate the area below a sea level, and state the assumptions.
+  - Compare subsidence with sea-level rise and compute relative sea-level rise.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import TerrainCurve from '../../../islands/TerrainCurve.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/soil-terrain.json';
+
+The floods, droughts and salt of the previous chapters all play out on a particular ground: young alluvium, acid in many places, and so low that a few tens of centimetres matter. This chapter measures that ground from space and shows where the measurement can be trusted and where it cannot.
+
+<Stats items={[
+  { v: '1.6', u: 'million ha', l: 'of acid sulfate soils in the Mekong Delta, about 400,000 ha of them in the Plain of Reeds (Husson, 1998)' },
+  { v: '0.8', u: 'm', l: 'mean elevation of the Mekong Delta from survey data, against 2.6 m in the SRTM model (Minderhoud et al., 2019)' },
+  { v: '60', u: '%', l: 'of Mekong Delta land below 2 m in DeltaDTM (38 % in Copernicus DEM)' },
+  { v: '1.1', u: 'cm/yr', l: 'mean subsidence from groundwater pumping in the Mekong Delta, about three times the global rate of sea-level rise (Minderhoud et al., 2017; IPCC, 2021)' },
+]} caption="DeltaDTM and Copernicus DEM figures computed by scripts/soil-terrain_numbers.ts; the others are taken from the publications named beside them." />
+
+## 11.1 The soils of the two deltas
+
+Both deltas are **young alluvium** laid down by the Red River and the Mekong over the last few thousand years. Fertile alluvial soils line the big rivers. In the low basins away from the rivers, once brackish swamps, lie **acid sulfate soils**. Saline soils fringe the coast, and peat forms in a few places that stay flooded for long periods.
+
+The FAO handbook (2017, section 1.4, Table 2) lists a **soil map** among the reference layers needed before doing agricultural statistics with satellite imagery, at a minimum scale of 1:100,000, for land suitability and erosion and salinity risks. Where no open national map exists, the easiest source is <Term id="soilgrids">SoilGrids</Term> 2.0 (Poggio et al., 2021): a global map at 250 m, six depths down to 2 m, licensed CC BY 4.0.
+
+But 250 m matches a map at about 1:500,000 (Tobler's rule: cell size in metres equals the scale denominator divided by 2,000), five times coarser than FAO asks for. And SoilGrids is a **prediction** by a machine-learning model trained on the soil profiles in international databases and on environmental covariates, not a measurement.
+
+<Predict client:visible lang="en"
+  title="Does SoilGrids see acid sulfate soils?"
+  q="Active acid sulfate soils have a pH below 4. Thap Muoi (Dong Thap) lies in the middle of the largest acid sulfate area of the Mekong Delta. What topsoil pH (0–30 cm) does SoilGrids give around Thap Muoi?"
+  options={['Below 4', 'Between 4 and 5', 'About 6', 'Above 7']} answer={2}
+  why="About 6.05: close to neutral. The lowest value in the whole Mekong Delta is 4.8, and it does lie in the low basin of the Plain of Reeds. SoilGrids puts its most acid spot in the right place but smooths it heavily: only 11.7 % of the Mekong Delta has a pH below 5.5, and no cell is below 4.5." />
+
+<Figure
+  title="Figure 11.1 — Topsoil (0–30 cm) pH, organic carbon and clay from SoilGrids 2.0"
+  try="On the pH layer, find the brownest (most acid) part of the Mekong Delta. Switch to organic carbon: where is the most carbon, near the rivers or near the sea?"
+  source="ISRIC SoilGrids 2.0 (Poggio et al., 2021), CC BY 4.0: weighted mean of the 0–5, 5–15 and 15–30 cm layers (5 : 10 : 15), nearest 250 m cell on the Mercator grid. Stretched colour scales: pH 5–7, carbon 15–60 g/kg, clay 30–48 %."
+>
+  <DeltaMap client:visible lang="en" label="Topsoil" region="mekong" choices={[
+    { key: 'ph', label: { vi: 'pH', en: 'pH' }, ids: { red: 'soil-ph-red', mekong: 'soil-ph-mekong' }, palette: 'brbg', range: [5, 7] },
+    { key: 'soc', label: { vi: 'Cacbon hữu cơ', en: 'Organic carbon' }, ids: { red: 'soil-soc-red', mekong: 'soil-soc-mekong' }, palette: 'viridis', range: [15, 60] },
+    { key: 'clay', label: { vi: 'Sét', en: 'Clay' }, ids: { red: 'soil-clay-red', mekong: 'soil-clay-mekong' }, palette: 'ylorrd', range: [30, 48] },
+  ]} />
+</Figure>
+
+<Term id="soil-organic-carbon">Organic carbon</Term> peaks on the coastal mud flats of both deltas (93.5 g/kg in the Mekong, 95.5 g/kg in the Red River Delta, against medians of 30.5 and 20 g/kg), where mangrove leaves and roots build up in tidal mud. Clay in the Mekong Delta is almost uniform (median 38.5 %): this map cannot tell a river levee from a back swamp, something any farmer knows.
+
+<Note kind="warn">
+
+SoilGrids is useful for a first look where there is no soil map. It does not replace a national soil survey, and it cannot map acid sulfate soils: extreme values are smoothed away, because the model learns from few profiles in the delta. To know which field is acid, auger and measure.
+
+</Note>
+
+## 11.2 Acid sulfate soils: satellites see the effects, not the pyrite
+
+<Term id="acid-sulfate-soil">Acid sulfate soils</Term> contain pyrite (FeS₂) formed under former mangroves and brackish swamps. While waterlogged, the pyrite is stable. When the soil dries (dry season, canal digging, raised beds), air gets in and the pyrite oxidises to sulfuric acid:
+
+<Formula label="Pyrite oxidation" tex="\mathrm{FeS_2} + \tfrac{15}{4}\,\mathrm{O_2} + \tfrac{7}{2}\,\mathrm{H_2O} \rightarrow \mathrm{Fe(OH)_3} + 2\,\mathrm{H_2SO_4}" where="
+\mathrm{FeS_2} :: pyrite in the sediment below the surface
+\mathrm{H_2SO_4} :: sulfuric acid that drops the pH below 4 and dissolves aluminium and iron, toxic to crops
+" />
+
+All of this happens underground. Optical images see only the top few millimetres, and C-band radar reaches only a few centimetres into moist soil. So satellites cannot measure pH. They see **signs**:
+
+<Steps title="What satellite images show in acid sulfate areas" items={[
+  { tag: '1', t: 'Indicator vegetation', d: 'Melaleuca forest and Eleocharis sedge grow on acid sulfate soils where rice struggles. Land-cover maps (Chapter 1) show them.' },
+  { tag: '2', t: 'Unusually clear water', d: 'Dissolved aluminium makes the mud settle fast, so canals and ponds on acid soils are crystal clear with a rusty iron film, unlike the turbid river water.' },
+  { tag: '3', t: 'Failed crops', d: 'Fields sown that never green up, or left fallow in the dry season. Vegetation-index series (Chapter 4) record it, but cannot say whether the cause is acidity, salt or lack of water.' },
+  { tag: '4', t: 'Terrain and flood history', d: 'Acid sulfate soils lie in the low basins flooded deep and long in the flood season (Chapter 8). Elevation and flood frequency help outline likely acid areas for a field survey.' },
+]} />
+
+<Note kind="key">
+
+Remote sensing helps **outline suspect areas** and **track the effects** of acid sulfate soils; it does not replace augering and measuring pH. A trustworthy acid sulfate map always has field points behind it.
+
+</Note>
+
+## 11.3 Elevation: surface models and terrain models
+
+Every free global elevation model is measured from space, and most measure the **first surface** seen. SRTM (2000) and Copernicus DEM (from the TanDEM-X satellites) use radar, and radar bounces off tree crowns and roofs. That is a <Term id="dsm-dtm">surface model (DSM)</Term>. Flooding questions need a **terrain model (DTM)**: the bare ground.
+
+In mountains, a few metres of error hardly matter. In a delta that is only one or two metres high, a few metres are the whole story. DeltaDTM (Pronk et al., 2024) corrects Copernicus DEM with lidar heights from the ICESat-2 and GEDI missions: it removes trees and buildings, then interpolates. Its mean absolute error on low coastal land below 10 m is 0.45 m.
+
+<Predict client:visible lang="en"
+  title="How tall is a coconut grove?"
+  q="Giong Trom (Ben Tre) is covered with coconut groves. DeltaDTM puts the ground there at about 1.8 m. What does Copernicus DEM give?"
+  options={['About 1.8 m, the same', 'About 2.5 m', 'About 6 m', 'About 15 m']} answer={2}
+  why="6.0 m (1 km mean around the point): 4.3 m above the ground, because the radar echoes off the palm crowns. In Can Tho, the city and orchards make Copernicus 2.4 m higher (4.95 against 2.57 m); in the Thap Muoi rice fields, only 0.7 m (2.89 against 2.15 m)." />
+
+<Figure
+  title="Figure 11.2 — Ground elevation (DeltaDTM), surface elevation (Copernicus DEM) and their difference"
+  try="Pick the Difference layer and look at the Mekong Delta: which way do the long yellow-red bands run? Compare with the land-cover map in Chapter 1."
+  source="DeltaDTM v1.0 (Pronk et al., 2024, Deltares), CC BY 4.0, clipped at 10 m; Copernicus DEM GLO-30 release 2024_1. Both in metres above the EGM2008 geoid, mean of the ~30 m cells in each ~250 m cell. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; the organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30. Difference left blank where DeltaDTM ≥ 10 m."
+>
+  <DeltaMap client:visible lang="en" label="Elevation" region="mekong" choices={[
+    { key: 'dtm', label: { vi: 'DeltaDTM (mặt đất)', en: 'DeltaDTM (ground)' }, ids: { red: 'dem-dtm-red', mekong: 'dem-dtm-mekong' }, range: [0, 6] },
+    { key: 'cop', label: { vi: 'Copernicus DEM (bề mặt)', en: 'Copernicus DEM (surface)' }, ids: { red: 'dem-cop-red', mekong: 'dem-cop-mekong' }, range: [0, 6] },
+    { key: 'diff', label: { vi: 'Hiệu Copernicus − DeltaDTM', en: 'Copernicus − DeltaDTM' }, ids: { red: 'dem-diff-red', mekong: 'dem-diff-mekong' } },
+  ]} />
+</Figure>
+
+The bands of large differences are the **sand ridges** (giồng) and river islands, where people plant orchards and coconut and build villages. Over open rice fields the two models agree closely.
+
+<Note kind="warn">
+
+**Elevation above what?** DeltaDTM and Copernicus DEM are measured from the <Term id="vertical-datum">EGM2008 geoid</Term>, while Vietnamese topographic maps use mean sea level at the Hon Dau tide gauge. Minderhoud et al. (2019) built a DEM from national survey data and found a mean elevation of 0.82 m above the Hon Dau datum for the Mekong Delta, while the median of DeltaDTM here is 1.9 m. That 1 m gap comes partly from the different datums and partly from DeltaDTM's remaining error; this chapter cannot separate the two. The lesson: before comparing a DEM with a water level, know which datum it uses.
+
+</Note>
+
+## 11.4 How much land lies below each water level
+
+Adding up the area of the cells below each elevation gives a <Term id="hypsometric-curve">hypsometric curve</Term>. Reading it at a sea level gives the area lower than that level.
+
+<Figure
+  title="Figure 11.3 — Share of each delta lower than each elevation, in two models"
+  try="Hover to 1 m, then 2 m. In the Mekong Delta, how many percentage points apart are the two models? Why does the Copernicus curve sit to the right?"
+  source="Area of 30 m cells summed in 0.1 m steps inside the region outline (geoBoundaries ADM1), on the cells DeltaDTM covers (large water bodies left out) for both models. Metres above the EGM2008 geoid. Area used: Mekong Delta 3.48 million ha, Red River Delta 1.90 million ha."
+>
+  <TerrainCurve client:visible lang="en" view="curve" />
+</Figure>
+
+In DeltaDTM, 60 % of Mekong Delta land is below 2 m and 92.5 % below 3 m; in Copernicus DEM, only 38 % and 65 %. The Red River Delta is much higher: 10.9 % below 2 m (median elevation about 5.3 m, as the region includes the upper delta around Hanoi).
+
+Below 1 m, DeltaDTM puts only 4 % of the Mekong Delta. Minderhoud et al. (2019), with their survey-based DEM, found that a 1 m sea-level rise would put 75 % of the Mekong Delta plain below sea level, against 31 % with the SRTM DEM. <mark>An offset of about 1 m in the elevation model turns "a small part" into "most of the delta".</mark> That is why every sea-level-rise map must state the elevation model and the datum it uses.
+
+<Note kind="myth">
+
+**"Below sea level means flooded."** Not quite. Sea dikes, river dikes and sluices keep the water out; large reclaimed areas of the Netherlands lie metres below sea level. But the lower the land sits against the water, the harder drainage gets, the more pumping costs, the easier salt seeps in, and the worse a dike breach becomes. The curve in Figure 11.3 measures **exposure**, not area certain to flood.
+
+</Note>
+
+## 11.5 Subsidence: the delta sinks faster than the sea rises
+
+In the Mekong Delta, <Term id="land-subsidence">subsidence</Term> comes mainly from groundwater pumping: as water pressure in the aquifers falls, the clay layers between them compact and the ground drops, for good. Erban et al. (2014) used 78 ALOS PALSAR radar interferograms from 2006–2010 (<Term id="insar">InSAR</Term>) and measured subsidence of about 1–4 cm/yr over areas of thousands of km². Minderhoud et al. (2017) modelled 25 years of pumping (1991–2016): the delta sank about 18 cm on average, at a current mean rate of 1.1 cm/yr and over 2.5 cm/yr in places.
+
+For comparison: global mean sea level rose by 3.7 mm/yr over 2006–2018 (IPCC, 2021). What decides flooding is <Term id="relative-slr">relative sea-level rise</Term>, the rising sea plus the sinking land:
+
+<Formula label="Relative sea-level rise" tex="\Delta \mathrm{RSL}(t) = \Delta \mathrm{SL}(t) + S \cdot t" where="
+\Delta \mathrm{SL}(t) :: absolute sea-level rise after t years (from a scenario)
+S :: local subsidence rate (cm/yr)
+t :: years since the base year
+" />
+
+<Predict client:visible lang="en"
+  title="Rising sea or sinking land?"
+  q="From 2025 to 2050, if the Mekong Delta keeps sinking at 1.1 cm/yr and the sea rises about 10 cm (Erban et al., 2014), which is larger?"
+  options={['Sea-level rise, by far', 'About the same', 'Subsidence, nearly three times larger', 'Subsidence, ten times larger']} answer={2}
+  why="Subsidence: 1.1 × 25 = 27.5 cm, nearly three times the 10 cm of sea-level rise. Together the relative water level rises about 37.5 cm in 25 years. Subsidence is the part people can reduce, by pumping less groundwater." />
+
+<Figure
+  title="Figure 11.4 — Area below relative sea level over time (illustrative)"
+  try="Keep sea-level rise at 50 cm by 2100 and move subsidence from 0 to 1.1, then 2.5 cm/yr. In which year does half the Mekong Delta fall below relative sea level in DeltaDTM?"
+  source="Illustrative: relative sea level = sea-level rise growing linearly from 2025 to the chosen 2100 value, plus subsidence uniform across the region; read off the DeltaDTM and Copernicus DEM curves of Figure 11.3 (EGM2008 geoid). Dikes, tides, DEM errors and datum ignored; the survey DEM of Minderhoud et al. (2019) puts the land lower, so the real area may be much larger."
+>
+  <TerrainCurve client:visible lang="en" view="future" />
+</Figure>
+
+Minderhoud et al. (2020) ran two groups of groundwater-pumping scenarios to 2100: group B (pumping following current trends) and group M (reduced pumping). Additional subsidence from 2018 to 2100 is 68 cm (B1) and about 1 m (B2, 86–110 cm) in group B, but only 12–39 cm in group M. With the median absolute sea-level rise of RCP 4.5, the share of the Mekong Delta still above sea level at the end of the century is 32 % in B1, 44 % in M1 and 57 % in M3. How groundwater is pumped over the next few decades decides nearly a quarter of the delta.
+
+<Depth level="advanced" title="Why this chapter does not measure subsidence itself">
+
+InSAR needs the **phase** of the radar signal. Sentinel-1 on Google Earth Engine is the GRD product: intensity only, the phase is gone. Measuring subsidence means downloading SLC images (tens of GB per scene) and processing them with software such as SNAP, ISCE or MintPy, or using processed products from projects such as LiCSAR. Rice fields add a difficulty: the field surface changes with the crop cycle, so the phase decorrelates quickly; analysts rely on stable reflectors such as houses, roads and dikes (persistent scatterer InSAR, PS-InSAR).
+
+</Depth>
+
+## 11.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9, 084010. https://doi.org/10.1088/1748-9326/9/8/084010
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Section 1.4, Table 2.
+- Husson, O. (1998). *Spatio-temporal variability of acid sulphate soils in the Plain of Reeds, Vietnam* (PhD thesis). Wageningen University. https://doi.org/10.18174/206281
+- IPCC (2021). Summary for Policymakers. In *Climate Change 2021: The Physical Science Basis*. Cambridge University Press. Section A.1.7.
+- Minderhoud, P. S. J., Erkens, G., Pham, V. H., Bui, V. T., Erban, L., Kooi, H., & Stouthamer, E. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12, 064006. https://doi.org/10.1088/1748-9326/aa7146
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- Minderhoud, P. S. J., Middelkoop, H., Erkens, G., & Stouthamer, E. (2020). Groundwater extraction may drown mega-delta: projections of extraction-induced subsidence and elevation of the Mekong delta for the 21st century. *Environmental Research Communications*, 2, 011005. https://doi.org/10.1088/2515-7620/ab5e21
+- Poggio, L., de Sousa, L. M., Batjes, N. H., Heuvelink, G. B. M., Kempen, B., Ribeiro, E., & Rossiter, D. (2021). SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. *SOIL*, 7, 217–240. https://doi.org/10.5194/soil-7-217-2021
+- Pronk, M., Hooijer, A., Eilander, D., Haag, A., de Jong, T., Vousdoukas, M., Vernimmen, R., Ledoux, H., & Eleveld, M. (2024). DeltaDTM: A global coastal digital terrain model. *Scientific Data*, 11, 273. https://doi.org/10.1038/s41597-024-03091-9
+- Tobler, W. (1987). Measuring spatial resolution. *Proceedings of the International Workshop on Geographic Information Systems*, Beijing, 12–16.

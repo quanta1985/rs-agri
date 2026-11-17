@@ -1,0 +1,54 @@
+{
+ "id": "dem-diff-red",
+ "region": "red",
+ "title": {
+  "vi": "Copernicus DEM trừ DeltaDTM",
+  "en": "Copernicus DEM minus DeltaDTM"
+ },
+ "units": {
+  "vi": "m",
+  "en": "m"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  6
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 0.05,
+ "offset": -2.0,
+ "nodata": 255,
+ "times": [
+  "2024 − v1.0"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 200497,
+   "mean": 0.9255,
+   "p2": -0.15,
+   "p50": 0.25,
+   "p98": 8.5,
+   "min": -2.0,
+   "max": 10.7
+  }
+ ],
+ "provenance": {
+  "source": "COPERNICUS/DEM/GLO30_2024_1 and projects/sat-io/open-datasets/DELTARES/deltadtm_v1",
+  "processing": "difference of the two 250 m means, both on the ~30 m cells DeltaDTM covers (open water out); left out where DeltaDTM is clipped at 10 m",
+  "attribution": "Copernicus DEM GLO-30 (2024_1): produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; DeltaDTM v1.0 (Pronk et al. 2024, Deltares), CC BY 4.0; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the EU and ESA",
+  "exported": "2026-11-17T14:35:18+00:00",
+  "script": "scripts/data/export_soil_terrain.py"
+ }
+}

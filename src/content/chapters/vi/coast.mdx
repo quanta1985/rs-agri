@@ -1,0 +1,202 @@
+---
+title: "Ven biển: tôm – lúa, rừng ngập mặn, xói lở"
+n: 12
+summary: "Bờ biển hai châu thổ không đứng yên: nơi bồi ra biển hàng chục mét mỗi năm, nơi bị sóng ăn vào hàng chục mét. Chương này vẽ đường bờ từ 38 năm ảnh Landsat ở Nam Định và Mũi Cà Mau, đo diện tích đất được và mất theo từng đoạn bờ, so bản đồ rừng ngập mặn toàn cầu với số liệu chính thức, và đếm ao nuôi tôm mùa khô trên toàn ĐBSCL."
+objectives:
+  - Vẽ đường bờ từ chỉ số nước MNDWI trên nhiều ảnh Landsat và hiểu vì sao thủy triều làm nó dao động.
+  - Đổi diện tích đất được hoặc mất trên một đoạn bờ thành tốc độ dịch chuyển đường bờ (m/năm).
+  - Đọc bản đồ rừng ngập mặn Global Mangrove Watch và giải thích vì sao nó khác số liệu thống kê.
+  - Nhận ra ao nuôi tôm trên ảnh mùa khô và theo dõi sự mở rộng của chúng qua ba mươi năm.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import CoastSeries from '../../../islands/CoastSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/coast.json';
+
+Ven biển là nơi đất, nước ngọt, nước mặn và con người gặp nhau. Ở đây lúa nhường chỗ cho tôm, rừng ngập mặn vừa bị chặt vừa được trồng lại, và chính đường bờ cũng di chuyển. Vệ tinh Landsat đã chụp hai châu thổ từ cuối thập niên 1980, đủ dài để thấy những thay đổi ấy.
+
+<Stats items={[
+  { v: '30', u: 'm/năm', l: 'tốc độ lùi trung bình của bờ Biển Đông ở Mũi Cà Mau, xu thế 1988–2025 (mất 198 ha đất mỗi năm trên 67 km bờ)' },
+  { v: '4 700', u: 'ha', l: 'đất mới bồi ở mũi Cà Mau phía vịnh Thái Lan trong 33 năm (xu thế 144 ha/năm)' },
+  { v: '2 200', u: 'ha', l: 'đất mới ở cửa Ba Lạt (Cồn Lu, Cồn Ngạn, Nam Định) trong 33 năm (68 ha/năm)' },
+  { v: '−7', u: '%', l: 'diện tích rừng ngập mặn ĐBSCL theo Global Mangrove Watch, 1996 đến 2020 (96 100 xuống 89 200 ha)' },
+]} caption="Tính từ Landsat 5/7/8/9 và Global Mangrove Watch v3 bằng scripts/coast_numbers.ts." />
+
+## 12.1 Hai kiểu bờ biển
+
+Bờ ĐBSCL chủ yếu là **bờ bùn**: phù sa mịn Mê Kông theo dòng ven bờ bồi thành bãi bùn, và rừng ngập mặn lấn ra trên đó. Khi phù sa giảm, bờ bùn lùi nhanh. Anthony và cs. (2015) đo trên ảnh vệ tinh: trong 2003–2012, hơn 50 % trong hơn 600 km bờ ĐBSCL bị xói; trên 180 km bờ bùn phía Biển Đông, gần 90 % đang lùi, với tốc độ trung bình tăng từ khoảng 6,4 m/năm lên hơn 12,5 m/năm. Các tác giả gắn hiện tượng này với hoạt động của con người: đập thượng nguồn và khai thác cát lòng sông giữ lại phù sa, làm bờ <Term id="sediment-starvation">thiếu hụt phù sa</Term>.
+
+Bờ ĐBSH ở Nam Định lại có cả hai mặt. Cửa Ba Lạt của sông Hồng vẫn bồi: trong 1998–2008, đất mới ở đây lấn ra biển trung bình khoảng 36 m/năm dọc 64,3 km bờ, riêng Cồn Ngạn – Cồn Lu tới 93 m/năm (Nguyễn Văn Thảo và cs., 2013). Xa hơn về phía tây nam, bờ Hải Hậu bị xói: trung bình 9 m/năm trong 1975–1989, có đoạn tới 30 m/năm (Phạm Quang Sơn và Nguyễn Đức Anh, 2016).
+
+## 12.2 Vẽ đường bờ từ Landsat
+
+Ranh giới đất – nước rõ nhất ở dải hồng ngoại sóng ngắn, nơi nước hấp thụ gần hết ánh sáng. Chỉ số nước MNDWI (Chương 8) dương trên nước, âm trên đất và cây. Nhưng ảnh nào cũng chụp vào một mức triều. Landsat bay qua lúc khoảng 10 giờ sáng, mỗi lần ở một pha triều khác nhau, nên trên một <Term id="tidal-flat">bãi bồi triều</Term> rộng, cùng một pixel có lúc là nước, lúc là đất.
+
+Cách giải quyết ở đây: lấy **mọi** ảnh không mây trong năm năm, đếm tỉ lệ số lần pixel là nước. Pixel là nước trong ít nhất một nửa số lần chụp được coi là nước. Ranh giới đó là <Term id="shoreline">đường bờ</Term> ở mức triều trung vị. So hai giai đoạn 1988–1992 và 2021–2025 cho ra bản đồ thay đổi đất – nước.
+
+<Predict client:visible lang="vi"
+  title="Vùng cam trong đất liền Cà Mau là gì?"
+  q="Ở khung Mũi Cà Mau, 122 600 ha đã đổi từ đất thành nước giữa 1988–92 và 2021–25, phần lớn nằm sâu trong đất liền, không phải ở bờ biển. Đó là gì?"
+  options={['Biển tràn vào do nước biển dâng', 'Ao nuôi tôm được đào trên đất lúa và rừng cũ', 'Sông đổi dòng', 'Lỗi mây trong ảnh Landsat']} answer={1}
+  why="Ao tôm: các ô vuông có bờ bao, giữ nước quanh năm, theo lưới kênh. Trên bản đồ đất – nước, chúng trông giống hệt bờ bị xói, vì cả hai đều là 'đất thành nước'. Phải đọc hình dạng và vị trí: dải liền dọc bờ biển là xói, ô lưới trong đất liền là ao." />
+
+<Figure
+  title="Hình 12.1 — Đất và nước 1988–92 so với 2021–25: bờ biển Nam Định và Mũi Cà Mau"
+  try="Ở Mũi Cà Mau, đi dọc bờ phía Biển Đông (đông nam) rồi sang bờ vịnh Thái Lan (tây). Màu nào chiếm ưu thế ở mỗi bên? Chuyển sang Nam Định, phóng to cửa Ba Lạt."
+  source="Landsat 5, 7, 8, 9 Collection 2 Level-2 (USGS), mọi tháng, che mây, bóng mây và dải lỗi. Nước = MNDWI = (lục − SWIR1)/(lục + SWIR1) > 0 trong ≥ 50 % số lần chụp không mây của mỗi giai đoạn (≥ 5 lần); 30 m, lưới Mercator. Đất ở cả hai giai đoạn để trong suốt."
+>
+  <DeltaMap client:visible lang="vi" label="Đất và nước" region="cmcoast" boundaries={false} choices={[
+    { key: 'shore', label: { vi: 'Đất – nước', en: 'Land – water' }, ids: { ndcoast: 'coast-change-ndcoast', cmcoast: 'coast-change-cmcoast' } },
+  ]} />
+</Figure>
+
+<Note kind="warn">
+
+Bản đồ này chỉ biết **đất** và **nước**, không biết vì sao. "Đất thành nước" có thể là bờ bị xói, ao mới đào hay ruộng ngập lâu hơn; "nước thành đất" có thể là bãi bồi, ao bị lấp hay rừng ngập mặn mới phủ kín bãi bùn. Phần giải thích là việc của người đọc bản đồ, dựa vào hình dạng, vị trí và hiểu biết thực địa. Hai giai đoạn cũng không cân nhau: 1988–92 chỉ có Landsat 5 với ít ảnh hơn, và cả hai gộp mọi tháng, nên ruộng ngập lâu trong mùa mưa có thể bị tính là nước. Hình 12.5 dùng riêng ảnh mùa khô để kiểm tra lại phần ao.
+
+</Note>
+
+## 12.3 Đất được, đất mất theo từng đoạn bờ
+
+Để có số, cộng diện tích đất mỗi năm trong một dải 1,5 km hai bên đường bờ cũ (hoặc một khung quanh cửa sông). Từng năm riêng lẻ dao động hàng trăm ha theo thủy triều và số ảnh, nên lấy **xu thế Theil–Sen** (Chương 7) qua mọi năm chụp đủ thay vì so hai năm. Chia tốc độ thay đổi diện tích cho chiều dài đoạn bờ sẽ ra tốc độ dịch chuyển trung bình của đường bờ:
+
+<Formula label="Tốc độ dịch chuyển đường bờ" tex="r = \frac{1}{L}\,\frac{\Delta A}{\Delta t}" where="
+\Delta A / \Delta t :: tốc độ được (dương) hay mất (âm) đất, m²/năm (xu thế); 1 ha = 10 000 m²
+L :: chiều dài đoạn bờ (m)
+" />
+
+<Predict client:visible lang="vi"
+  title="Bờ Biển Đông Cà Mau lùi nhanh cỡ nào?"
+  q="Trên 66,6 km bờ Biển Đông từ Đất Mũi đến Rạch Gốc, dải ven bờ mất trung bình 198 ha đất mỗi năm trong 1988–2025. Đường bờ lùi trung bình bao nhiêu mét mỗi năm?"
+  options={['Khoảng 3 m', 'Khoảng 30 m', 'Khoảng 300 m', 'Khoảng 3 km']} answer={1}
+  why="198 ha × 10 000 m² / 66 600 m ≈ 29,7 m/năm: gần 1 km trong 33 năm. Tran Thi và cs. (2014) đo trên bản đồ và ảnh 1953–2011 được 33,2 m/năm cho cùng bờ này." />
+
+<Figure
+  title="Hình 12.2 — Đất được (+) hay mất (−) mỗi năm theo đoạn bờ, so với năm 1990"
+  try="Tìm đường đi xuống đều nhất và đường đi lên nhanh nhất. Đường Hải Hậu có xu hướng rõ không, so với độ dao động giữa các năm?"
+  source="Landsat 5, 7, 8, 9 C2 L2: đất = nước trong < 50 % số lần chụp không mây của năm; diện tích đất trong dải 1,5 km hai bên đường bờ 1988–92 vẽ tay (Hải Hậu, Giao Thủy, bờ Biển Đông Cà Mau) hoặc trong khung quanh cửa sông (Ba Lạt, mũi Cà Mau), trừ giá trị của đường xu thế Theil–Sen tại năm 1990; nét đứt là xu thế, số trong chú giải là ha/năm. Bỏ năm có dưới 95 % diện tích được chụp ít nhất 3 lần không mây. Dao động hàng trăm ha giữa các năm là do thủy triều và số ảnh."
+>
+  <CoastSeries client:visible lang="vi" view="shore" />
+</Figure>
+
+Ba kiểu bờ hiện ra rõ:
+
+- **Lùi đều**: bờ Biển Đông Cà Mau mất 198 ha mỗi năm, khoảng 6 500 ha trong 33 năm, tức đường bờ lùi 29,7 m/năm, gần con số 33,2 m/năm của Tran Thi và cs. (2014). Phía sau dải bờ này là rừng ngập mặn còn nguyên (Hình 12.3), nên gần như toàn bộ phần đất mất là ở mép biển, không phải ao đào trong dải 1,5 km.
+- **Bồi**: mũi Cà Mau phía vịnh Thái Lan thêm 144 ha mỗi năm (khoảng 4 700 ha trong 33 năm), cửa Ba Lạt thêm 68 ha mỗi năm (khoảng 2 200 ha). Tran Thi và cs. (2014) đo bờ vịnh Thái Lan ở mũi bồi 40,7 m/năm.
+- **Không rõ xu thế**: dải bờ Hải Hậu dài 24,6 km chỉ thay đổi +10 ha/năm (+4 m/năm), trong khi dao động giữa hai năm liền nhau thường khoảng 130 ha, và dải này còn chứa ao, ruộng muối trong đất liền. Vệ tinh ở độ phân giải này không thấy Hải Hậu lùi trong 1988–2025. Một lý do có thể là đê, kè biển giữ đường bờ, nhưng chương này không kiểm chứng điều đó; xói mạnh được đo ở các đoạn ngắn như Hải Lý (−22,6 m/năm trong 1998–2008, Nguyễn Văn Thảo và cs., 2013).
+
+<Note kind="key">
+
+Một ảnh không đo được đường bờ trên bờ bùn có triều; nhiều năm ảnh thì đo được. Kết quả 29,7 m/năm từ 38 năm Landsat gần với một nghiên cứu độc lập dùng dữ liệu và giai đoạn khác, nhưng chỉ cho **trung bình cả đoạn bờ**. Muốn biết đoạn nào lùi nhanh nhất, phải đo theo các mặt cắt vuông góc với bờ, như cách các nghiên cứu được trích ở đây làm.
+
+</Note>
+
+## 12.4 Rừng ngập mặn
+
+<Term id="mangrove">Rừng ngập mặn</Term> giữ bùn, giảm sóng và che đê. Bản đồ toàn cầu <Term id="gmw">Global Mangrove Watch</Term> phiên bản 3 (Bunting và cs., 2022) có 11 năm từ 1996 đến 2020, dựng từ radar ALOS PALSAR và ảnh Landsat ở 25 m.
+
+<Figure
+  title="Hình 12.3 — Rừng ngập mặn theo Global Mangrove Watch, 1996 và 2020"
+  try="Ở Mũi Cà Mau, những vệt đỏ (mất) nằm ở đâu: dọc bờ Biển Đông hay trong đất liền? So với vùng cam của Hình 12.1."
+  source="Global Mangrove Watch v3.0 (Bunting và cs., 2022), CC BY 4.0: các năm 1996 và 2020, 25 m, lấy ô gần nhất trên lưới 30 m."
+>
+  <DeltaMap client:visible lang="vi" label="Rừng ngập mặn" region="cmcoast" boundaries={false} choices={[
+    { key: 'gmw', label: { vi: 'Rừng ngập mặn', en: 'Mangroves' }, ids: { ndcoast: 'mangrove-change-ndcoast', cmcoast: 'mangrove-change-cmcoast' } },
+  ]} />
+</Figure>
+
+Trong khung Mũi Cà Mau, 7 700 ha rừng ngập mặn năm 1996 không còn năm 2020 và 2 300 ha là rừng mới. Phần mất tạo thành một dải liền dọc bờ Biển Đông, đúng nơi đường bờ lùi (Hình 12.1): ở đó rừng không bị chặt, mà đất dưới rừng bị sóng cuốn đi. Rừng mới mọc trên bãi bồi phía tây mũi Cà Mau.
+
+<Predict client:visible lang="vi"
+  title="Rừng ngập mặn tăng hay giảm?"
+  q="Theo số liệu chính thức, rừng ngập mặn ĐBSCL tăng từ 79 593 ha (2015) lên 90 777 ha (2020) nhờ trồng mới (Tinh và cs., 2022). Global Mangrove Watch cho cùng giai đoạn thì sao?"
+  options={['Cũng tăng khoảng 11 000 ha', 'Gần như không đổi (giảm khoảng 500 ha)', 'Giảm một nửa', 'Không có dữ liệu']} answer={1}
+  why="GMW: 89 679 ha năm 2015 và 89 205 ha năm 2020, giảm 474 ha. Hai nguồn đo hai thứ khác nhau: thống kê lâm nghiệp tính diện tích đất rừng đã trồng, kể cả cây non chưa khép tán; vệ tinh chỉ thấy tán rừng đủ dày, và cây trồng vài năm tuổi trên bãi bùn chưa hiện lên. Trồng mới cũng phải bù phần bị xói mất." />
+
+<Figure
+  title="Hình 12.4 — Diện tích rừng ngập mặn theo Global Mangrove Watch, 1996–2020"
+  try="Rê chuột qua các năm. Đường ĐBSCL và đường khung Mũi Cà Mau có đi cùng nhau không? Đường ĐBSH thì sao?"
+  source="Global Mangrove Watch v3.0, diện tích các ô rừng ngập mặn 25 m trong ranh giới vùng (geoBoundaries ADM1) và trong hai khung ven biển của Hình 12.1. Không có năm 1997–2006 và 2011–2014."
+>
+  <CoastSeries client:visible lang="vi" view="mangrove" />
+</Figure>
+
+Rừng ngập mặn ĐBSCL theo GMW giảm 7,2 %, từ 96 100 ha (1996) xuống 89 200 ha (2020), phần lớn trước 2010. Các năm của GMW không dựng từ cùng một bộ dữ liệu radar, nên một phần chênh lệch giữa 1996 và 2007 có thể đến từ khác biệt dữ liệu chứ không phải thay đổi thật. Ở ĐBSH, diện tích gần như giữ nguyên, từ 21 900 ha năm 1996 đến 21 900 ha năm 2020 (thấp nhất 20 000 ha năm 2018); khung Nam Định có khoảng 2 900 ha, chủ yếu ở các bãi bồi cửa Ba Lạt.
+
+## 12.5 Ao tôm và chuyển đổi lúa sang tôm
+
+Nhiều vùng ruộng lúa nhiễm mặn ở bán đảo Cà Mau đã chuyển sang nuôi tôm, hoặc luân canh lúa mùa mưa với tôm mùa khô (Chương 10). Trên ảnh mùa khô, <Term id="aquaculture-pond">ao tôm</Term> là mặt nước gần như suốt mùa, còn ruộng lúa Đông Xuân chỉ ngập ngắn ngày lúc làm đất. Đếm tỉ lệ ô 30 m có nước trong ít nhất ba phần tư số lần chụp tháng 1–4 sẽ tách được ao tôm (cùng sông, kênh) khỏi ruộng.
+
+<Predict client:visible lang="vi"
+  title="Ao tôm mọc lên ở đâu?"
+  q="Tính diện tích mặt nước suốt mùa khô theo tỉnh. Từ 1993–97 đến 2003–07, tỉnh nào tăng nhiều nhất?"
+  options={['An Giang', 'Bến Tre', 'Cà Mau', 'Cần Thơ']} answer={2}
+  why="Cà Mau: từ 37,1 lên 145,6 nghìn ha, gấp gần bốn lần trong mười năm; Bạc Liêu từ 14,1 lên 56,3 nghìn ha. An Giang và Cần Thơ gần như không đổi: mặt nước mùa khô ở đó chủ yếu là sông Tiền, sông Hậu." />
+
+<Figure
+  title="Hình 12.5 — Mặt nước suốt mùa khô (tháng 1–4) ở ĐBSCL: 1993–97, 2003–07, 2021–25"
+  try="Bật So sánh, đặt 1993–97 bên trái và 2021–25 bên phải. Vùng xanh mới nằm ở đâu? Có tỉnh nội đồng nào thay đổi không?"
+  source="Landsat 5, 7, 8, 9 C2 L2, tháng 1–4 của mỗi giai đoạn: ô 30 m có MNDWI > 0 trong ≥ 75 % số lần chụp không mây (≥ 5 lần), lấy tỉ lệ trong mỗi ô ~250 m. Gồm cả sông, kênh, hồ; thay đổi giữa các giai đoạn chủ yếu là ao nuôi."
+>
+  <DeltaMap client:visible lang="vi" label="Mặt nước mùa khô" region="mekong" compare time={2} compareTime={0} choices={[
+    { key: 'ponds', label: { vi: 'Mặt nước mùa khô', en: 'Dry-season water' }, ids: { mekong: 'ponds-dry-mekong' }, clearBelow: 2 },
+  ]} />
+  <details slot="caption">
+    <summary>Bảng số liệu: mặt nước suốt mùa khô theo tỉnh (nghìn ha)</summary>
+    <div class="table-wrap">
+
+| Tỉnh | 1993–97 | 2003–07 | 2021–25 |
+|---|---|---|---|
+| Toàn ĐBSCL | 226,1 | 398,7 | 368,2 |
+| Cà Mau | 37,1 | 145,6 | 125,4 |
+| Bạc Liêu | 14,1 | 56,3 | 41,9 |
+| Kiên Giang | 15,9 | 26,5 | 43,9 |
+| Sóc Trăng | 26,8 | 27,6 | 26,1 |
+| Trà Vinh | 21,5 | 28,3 | 25,3 |
+| Bến Tre | 42,2 | 46,5 | 41,2 |
+| Tiền Giang | 17,8 | 17,0 | 16,6 |
+| Long An | 11,7 | 11,2 | 8,5 |
+| Vĩnh Long | 7,2 | 6,9 | 6,7 |
+| Đồng Tháp | 12,0 | 12,5 | 13,0 |
+| An Giang | 12,0 | 11,9 | 11,7 |
+| Cần Thơ | 7,5 | 7,6 | 7,5 |
+| Hậu Giang | 0,6 | 0,6 | 0,4 |
+
+    </div>
+  </details>
+</Figure>
+
+Toàn ĐBSCL, mặt nước suốt mùa khô tăng từ 226 100 ha (1993–97) lên 398 700 ha (2003–07), rồi còn 368 200 ha (2021–25). Gần như toàn bộ phần tăng nằm ở bán đảo Cà Mau: Cà Mau thêm 108 500 ha và Bạc Liêu thêm 42 200 ha chỉ trong mười năm đầu. Sau đó hai tỉnh này giảm nhẹ (Cà Mau còn 125 400 ha, Bạc Liêu 41 900 ha), còn Kiên Giang tiếp tục tăng (15 900 lên 43 900 ha). Ảnh không nói được vì sao giảm: ao chuyển sang luân canh lúa – tôm (ruộng có lúa vào cuối mùa khô), ao nuôi công nghiệp tháo cạn giữa các vụ, hay ao bị bỏ. Ở các tỉnh nội đồng như An Giang, Cần Thơ, con số gần như không đổi qua ba mươi năm.
+
+<Note kind="key">
+
+Vệ tinh thấy rõ **khi nào và ở đâu** đất lúa ven biển thành ao nuôi: một làn sóng chuyển đổi lớn ở Cà Mau và Bạc Liêu giữa giữa thập niên 1990 và giữa thập niên 2000. Nó không thấy ao nuôi con gì, nuôi kiểu gì, lời hay lỗ. Muốn biết, phải ghép bản đồ với thống kê thủy sản và khảo sát nông hộ.
+
+</Note>
+
+<Depth level="advanced" title="Tách ao tôm khỏi sông và ruộng ngập">
+
+Ngưỡng 75 % số lần chụp tháng 1–4 vẫn lẫn ba thứ: sông, kênh lớn (nước quanh năm, không đổi giữa các giai đoạn), ao nuôi (nước quanh năm, mới) và ruộng ngập lâu (hiếm trong mùa khô). Có thể tách thêm bằng: (1) trừ mặt nước cố định của JRC (Chương 8); (2) hình dạng: ao là ô chữ nhật có bờ bao, thấy rõ ở 10 m trên Sentinel-2; (3) lịch nước: ao lúa – tôm khô vào mùa mưa khi trồng lúa, còn ao tôm chuyên canh ngập quanh năm. Một bản đồ nuôi trồng thủy sản đáng tin vẫn cần đối chiếu với thống kê của tỉnh.
+
+</Depth>
+
+## 12.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Anthony, E. J., Brunier, G., Besset, M., Goichot, M., Dussouillez, P., & Nguyen, V. L. (2015). Linking rapid erosion of the Mekong River delta to human activities. *Scientific Reports*, 5, 14745. https://doi.org/10.1038/srep14745
+- Bunting, P. và cs. (2022). Global Mangrove Extent Change 1996–2020: Global Mangrove Watch Version 3.0. *Remote Sensing*, 14(15), 3657. https://doi.org/10.3390/rs14153657
+- Nguyễn Văn Thảo, Trần Đức Thạnh, Saito, Y., & Gouramanis, C. (2013). Monitoring coastline change in the Red River Delta using remotely sensed data. *Journal of Marine Science and Technology*, 13(2), 151–160.
+- Phạm Quang Sơn & Nguyễn Đức Anh (2016). Diễn biến xói lở – bồi tụ ven biển Hải Hậu, Nam Định. *Tạp chí Các Khoa học về Trái Đất*, 38(1), 118–130.
+- Tinh, P. H. và cs. (2022). Mangrove restoration in Vietnamese Mekong Delta during 2015–2020: Achievements and challenges. *Frontiers in Marine Science*, 9, 1043943. https://doi.org/10.3389/fmars.2022.1043943
+- Tran Thi, V., Tien Thi Xuan, A., Phan Nguyen, H., Dahdouh-Guebas, F., & Koedam, N. (2014). Application of remote sensing and GIS for detection of long-term mangrove shoreline changes in Mui Ca Mau, Vietnam. *Biogeosciences*, 11, 3781–3795. https://doi.org/10.5194/bg-11-3781-2014

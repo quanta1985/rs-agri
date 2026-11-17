@@ -1,0 +1,23 @@
+[
+ { "id": "shoreline", "vi": "Đường bờ", "en": "Shoreline",
+   "def": { "vi": "Ranh giới đất – nước ở bờ biển. Vì thủy triều lên xuống, đường bờ trên ảnh phụ thuộc giờ chụp; bài này dùng đường bờ ở mức triều trung vị (nước trong ít nhất một nửa số lần chụp).",
+            "en": "The land–water boundary at the coast. Because the tide rises and falls, the shoreline on an image depends on when it was taken; this chapter uses a median-tide shoreline (water in at least half of the looks)." } },
+ { "id": "tidal-flat", "vi": "Bãi bồi triều", "en": "Tidal mud flat",
+   "def": { "vi": "Bãi bùn ngập khi triều lên, lộ ra khi triều xuống. Trên ảnh lúc là nước, lúc là đất; rừng ngập mặn lấn ra từ những bãi này.",
+            "en": "A mud flat flooded at high tide and exposed at low tide. On images it is sometimes water, sometimes land; mangroves colonise seaward from such flats." } },
+ { "id": "erosion-accretion", "vi": "Xói lở và bồi tụ", "en": "Erosion and accretion",
+   "def": { "vi": "Bờ lùi vào đất liền (xói) hay lấn ra biển (bồi). Tốc độ đo bằng mét mỗi năm dọc theo đường vuông góc với bờ, hoặc bằng diện tích đất mất / được trên một đoạn bờ.",
+            "en": "The shore retreating landward (erosion) or building seaward (accretion). Rates are given in metres per year along transects normal to the coast, or as land area lost or gained along a stretch." } },
+ { "id": "mangrove", "vi": "Rừng ngập mặn", "en": "Mangrove forest",
+   "def": { "vi": "Rừng cây chịu mặn (đước, mắm, bần) ở vùng triều. Rễ giữ phù sa, giảm sóng và che chắn đê; ở Cà Mau, rừng ngập mặn thường đan xen với ao tôm.",
+            "en": "Salt-tolerant forest (Rhizophora, Avicennia, Sonneratia) in the tidal zone. Roots trap mud, damp waves and shield dikes; in Ca Mau, mangroves are often interwoven with shrimp ponds." } },
+ { "id": "gmw", "vi": "Global Mangrove Watch (GMW)", "en": "Global Mangrove Watch (GMW)",
+   "def": { "vi": "Bản đồ rừng ngập mặn toàn cầu 25 m từ radar ALOS PALSAR và Landsat, phiên bản 3 có 11 năm từ 1996 đến 2020 (Bunting và cs., 2022).",
+            "en": "Global 25 m mangrove maps from ALOS PALSAR radar and Landsat; version 3 has 11 epochs from 1996 to 2020 (Bunting et al., 2022)." } },
+ { "id": "sediment-starvation", "vi": "Thiếu hụt phù sa", "en": "Sediment starvation",
+   "def": { "vi": "Bờ biển nhận ít phù sa hơn lượng sóng mang đi, do đập thượng nguồn giữ lại và khai thác cát lòng sông. Bờ bùn khi đó lùi dần dù có rừng ngập mặn.",
+            "en": "A coast receiving less mud than waves carry away, because upstream dams trap it and sand is mined from river beds. Mud coasts then retreat even behind mangroves." } },
+ { "id": "aquaculture-pond", "vi": "Ao nuôi thủy sản", "en": "Aquaculture pond",
+   "def": { "vi": "Ô đất có bờ bao, giữ nước để nuôi tôm, cá. Trên ảnh mùa khô, ao tôm là mặt nước quanh năm, khác ruộng lúa chỉ ngập ngắn ngày.",
+            "en": "An embanked plot kept under water to raise shrimp or fish. On dry-season images a shrimp pond is standing water all season, unlike a rice field flooded only briefly." } }
+]

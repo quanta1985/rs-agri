@@ -1,0 +1,164 @@
+{
+ "id": "rain-normal-red",
+ "region": "red",
+ "title": {
+  "vi": "Lượng mưa trung bình tháng 1991–2020 (CHIRPS)",
+  "en": "Mean monthly rainfall 1991–2020 (CHIRPS)"
+ },
+ "units": {
+  "vi": "mm/tháng",
+  "en": "mm/month"
+ },
+ "kind": "continuous",
+ "palette": "water",
+ "range": [
+  0,
+  400
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11720230.28,
+  2464884.197
+ ],
+ "res": 5346.820383,
+ "ground_res_m": 5000,
+ "width": 37,
+ "height": 39,
+ "dtype": "uint8",
+ "scale": 4,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "M01",
+  "M02",
+  "M03",
+  "M04",
+  "M05",
+  "M06",
+  "M07",
+  "M08",
+  "M09",
+  "M10",
+  "M11",
+  "M12"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 753,
+   "mean": 18.3692,
+   "p2": 8.0,
+   "p50": 16.0,
+   "p98": 32.0,
+   "min": 4.0,
+   "max": 36.0
+  },
+  {
+   "valid": 753,
+   "mean": 32.5631,
+   "p2": 12.0,
+   "p50": 32.0,
+   "p98": 48.0,
+   "min": 4.0,
+   "max": 56.0
+  },
+  {
+   "valid": 753,
+   "mean": 46.4489,
+   "p2": 28.0,
+   "p50": 48.0,
+   "p98": 60.0,
+   "min": 20.0,
+   "max": 68.0
+  },
+  {
+   "valid": 753,
+   "mean": 69.8167,
+   "p2": 48.0,
+   "p50": 68.0,
+   "p98": 91.84,
+   "min": 36.0,
+   "max": 104.0
+  },
+  {
+   "valid": 753,
+   "mean": 221.9177,
+   "p2": 156.16,
+   "p50": 224.0,
+   "p98": 288.0,
+   "min": 132.0,
+   "max": 304.0
+  },
+  {
+   "valid": 753,
+   "mean": 216.1275,
+   "p2": 144.0,
+   "p50": 224.0,
+   "p98": 268.0,
+   "min": 124.0,
+   "max": 292.0
+  },
+  {
+   "valid": 753,
+   "mean": 329.5458,
+   "p2": 236.48,
+   "p50": 324.0,
+   "p98": 464.0,
+   "min": 196.0,
+   "max": 492.0
+  },
+  {
+   "valid": 753,
+   "mean": 336.4356,
+   "p2": 292.0,
+   "p50": 332.0,
+   "p98": 396.0,
+   "min": 228.0,
+   "max": 460.0
+  },
+  {
+   "valid": 753,
+   "mean": 254.587,
+   "p2": 168.16,
+   "p50": 240.0,
+   "p98": 376.0,
+   "min": 156.0,
+   "max": 392.0
+  },
+  {
+   "valid": 753,
+   "mean": 107.3944,
+   "p2": 60.16,
+   "p50": 108.0,
+   "p98": 171.84,
+   "min": 44.0,
+   "max": 180.0
+  },
+  {
+   "valid": 753,
+   "mean": 43.8088,
+   "p2": 28.0,
+   "p50": 44.0,
+   "p98": 60.0,
+   "min": 20.0,
+   "max": 76.0
+  },
+  {
+   "valid": 753,
+   "mean": 21.3068,
+   "p2": 8.0,
+   "p50": 20.0,
+   "p98": 32.0,
+   "min": 4.0,
+   "max": 32.0
+  }
+ ],
+ "provenance": {
+  "source": "UCSB-CHG/CHIRPS/PENTAD summed per month",
+  "attribution": "CHIRPS v2.0 (Funk et al. 2015, Scientific Data 2:150066), UCSB Climate Hazards Center",
+  "processing": "monthly totals, mean of 1991-2020 per calendar month, ~5 km",
+  "exported": "2026-11-17T10:21:19+00:00",
+  "script": "scripts/data/export_climate.py"
+ }
+}

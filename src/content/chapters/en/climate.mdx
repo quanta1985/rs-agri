@@ -1,0 +1,174 @@
+---
+title: Agricultural climate
+n: 7
+summary: Rain, heat and evapotranspiration set the crop calendar in both deltas. This chapter builds the 1991–2020 climate from CHIRPS satellite rainfall and the ERA5-Land reanalysis, compares air temperature with MODIS surface temperature, then looks at the dry seasons of 2016, 2020 and 2024 and the 1981–2025 warming through the lens of El Niño.
+objectives:
+  - Read the mean monthly climate of the two deltas and explain why their crop calendars differ.
+  - Tell satellite rainfall (CHIRPS), reanalysis (ERA5-Land) and land surface temperature (MODIS LST) apart, and know each one's weak points.
+  - Read the monthly balance of rain and evapotranspiration to see when fields depend on irrigation.
+  - Relate the ONI index to dry-season rain and heat in both regions, and explain why El Niño affects the north and south differently.
+  - Estimate a temperature trend with the Theil–Sen method and state the limits of reanalysis data.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import ClimateSeries from '../../../islands/ClimateSeries.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/climate.json';
+
+Rice needs water and warmth. In the Red River Delta the cold winter makes the spring crop wait until the cold spells end. In the Mekong Delta the temperature hardly changes through the year, so water sets the calendar: flood, rain and salt. This chapter measures those factors from satellites and reanalysis for both regions over 45 years.
+
+<Stats items={[
+  { v: '16.4', u: '°C', l: 'mean January temperature in the Red River Delta (Mekong: 25.8), 1991–2020' },
+  { v: '9', u: '%', l: 'of the Mekong Delta\'s annual rain falls in the five dry-season months (Dec–Apr)' },
+  { v: '−60', u: '%', l: 'Mekong Delta dry-season rain in 2023–24 against the 1991–2020 mean' },
+  { v: '+0.19', u: '°C/decade', l: 'annual temperature trend in the Red River Delta 1981–2025 from ERA5-Land (Mekong: +0.13)' },
+]} caption="Region means from CHIRPS and ERA5-Land; computed by scripts/climate_numbers.ts." />
+
+## 7.1 Two climates
+
+**The Red River Delta** has a tropical monsoon climate with a real cold winter. January averages only 16.4 °C, June reaches 28.8 °C: an annual range of 12.4 °C. Rain falls mostly from May to October, peaking in August (336 mm); winter is dry but often drizzly and overcast (Chapter 2).
+
+**The Mekong Delta** is hot all year: the coolest month is 25.8 °C, the hottest (April) 28.6 °C, a range of only 2.8 °C. Its annual rain almost equals the Red River Delta's (1,705 against 1,698 mm), but the seasons are harsher: December to April gets only 9 % of the year's rain, and February averages 7 mm.
+
+<Predict client:visible lang="en"
+  title="Which is the Mekong Delta's wettest month?"
+  q="According to the 1991–2020 CHIRPS mean, which month brings the Mekong Delta the most rain?"
+  options={['June', 'August', 'October', 'December']} answer={2}
+  why="October, about 278 mm. The Mekong rainy season is long and peaks late, together with the Mekong flood peak (Chapter 8). In the Red River Delta the rain peaks in August (336 mm)." />
+
+<Figure
+  title="Figure 7.1 — Mean monthly climate 1991–2020: rain, evapotranspiration, temperature"
+  try="Compare the two regions: in which months is rain (blue) below actual evapotranspiration (green)? In the lower chart, in which month is the gap between surface and air temperature largest?"
+  source="Area-weighted region means (inside the region outline) of CHIRPS v2.0 (Funk et al., 2015) and monthly ERA5-Land (Muñoz-Sabater et al., 2021) on a ~5 km grid, 1991–2020; MODIS MOD11A2 C6.1 daytime land surface temperature over cells ≥ 50 % cropland (WorldCover), 2001–2024, clear days only."
+>
+  <ClimateSeries client:visible lang="en" view="normals" region="red" />
+</Figure>
+
+<Note kind="key">
+
+The two deltas get almost the same annual rain, but the Red River Delta is limited by **heat** (a cold winter) and the Mekong Delta by **water** (a rainless dry season, a flooded wet season). That is why the north grows two crops following the temperature, and the south two to three crops following irrigation and the flood (Chapter 4).
+
+</Note>
+
+## 7.2 Rain seen from space
+
+Rain gauges in the two deltas are sparse and their records are not open. <Term id="chirps">CHIRPS</Term> fills the gap: it estimates rain from cold-cloud duration in geostationary infrared imagery, then corrects it with gauge data, at 0.05° (about 5.5 km) since 1981 (Funk et al., 2015).
+
+Figure 7.2 has two layers. The first is the mean rain of each month; drag the time slider to watch the rainy season arrive and leave in each region. The second is the rain of three dry seasons, 2015–16, 2019–20 and 2023–24, against the mean (very strong, weak and strong El Niño).
+
+<Figure
+  title="Figure 7.2 — Mean monthly rainfall 1991–2020 and the rain of three dry seasons, 2016, 2020, 2024"
+  try="On 'Mean monthly rain', press Play and watch where the rainy season starts. Then choose 'Dry-season rain' and compare the Mekong and Red River deltas in 2015–16: do they have the same colour?"
+  source="CHIRPS v2.0 (UCSB Climate Hazards Center), monthly totals, ~5 km. Dry-season rain = total from December to April against the 1991–2020 mean of the same months, in %. Clipped to the region outline (geoBoundaries ADM1, 2008 boundaries)."
+>
+  <DeltaMap client:visible lang="en" label="CHIRPS rainfall" region="mekong" choices={[
+    { key: 'normal', label: { vi: 'Mưa trung bình tháng', en: 'Mean monthly rain' }, ids: { red: 'rain-normal-red', mekong: 'rain-normal-mekong' } },
+    { key: 'dry', label: { vi: 'Mưa mùa khô so với TB', en: 'Dry-season rain vs mean' }, ids: { red: 'rain-dryanom-red', mekong: 'rain-dryanom-mekong' } },
+  ]} />
+</Figure>
+
+<Note kind="warn">
+
+At 5 km CHIRPS smooths out local thunderstorms, and the coast has fewer correcting gauges. Use it for region means, seasonal trends and year-to-year comparisons; do not read a single cell as if it were a gauge.
+
+</Note>
+
+## 7.3 Air temperature and surface temperature
+
+The two "temperatures" in this chapter measure different things.
+
+- **Air temperature at 2 m** comes from the ERA5-Land <Term id="reanalysis">reanalysis</Term> (0.1°, since 1950). It is what a weather station measures and what the rice plant "feels" through the air.
+- **MODIS <Term id="lst">land surface temperature</Term>** is the temperature of the field, canopy or roof itself, measured in thermal infrared bands when Terra passes at about 10:30 in the morning, and only under clear skies.
+
+<Predict client:visible lang="en"
+  title="How much hotter than the air are Mekong fields?"
+  q="In April, how much warmer is the daytime surface temperature (MODIS) of Mekong Delta cropland than the monthly mean air temperature (ERA5-Land)?"
+  slider={{ min: 0, max: 15, step: 0.5, unit: '°C' }} answer={5} tol={1.5}
+  why="About 4.9 °C (33.5 against 28.6 °C). March–April is just after the winter–spring harvest, when bare soil bakes in the late-morning sun. In January, with the rice green, the gap is only 1.3 °C: transpiring leaves stay cool." />
+
+The gap between the two temperatures tells whether a field holds green, transpiring plants or lies bare and dry. That is the basis of the Temperature Condition Index (TCI) in Chapter 9. In the Red River Delta the winter gap reaches 6–8 °C, but part of it is bias: MODIS measures only on the rare clear days, and clear days are usually sunnier and warmer than the monthly mean.
+
+<Depth level="advanced" title="What a reanalysis is, and when to doubt it">
+
+ERA5-Land re-runs the ECMWF land-surface model for every hour since 1950, driven by the ERA5 atmosphere, which assimilates millions of observations from stations, radiosondes and satellites. The result is continuous, with no cloud gaps. But it is a **model product**: 0.1° (about 11 km) does not see flooded paddies or towns; the model does not know how much farmers irrigate; and as the observing system changes over the decades, long-term trends can drift. Compare ERA5-Land trends with station records where possible.
+
+</Depth>
+
+## 7.4 Evapotranspiration and the water balance
+
+<Term id="evapotranspiration">Evapotranspiration</Term> is the water a field returns to the atmosphere. Comparing it with rain shows in which months crops are self-sufficient and in which they need irrigation.
+
+According to ERA5-Land, actual evapotranspiration is about 1,100 mm a year in the Red River Delta and 1,265 mm in the Mekong Delta. In the Mekong Delta rain stays below potential evapotranspiration from November to May; the largest deficit is in March, about 280 mm. That is when the winter–spring crop heads and ripens, living on river water just as the salt moves in (Chapter 10).
+
+<Note kind="warn">
+
+ERA5-Land computes potential evaporation as if the surface were always wet, so its absolute values (about 2,000–2,650 mm a year) are higher than the FAO-56 reference evapotranspiration ET₀. Read only **which season is short of water**, not the size of the deficit.
+
+</Note>
+
+## 7.5 El Niño and the dry seasons of 2016, 2020 and 2024
+
+<Term id="enso">ENSO</Term> is the largest mode of tropical climate variability. NOAA's <Term id="oni">ONI</Term> measures it: December–February of the 2015–16 dry season was +2.50 (very strong El Niño), 2019–20 +0.71 (weak), 2023–24 +1.84 (strong).
+
+<Predict client:visible lang="en"
+  title="Does El Niño dry out both deltas?"
+  q="In the 2015–16 dry season (very strong El Niño), how did December–April rain in the Red River Delta compare with the 1991–2020 mean?"
+  options={['Much lower, like the Mekong', 'About normal', 'Clearly higher']} answer={2}
+  why="About 48 % higher, while the Mekong Delta was 34 % short. El Niño makes the southern dry season drier and hotter, but that winter the north was wetter than usual. One global index does not act the same way on two regions 1,200 km apart." />
+
+<Figure
+  title="Figure 7.3 — Dry-season rain and Feb–Apr temperature against the mean, 1982–2025, and El Niño years"
+  try="Hover over the shaded (El Niño) years: is the Mekong Delta always short of rain? Find the hottest Feb–Apr in each region."
+  source="Region means of CHIRPS (rain from December of the previous year to April) and ERA5-Land (2 m temperature, Feb–Apr), against the 1991–2020 mean. Shading: seasons with Dec–Feb ONI ≥ 1.0 (NOAA CPC, ERSSTv5)."
+>
+  <ClimateSeries client:visible lang="en" view="dry" />
+</Figure>
+
+The three dry seasons tell three different stories in the Mekong Delta:
+
+- **2015–16**: rain 34 % short, Feb–Apr 0.9 °C warmer. Drought came with record salinity (Chapter 10).
+- **2019–20**: rain 38 % short, about 70 % of the deficit in December–January; Feb–Apr was only slightly dry (SPI-3 −0.14, Chapter 9). Local rain does not explain that year's salinity (Chapter 10).
+- **2023–24**: rain 60 % short, level with the driest years since 1981 (1987, 2005); Feb–Apr the hottest since 1981 (+1.3 °C).
+
+<Note kind="warn">
+
+In August–October 2026 the ONI reached +2.46, the highest since the 2015–16 season (NOAA CPC, data downloaded 17 November 2026). Since 1950 only three seasons had a December–February ONI above +2 (1982–83, 1997–98, 2015–16); all three times the Mekong dry season was 34–59 % short of rain. ENSO does not decide everything, but it is reason to watch the 2026–27 dry season closely with the indices of Chapters 9 and 10.
+
+</Note>
+
+## 7.6 Warming
+
+<Figure
+  title="Figure 7.4 — Annual mean air temperature 1981–2025 and Theil–Sen trend"
+  try="Which was the hottest year in each region? Whose trend line is steeper?"
+  source="Region means of ERA5-Land 2 m temperature, 12-month mean; Theil–Sen trend (median slope of all pairs of years), computed in the browser by src/lib/change.ts."
+>
+  <ClimateSeries client:visible lang="en" view="warming" />
+</Figure>
+
+According to ERA5-Land, the annual temperature rose by about 0.19 °C per decade in the Red River Delta and 0.13 °C in the Mekong Delta over 1981–2025. The hottest year was 2019 in the Red River Delta and 2024 in the Mekong Delta. The trend uses the Theil–Sen method (median slope between all pairs of years), so one unusually hot El Niño year does not pull the line the way least squares would.
+
+<Note kind="key">
+
+A trend from a reanalysis is an estimate, not a measurement. Before using it for decisions, compare it with the nearest weather station and state the source, period and method.
+
+</Note>
+
+## 7.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Funk, C. et al. (2015). The climate hazards infrared precipitation with stations — a new environmental record for monitoring extremes. *Scientific Data*, 2, 150066. https://doi.org/10.1038/sdata.2015.66
+- Muñoz-Sabater, J. et al. (2021). ERA5-Land: a state-of-the-art global reanalysis dataset for land applications. *Earth System Science Data*, 13, 4349–4383. https://doi.org/10.5194/essd-13-4349-2021
+- NOAA Climate Prediction Center. Oceanic Niño Index (ONI), ERSSTv5. https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt (downloaded 17 November 2026).
+- Sen, P. K. (1968). Estimates of the regression coefficient based on Kendall's tau. *Journal of the American Statistical Association*, 63(324), 1379–1389.
+- Wan, Z. (2014). New refinements and validation of the collection-6 MODIS land-surface temperature/emissivity product. *Remote Sensing of Environment*, 140, 36–45. https://doi.org/10.1016/j.rse.2013.08.027
+- WMO (2017). *WMO Guidelines on the Calculation of Climate Normals* (WMO-No. 1203). Geneva.
