@@ -15,7 +15,7 @@ A bilingual (Vietnamese–English) interactive handbook on remote sensing for ag
 - Phần C / Part C: 7 Khí hậu / Climate, 8 Lũ / Floods, 9 Hạn / Drought, 10 Xâm nhập mặn / Salinity, 11 Đất & địa hình / Soils & terrain, 12 Ven biển / The coast, 13 Phát thải / Emissions, 14 Đa rủi ro / Multi-hazard risk
 - Phần D / Part D: 15 Bài thực hành / Labs (12 bài Colab + GEE cho chương 2–14 / 12 Colab + GEE labs for chapters 2–14), 16 Công thức & tài liệu tham khảo / Formulas & references
 
-Còn lại / still planned: kiểm tra cuối, repo GitHub và triển khai / final check, GitHub repo and deploy. Lộ trình / roadmap: [PLAN.md](PLAN.md).
+Trực tuyến / live: https://quanta1985.github.io/rs-agri/ · http://remosat.usth.edu.vn/~quanta/rs-agri/. Lộ trình / roadmap: [PLAN.md](PLAN.md).
 
 ## Chạy cục bộ / Run locally
 

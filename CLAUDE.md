@@ -43,12 +43,19 @@ python -I scripts/data/export_boundaries.py <adm1.geojson>   # province lines (d
 python -I scripts/data/export_hero.py         # home hero: S2 dry-season composites of both deltas -> public/img/hero-*.webp + hero.json
 ```
 
-GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via `.github/workflows/deploy.yml` (runs `npm test`, then `withastro/action`), once the GitHub repo `quanta1985/rs-agri` exists (not created yet).
+GEE project: `claudev1-503808` (auth works locally). Push to `main` of the public repo https://github.com/quanta1985/rs-agri deploys GitHub Pages via `.github/workflows/deploy.yml` (runs `npm test`, then `withastro/action`; Pages source = GitHub Actions).
 
-### Deploy targets (planned, not done yet)
+### Deploy targets (live since 2026-11-18)
 
-- GitHub Pages `https://quanta1985.github.io/rs-agri/` (default `base: '/rs-agri'`).
-- Homepage copy `http://remosat.usth.edu.vn/~quanta/rs-agri/`: same procedure as rs-knowledge (see its CLAUDE.md, "Deploy to the homepage"), with `SITE_BASE=/~quanta/rs-agri` and folder `rs-agri`.
+- GitHub Pages `https://quanta1985.github.io/rs-agri/` (default `base: '/rs-agri'`): every push to `main`.
+- Homepage copy `http://remosat.usth.edu.vn/~quanta/rs-agri/` (`/home/quanta/public_html/rs-agri` on `quanta@14.231.137.16`, key `~/.ssh/id_ed25519_quanta`). Not synced by a push; rebuild and swap in:
+
+```bash
+SITE_URL=http://remosat.usth.edu.vn SITE_BASE=/~quanta/rs-agri BUILD_ID=home npx astro build && npx pagefind --site dist-home
+tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16 'set -e; cd /home/quanta/public_html; rm -rf rs-agri.new; mkdir rs-agri.new; tar -C rs-agri.new -xzf - --no-same-owner; find rs-agri.new -type d -exec chmod 755 {} +; find rs-agri.new -type f -exec chmod 644 {} +; if [ -d rs-agri ]; then mv rs-agri rs-agri.old; fi; mv rs-agri.new rs-agri; rm -rf rs-agri.old; find rs-agri -type f | wc -l'
+```
+
+- The printed file count must equal `find dist-home -type f | wc -l`. Plain `ssh` prints post-quantum warnings on stderr: filter them. The homepage's own HTML pages (teaching.html, software.html) are the user's: copy to `<page>.bak-YYYYMMDD` before editing (rs-knowledge CLAUDE.md describes their card markup).
 - Push / deploy only when the user asks; when they say "push", ask or do both targets.
 
 ### Environment gotchas (Windows)
@@ -147,7 +154,7 @@ GEE project: `claudev1-503808` (auth works locally). Push to `main` deploys via 
 
 ## Status
 
-**Step 16 final check done (2026-11-18); GitHub repo + deploy still waiting for the user** (steps 15-16 uncommitted until the user asks).
+**Step 16 done (2026-11-18): final check, public repo, both deploys.** Steps 15-16 committed `08fe7bf`; repo https://github.com/quanta1985/rs-agri created (public, Pages via Actions) and pushed: deploy run OK; homepage copy uploaded (345 files). Live check on both hosts (vi/flood, en/risk, vi/search): islands hydrate, no console errors, no 4xx, search works.
 - Production sweep (preview :4322, 19 pages x vi/en x light/dark x 1600/390, 8 browsers in parallel): 0 console/page errors, overflow 0, 0 broken images, 1,056 islands hydrated (2 single misses under parallel load, both fine when re-run alone), 38 internal links per language all 200, Pagefind search works ('phù sa' 5, 'salinity' 5).
 - Repo scan: book files untracked, no email / project id in src, public or labs, GADM only named as 'not used', largest data file 2.6 MB, dist 33 MB.
 - Licences verified and written into the 16.2 table: CHIRPS v2.0 public domain; GHS-POP CC BY 4.0; JRC GSW free, map credit 'Source: EC JRC/Google'; Copernicus DEM free licence (read from the licence PDF, Art. 6): notice 'produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved' + the no-liability sentence; the notice is now on every figure built from Copernicus DEM or DeltaDTM (ch.11 Figures 11.2-11.4, ch.14).
