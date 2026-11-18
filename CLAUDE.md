@@ -55,7 +55,7 @@ SITE_URL=http://remosat.usth.edu.vn SITE_BASE=/~quanta/rs-agri BUILD_ID=home npx
 tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16 'set -e; cd /home/quanta/public_html; rm -rf rs-agri.new; mkdir rs-agri.new; tar -C rs-agri.new -xzf - --no-same-owner; find rs-agri.new -type d -exec chmod 755 {} +; find rs-agri.new -type f -exec chmod 644 {} +; if [ -d rs-agri ]; then mv rs-agri rs-agri.old; fi; mv rs-agri.new rs-agri; rm -rf rs-agri.old; find rs-agri -type f | wc -l'
 ```
 
-- The printed file count must equal `find dist-home -type f | wc -l`. Plain `ssh` prints post-quantum warnings on stderr: filter them. The homepage's own HTML pages (teaching.html, software.html) are the user's: copy to `<page>.bak-YYYYMMDD` before editing (rs-knowledge CLAUDE.md describes their card markup).
+- The printed file count must equal `find dist-home -type f | wc -l`. Plain `ssh` prints post-quantum warnings on stderr: filter them. The homepage's own HTML pages (teaching.html, software.html) are the user's: copy to `<page>.bak-YYYYMMDD` before editing (rs-knowledge CLAUDE.md describes their card markup). Since 2026-11-18 both pages carry an rs-agri card right after the rs-knowledge card (thumbnails `img/software/rs-agri{,-2x}.webp`, 480x360 / 960x720 = home page vi at 960x720 with the app bar hidden; refs line '57 simulations and maps · 72 quiz questions · 12 Colab and Earth Engine labs': update those counts when chapters change).
 - Push / deploy only when the user asks; when they say "push", ask or do both targets.
 
 ### Environment gotchas (Windows)
