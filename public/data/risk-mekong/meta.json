@@ -1,0 +1,102 @@
+{
+ "id": "risk-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Chỉ số hiểm họa trên đất trồng trọt",
+  "en": "Hazard indicators on cropland"
+ },
+ "units": {
+  "vi": "điểm (0–100)",
+  "en": "score (0–100)"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 253.682951,
+ "ground_res_m": 250,
+ "width": 1076,
+ "height": 1137,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0,
+ "nodata": 255,
+ "times": [
+  "flood",
+  "rain",
+  "crop",
+  "low"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 311190,
+   "mean": 27.8735,
+   "p2": 0.0,
+   "p50": 4.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 311229,
+   "mean": 60.9355,
+   "p2": 52.0,
+   "p50": 61.0,
+   "p98": 72.0,
+   "min": 47.0,
+   "max": 80.0
+  },
+  {
+   "valid": 311183,
+   "mean": 36.7062,
+   "p2": 0.0,
+   "p50": 33.0,
+   "p98": 100.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 310996,
+   "mean": 57.0474,
+   "p2": 0.0,
+   "p50": 61.0,
+   "p98": 98.0,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "layers dem-dtm, flood-s1-2018, lc-cropfrac, sal-evianom, spi3 (this repository)",
+  "processing": "cells with >= 50 % WorldCover 2021 cropland; flood = largest monthly S1 water share Jul-Dec 2018; rain = mean Feb-Apr SPI-3 2016/2020/2024, 0 at >= 0, 100 at <= -2.0 (5 km, nearest); crop = share of 2016/2020/2024 with Feb-Apr EVI anomaly <= -0.05; low = 100 at DeltaDTM <= 1.0 m, 0 at >= 3.0 m, linear",
+  "attribution": "Contains modified Copernicus Sentinel data; CHIRPS (UCSB CHC); MODIS (NASA LP DAAC); DeltaDTM (Pronk et al. 2024, CC BY 4.0); ESA WorldCover 2021 (CC BY 4.0)",
+  "exported": "2026-11-18T02:56:03+00:00",
+  "script": "scripts/data/export_risk.py"
+ },
+ "indicators": {
+  "flood": {
+   "vi": "Ngập lũ",
+   "en": "Flooding"
+  },
+  "rain": {
+   "vi": "Thiếu mưa mùa khô",
+   "en": "Dry-season rain deficit"
+  },
+  "crop": {
+   "vi": "Cây trồng suy giảm mùa khô",
+   "en": "Dry-season crop decline"
+  },
+  "low": {
+   "vi": "Đất thấp",
+   "en": "Low-lying land"
+  }
+ }
+}

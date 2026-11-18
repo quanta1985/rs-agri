@@ -1,0 +1,245 @@
+---
+title: "Straw burning, paddy CH₄ & emissions"
+n: 13
+summary: "Rice paddies are a large source of Viet Nam's greenhouse gases, and straw is burned in the field after every harvest. This chapter counts MODIS fire detections over both deltas for 23 years, reads NO₂, CO and CH₄ from Sentinel-5P, shows what satellites see and what they miss, and then works out the CH₄ of one rice season with the IPCC method to see how much alternate wetting and drying can cut."
+objectives:
+  - Explain how satellites detect active fires and why they miss most small straw fires.
+  - Read the straw-burning calendar of both deltas from fire counts and relate it to the crop calendar and dry-season rain.
+  - Tell the sources of NO₂ (fuel) from those of CH₄ (flooded fields) on Sentinel-5P maps, and state the limits of space-borne CH₄ in cloudy regions.
+  - Compute the CH₄ of a rice season with IPCC Tier 1 and estimate the cut from alternate wetting and drying.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import EmissionSeries from '../../../islands/EmissionSeries.tsx';
+import RiceMethane from '../../../islands/RiceMethane.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/emissions.json';
+
+Flooded paddies give off methane (CH₄). After each harvest, the straw is often burned where it lies, sending up smoke and gases. Both are farm emissions. Satellites see part of them: a fire hot enough and large enough, burning when the satellite passes; and the amount of gas in the whole column of air above a cell a few kilometres wide. The rest has to be calculated from rice area, irrigation practice and emission factors.
+
+<Stats items={[
+  { v: '15.7', u: '%', l: 'of Viet Nam\'s net greenhouse gas emissions in 2016 came from rice cultivation (BUR3)' },
+  { v: '78', u: '%', l: 'of the days with a fire detection on Mekong Delta cropland fall in February–April, 2003–2025 (MODIS)' },
+  { v: '−0.68', u: '', l: 'correlation between dry-season rain and February–April cropland fire days in the Mekong Delta, 23 years' },
+  { v: '−45', u: '%', l: 'CH₄ of one rice season when continuous flooding gives way to alternate wetting and drying, IPCC 2019 default factors' },
+]} caption="Computed from FIRMS MODIS, CHIRPS and IPCC factors by scripts/emissions_numbers.ts; the 15.7 % share is from Viet Nam's BUR3." />
+
+## 13.1 What farming emits, and what satellites see
+
+Viet Nam's Third Biennial Update Report (BUR3) to the UN climate convention puts rice cultivation in 2016 at 1,774.75 thousand tonnes of CH₄, or 49.7 million tonnes of CO₂ equivalent (with the IPCC AR5 <Term id="gwp">global warming potential</Term> of 28). That is 15.7 % of the country's net emissions and nearly 60 % of agricultural emissions (excluding forest land). Rice cultivation is the second key category in the national <Term id="ghg-inventory">greenhouse gas inventory</Term>.
+
+CH₄ forms when bacteria break down organic matter in flooded, oxygen-poor soil. The longer a field stays flooded, and the more straw is ploughed in just before planting, the more it emits. Straw has another fate too: fire. The Mekong Delta produced about 29.16 million tonnes of dry straw in 2019, out of 53.3 million tonnes for the whole country (Cuong et al., 2021). In the Mekong Delta, 50–60 % of straw is burned in the field (Nguyen-Van-Hung et al., 2019, citing an IRRI survey from 2014).
+
+| Source | What satellites see | What they miss |
+|---|---|---|
+| Straw burning | Hot spots (MODIS, VIIRS); smoke gases NO₂ and CO in the air column (Sentinel-5P) | Small fires, short fires, fires under cloud or between overpasses |
+| Paddy CH₄ | Column-average CH₄ in 5.5 × 7 km cells (Sentinel-5P) | Emissions of individual fields; nearly every cloudy day |
+| Indirect | Rice area and calendar, flooded or dry fields (Chapters 4, 8) | Fertiliser, variety, actual irrigation practice |
+| N₂O from nitrogen fertiliser | Nothing | All of it |
+
+<Predict client:visible lang="en"
+  title="Measuring paddy CH₄ from space?"
+  q="Sentinel-5P measures CH₄ in the whole air column. Why does it struggle to measure CH₄ over the Mekong Delta in July–October, when the fields are most flooded?"
+  options={['CH₄ does not absorb light', 'It is the rainy season: cloud nearly every day, and dark water spoils the retrieval', 'The satellite does not pass over Viet Nam in the rainy season', 'Rice fields do not emit in the rainy season']} answer={1}
+  why="The TROPOMI CH₄ retrieval needs a fully clear sky and a bright enough surface. In the seven years 2019–2025 the Mekong Delta has not a single valid CH₄ value in September, and only 2–5 years with data in July, August and October. The satellite is blind exactly when emissions peak." />
+
+<Note kind="key">
+
+Satellites do not measure emissions. They measure **signs**: a hot spot, a column of gas denser than its surroundings, a flooded field. Turning signs into tonnes of CH₄ or of dust takes models and emission factors. Remote sensing is strongest here as a source of **activity data**: rice area, number of seasons, flooding calendar, burned area.
+
+</Note>
+
+## 13.2 Catching fires from space
+
+A fire burning at several hundred degrees glows strongly in the mid-infrared, around 4 µm. Even a small fire makes a 1 km MODIS pixel clearly warmer in that band than in the 11 µm thermal band and than its neighbours. The <Term id="active-fire">active fire</Term> algorithm looks for that contrast. According to the MODIS active fire user's guide (Giglio et al., 2021), MODIS routinely detects fires of about 1,000 m², fires ten times smaller under very good conditions, and flaming fires of only about 50 m² under ideal ones.
+
+"Can detect" is not "detects all". Against ASTER images taken at the same time at 30 m, MODIS misses 86.2 % of fires, mostly small ones; it almost never misses large fires (Giglio et al., 2016). Terra passes at about 10:30 and 22:30, Aqua at about 13:30 and 01:30. A pile of straw lit at 16:00 that burns for an hour, or one burning under cloud, never enters the record. Lasko et al. (2017) blame cloud, small fires, short fires and burning after the overpass for global inventories underestimating straw burning in Viet Nam. The 375 m VIIRS sensor sees more fire pixels: 3 times more by day and 25 times more by night than the 750 m product of the same sensor (Schroeder et al., 2014).
+
+Figure 13.1 counts the days each year on which a 1 km cell had at least one MODIS fire detection, averaged over five-year periods. In 2001–2002 only Terra was flying (Aqua data begin in July 2002), so the numbers in this chapter start in 2003.
+
+<Figure
+  title="Figure 13.1 — Days with a fire detection per year, 1 km cells, 2006–2025"
+  try="In the Mekong Delta, turn on Compare: 2006–2010 on the left, 2016–2020 on the right. Where do fires light up? Switch to the Red River Delta: are the fires on rice land or elsewhere? Look for cells that burn more than 10 days a year."
+  source="NASA FIRMS, MODIS Collection 6.1 active fires (Terra + Aqua), 1 km daily raster. Value = days with ≥ 1 detection in the cell, divided by the years in the period; nearest neighbour onto a 1 km Mercator grid; cells below 0.1 day/yr are transparent."
+>
+  <DeltaMap client:visible lang="en" label="Fire days" region="mekong" compare time={3} compareTime={0} choices={[
+    { key: 'fire', label: { vi: 'Ngày cháy/năm', en: 'Fire days/yr' }, ids: { red: 'fire-red', mekong: 'fire-mekong' }, palette: 'ylorrd', range: [0, 4], clearBelow: 0.1 },
+  ]} />
+</Figure>
+
+In 2003–2025, 75 % of the fire days in the Mekong Delta were on cropland (cells at least half cropland in ESA WorldCover 2021), 8 % on forest and wetland and 17 % on other land. The Red River Delta is the reverse: only 10 % on cropland, 57 % on forest and wetland, 33 % on other land. The days with the most fires that we checked (December 2024, January 2025) cluster in the Quang Ninh hills, which lie inside the Red River statistical region.
+
+<Note kind="warn">
+
+A rice field burns once or twice a season. Cells that "burn" more than 10 days a year, such as the cell at 106.13° E, 21.24° N (Red River Delta, 13.8 days/yr in 2021–2025) or the one at 106.32° E, 10.47° N (Mekong Delta, 14.2 days/yr), are most likely not straw fires but heat sources that recur in one place, such as factories or kilns. The standard MODIS product labels hot spots seen on 16 or more days in a year, or in urban areas, as "other static land source" (Giglio et al., 2021). The near-real-time FIRMS data used here carry no such label, so they must be removed by hand before counting "straw burning".
+
+</Note>
+
+## 13.3 The straw-burning calendar
+
+In the Mekong Delta, winter–spring rice is sown after the flood recedes, in November–December (Chapter 4), and harvested about 100 days later. Cropland fires follow that calendar: March has on average 146 fire days per 1,000 1 km cells, February 35, April 71. February–April hold 78 % of the year's fire days. Summer–autumn and autumn–winter rice are harvested in the rainy season, when straw is wet and skies are cloudy, and hardly any fires show up.
+
+<Figure
+  title="Figure 13.2 — Days with a fire detection per month, by land class, 2003–2025"
+  try="In the Mekong Delta, which month is highest, and how many times July? Switch to the Red River Delta: does the cropland line have a clear peak? Is January–March low there because nobody burns, or for another reason?"
+  source="NASA FIRMS MODIS C6.1 (Terra + Aqua). Days with ≥ 1 detection in each 1 km cell, summed per month, 2003–2025 mean, per 1,000 cells of the land class. Land class = the class covering ≥ 50 % of the cell in ESA WorldCover 2021 (cropland; trees + herbaceous wetland + mangrove; the rest). All years use the 2021 map."
+>
+  <EmissionSeries client:visible lang="en" view="fire-months" region="mekong" />
+</Figure>
+
+The Red River Delta is different. Its cropland has only 54 fire days per 1,000 cells a year, against 324 in the Mekong Delta. They spread evenly from May to September (81 % of fire days) and drop to almost nothing in January–March. January–March in the north is also when the fewest optical images are usable (Chapter 2): cloud and drizzle hide both fire and ground. The Red River fire record therefore reflects the cloud calendar as much as the burning calendar, and cannot be read as the true burning season.
+
+<Predict client:visible lang="en"
+  title="Which years burn most?"
+  q="In the Mekong Delta, February–April fire days on cropland range from 1,902 (2006) to 11,003 (2020). What goes with the years of many fires?"
+  options={['A dry season with little rain', 'A dry season with a lot of rain', 'A big flood the October before', 'Nothing to do with the weather']} answer={0}
+  why="The correlation between December–April rain (CHIRPS) and February–April fire days is −0.68 over 23 years. 2020: 98 mm of dry-season rain, 11,003 fire days; 2022: 238 mm, 2,070 fire days. Dry straw burns easily, and clear skies also let the satellite see more fires. The two effects add up." />
+
+<Figure
+  title="Figure 13.3 — Days with a fire detection on cropland per year, 2003–2025"
+  try="Find the highest and lowest years in the Mekong Delta and compare them with dry-season rain in Chapters 7 and 9. In the Red River Delta, does the line rise or stay flat?"
+  source="NASA FIRMS MODIS C6.1 (Terra + Aqua). Total days with ≥ 1 detection in the 1 km cropland cells (≥ 50 % in ESA WorldCover 2021), per 1,000 cells."
+>
+  <EmissionSeries client:visible lang="en" view="fire-years" />
+</Figure>
+
+In the Mekong Delta, cropland fire days rise and fall with the weather, from 96 per 1,000 cells (2006) to 586 (2020). In the Red River Delta they climb steadily: from 8 per 1,000 cells a year on average in 2003–2007 to 92 in 2021–2025. The satellite cannot say why. Farmers may be burning more, or the fires may be larger or closer to overpass time. Finding out takes fieldwork.
+
+<Note kind="key">
+
+The Mekong fire record reads as a winter–spring harvest calendar, and its size follows the dryness of the dry season. That much the satellite gives reliably. Burned area, tonnes of straw and tonnes of smoke it does not: MODIS misses most small fires, so fire counts are a **relative index** for comparing years and regions.
+
+</Note>
+
+## 13.4 Smoke, NO₂ and CO
+
+Sentinel-5P carries the TROPOMI instrument, covers nearly the whole Earth every day and passes at about 13:30 local time (ESA). It measures sunlight reflected through the whole atmosphere and works out the amount of each gas above each square metre of ground: nitrogen dioxide (NO₂), carbon monoxide (CO), methane (CH₄) and others. These are <Term id="column-amount">column amounts</Term>, not the ground-level concentration that people breathe.
+
+NO₂ comes mainly from burning fuel: traffic, power plants, industry. It lasts only hours in the air, so an NO₂ map shows where the burning happens. Averaged over the months of 2019–2025 across the whole region, tropospheric NO₂ over the Red River Delta was 64.8 µmol/m², more than three times the Mekong Delta (20.2 µmol/m²). The highest Red River cell (185 µmol/m²) lies north of central Hai Phong; Ha Noi is about 85 µmol/m². In the Mekong Delta the highest cell (47.6 µmol/m²) lies on the eastern edge, next to Ho Chi Minh City. No rice land stands out.
+
+<Figure
+  title="Figure 13.4 — Tropospheric NO₂, 2019–2025 mean"
+  try="Compare the two deltas on the same scale. In the Red River Delta, hover from Ha Noi to Hai Phong and then down to Nam Dinh and Thai Binh: how does NO₂ fall away from the cities?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 tropospheric NO₂ (grid ~1.1 km, native footprint 5.5 × 3.5 km), mean of all images 2019–2025; 1 km Mercator grid. Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="en" label="Tropospheric NO₂" region="red" choices={[
+    { key: 'no2', label: { vi: 'NO₂', en: 'NO₂' }, ids: { red: 'no2-red', mekong: 'no2-mekong' } },
+  ]} />
+</Figure>
+
+CO lives far longer than NO₂, long enough for the wind to carry it a long way. Over the Mekong Delta, column CO is highest in January–April (about 38–39 mmol/m²) and lowest in July (24.5), at the time of local straw burning. Over the Red River Delta, CO peaks in March–April (66.0 and 63.6 mmol/m²), twice the July value, while fires on Red River farmland are then very few (Figure 13.2); fires on forest land peak in January–May. A region's CO column holds both CO made there and CO carried in by the wind, and these data cannot separate the two.
+
+<Figure
+  title="Figure 13.5 — Monthly NO₂ and CO over the two deltas, 2019–2025"
+  try="Choose CO. In which month does the Red River Delta peak, and does it match the peak of its own fires in Figure 13.2? Choose NO₂: why is winter higher than summer when traffic is the same?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 tropospheric NO₂ and total column CO; monthly mean over each statistical region (sampled at 7 km). Contains modified Copernicus Sentinel data."
+>
+  <EmissionSeries client:visible lang="en" view="air" />
+</Figure>
+
+Sentinel-5P does not measure fine dust from straw fires directly. Lasko and Vadrevu (2018) estimate that rice residue burning in Viet Nam released about 150 thousand tonnes of PM2.5 in 2015, 14–18 % of the country's PM2.5 emissions. That estimate rests on rice area, an assumed burned fraction and emission factors, not on fire counts, which are far too low.
+
+## 13.5 Paddy CH₄: seen from above, calculated from below
+
+TROPOMI measures <Term id="xch4">XCH₄</Term>, the column-average dry-air mixing ratio of CH₄, in ppb (parts per billion). A measurement cell is 5.5 × 7 km (since August 2019). A retrieval is kept only when the sky is almost cloud-free, the surface bright enough and aerosol low (Lorente et al., 2021). Over cloudy tropics and dark flooded fields, that is rare.
+
+<Figure
+  title="Figure 13.6 — Column CH₄, 2019–2025 mean, and the number of valid looks"
+  try="On the XCH₄ layer, find the Red River and Mekong deltas: are they darker than the hills at the same latitude? Switch to 'Looks': how many looks does a Mekong cell have in seven years, compared with north-eastern Thailand?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 bias-corrected XCH₄, all daily images 2019–2025; 10 km cells, 1,800 km Mercator frame; looks and XCH₄ computed on the ~1.1 km L3 grid, 1.1 km cells with ≥ 10 looks kept, then averaged to 10 km cells. Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="en" label="Column CH₄" region="vietnam" boundaries={false} choices={[
+    { key: 'ch4', label: { vi: 'XCH₄', en: 'XCH₄' }, ids: { vietnam: 'ch4-vietnam' } },
+    { key: 'looks', label: { vi: 'Số lần đo', en: 'Looks' }, ids: { vietnam: 'ch4looks-vietnam' } },
+  ]} />
+</Figure>
+
+Averaged over 2019–2025, XCH₄ over the Red River Delta was 1,951 ppb, 20.9 ppb above the band at the same latitude (100–112° E) outside the delta. The Mekong Delta was 12.7 ppb above its band. The comparison band mixes hills, forest, cities and surfaces of different brightness, so these differences are not a paddy signal as such. The number of looks also differs widely: over seven years a 1.1 km cell has a median of 49 valid looks in the Red River Delta, only 17 in the Mekong Delta (about 6 on the western rice land), against about 170 in north-eastern Thailand. The highest 10 km cells in the frame (about 1,970 ppb) lie in the Pearl River Delta (China) and around Ha Noi.
+
+<Figure
+  title="Figure 13.7 — Monthly XCH₄ over the two deltas, 2019–2025"
+  try="In the Red River Delta, how much higher is XCH₄ in September–November than in January–July? In the Mekong Delta, find the months with no point. Which season are they?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 bias-corrected XCH₄; monthly mean inside each region, on the ~1.1 km L3 grid. Months without data are left empty. Contains modified Copernicus Sentinel data."
+>
+  <EmissionSeries client:visible lang="en" view="ch4" />
+</Figure>
+
+Over the Red River Delta, XCH₄ in September–November (1,948–1,957 ppb, mean of the years) is above January–July (1,905–1,918 ppb; July has data in only 4 years). The peak falls during and just after the flooded summer rice season (July–October). Wójcik-Gront et al. (2025) also find a seasonal swing of about 30 ppb, peaking in the fourth quarter, over high-emission regions including the Mekong Delta, against about 17 ppb in low-emission regions. Part of that seasonal cycle belongs to the whole atmosphere, not to the paddies alone. The series also climbs from year to year: over the Red River Delta from 1,861–1,893 ppb in January–April 2019 to 1,944–1,970 ppb in October–December 2025, so compare months within the same year. Over the Mekong Delta there is not one September value in seven years. The satellite is absent exactly when the fields are most flooded.
+
+That is why national inventories do not measure CH₄ from space but calculate it from below, with the IPCC method:
+
+<Formula label="CH₄ from one rice season (IPCC 2019, Tier 1)" tex="\mathrm{CH_4} = EF_c \times SF_w \times SF_p \times SF_o \times t \times A" where="EFc: baseline factor, kg CH₄/ha/day (continuously flooded, no organic amendment; South-East Asia 1.22); SFw: water regime in the season (continuous flooding 1; single drainage 0.71; multiple drainage, including alternate wetting and drying, 0.55); SFp: water regime before the season (dry under 180 days 1; flooded over 30 days 2.41); SFo = (1 + Σ rate × CFOA)^0.59: organic amendments (straw incorporated under 30 days before planting CFOA = 1; over 30 days 0.19; burned or surface straw not counted); t: season length in days (South-East Asia default 102); A: area (ha)" />
+
+With the South-East Asia defaults, one hectare of continuously flooded rice over 102 days emits 124.4 kg CH₄, or 3.36 t CO₂ equivalent (with the IPCC AR6 factor of 27). Times the 1,487.7 thousand ha of winter–spring rice in the Mekong Delta in 2024 (General Statistics Office, Chapter 4), that is about 185 thousand tonnes of CH₄ for one season, assuming every field is continuously flooded with no straw ploughed in. Ploughing in 3 t of dry straw per hectare just before planting multiplies it by 2.27; ploughing it in more than 30 days earlier, by only 1.30.
+
+<Figure
+  title="Figure 13.8 — CH₄ of one rice season with IPCC Tier 1"
+  try="Start from continuous flooding, straw burned. Switch to 'Incorporated < 30 days before' with 5 t/ha: by how much does CH₄ grow? Keep the straw and switch to alternate wetting and drying: how much does it fall? Change the pre-season regime to 'Flooded > 30 days'."
+  source="Equations 5.1–5.3 and default factors in Tables 5.11–5.14, IPCC (2019) Refinement, Volume 4, Chapter 5.5; GWP-100 of non-fossil CH₄ = 27 (IPCC AR6 WG1, Table 7.15). Illustrative, not a measurement."
+>
+  <RiceMethane client:visible lang="en" />
+</Figure>
+
+<Depth level="advanced" title="Tier 1, Tier 2 and factors measured in Viet Nam">
+
+Tier 1 uses global or regional default factors; Tier 2 replaces them with factors measured in the country. Vo et al. (2020) pooled chamber measurements from Viet Nam and give baseline factors from 1.72 to 3.89 kg CH₄/ha/day depending on region and season of the year (early, mid and late year), all above the IPCC South-East Asia default of 1.22. Arai (2022) measured 15 seasons in a row in a triple-cropped field in the Mekong Delta and found continuous-flooding emissions 1.1–2.7 times the factors used in Viet Nam. Two lessons follow: the defaults may underestimate emissions here, and any paddy CH₄ estimate carries a large error. Remote sensing shrinks the error in **area and calendar**, not in the factors.
+
+</Depth>
+
+## 13.6 Alternate wetting and drying, and low-emission rice
+
+<Term id="awd">Alternate wetting and drying</Term> (AWD) lets the field dry until the water falls below the soil surface before it is flooded again, several times a season. The soil gets air, and the bacteria that make CH₄ slow down. IPCC puts AWD under "multiple drainage", factor 0.55: 45 % less than continuous flooding. Trials in Viet Nam point the same way: over 5 years (15 seasons) in a triple-cropped field in the Mekong Delta, AWD cut annual CH₄ by 51 % and raised yield by 9 % (Arai, 2022). In the north, early plus mid-season drainage cut CH₄ by 67 % with good water management and by 43 % with poor management (Tariq et al., 2017).
+
+<Predict client:visible lang="en"
+  title="One million hectares of low-emission rice"
+  q="The programme for one million hectares of high-quality, low-emission rice in the Mekong Delta has a 2030 target. With the IPCC defaults, if all one million hectares switched from continuous flooding to AWD, how much would one season save?"
+  options={['0.15 million t CO₂ equivalent', '1.5 million t CO₂ equivalent', '15 million t CO₂ equivalent', '150 million t CO₂ equivalent']} answer={1}
+  why="124.4 − 68.4 = 56 kg CH₄/ha/season; times one million hectares is 56 thousand tonnes of CH₄, times 27 about 1.51 million t CO₂ equivalent per season. With two or three seasons a year the figure grows accordingly. Try it in Figure 13.8." />
+
+Decision 1490/QĐ-TTg of 27 November 2023 approved the programme for one million hectares of high-quality, low-emission rice in 12 Mekong Delta provinces. Targets: 180 thousand ha by 2025 and one million ha by 2030; greenhouse gas emissions more than 10 % below conventional rice; 20 % less irrigation water; straw collected from the fields for reuse, 70 % by 2025 and 100 % by 2030; and every hectare under at least one sustainable practice such as AWD.
+
+A target like that needs measurement, reporting and verification (<Term id="mrv">MRV</Term>). Remote sensing helps at each step:
+
+<Steps items={[
+  { t: 'Area and calendar', d: 'Rice maps and sowing dates from Sentinel-1 and MODIS (Chapter 4) give A and t in the formula, per season and per province.' },
+  { t: 'Flooded or dry', d: 'Sentinel-1 radar separates water from soil (Chapters 4, 8), so in principle it can check whether fields are drained. But with images 12 days apart at 10 m, a short drying spell easily falls between two looks: field checks are needed.' },
+  { t: 'Is the straw burned?', d: 'MODIS and VIIRS fire detections after harvest are a relative index for the straw-collection target, especially in the Mekong dry season. No detection does not prove no burning.' },
+  { t: 'A check from above', d: 'Sentinel-5P XCH₄ is useful only for whole regions over many years. Over the Mekong Delta there are too few looks to verify a 10 % cut by a programme.' },
+]} />
+
+<Note kind="key">
+
+The CH₄ saved by low-emission rice will be **calculated**, not **measured** from space. Satellites make the calculated number more credible by confirming area, crop calendar, drainage and straw burning. That is also where the FAO (2017) handbook places remote sensing in agricultural statistics: it supplies activity data and sampling frames, while the final figures still need measurements on the ground.
+
+</Note>
+
+## 13.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Arai, H. (2022). Increased rice yield and reduced greenhouse gas emissions through alternate wetting and drying in a triple-cropped rice field in the Mekong Delta. *Science of the Total Environment*, 842, 156958. https://doi.org/10.1016/j.scitotenv.2022.156958
+- Cuong, T. T. et al. (2021). Renewable energy from biomass surplus resource: potential of power generation from rice straw in Vietnam. *Scientific Reports*, 11, 792. https://doi.org/10.1038/s41598-020-80678-3
+- Giglio, L., Schroeder, W., & Justice, C. O. (2016). The collection 6 MODIS active fire detection algorithm and fire products. *Remote Sensing of Environment*, 178, 31–41. https://doi.org/10.1016/j.rse.2016.02.054
+- Giglio, L., Schroeder, W., Hall, J. V., & Justice, C. O. (2021). MODIS Collection 6 and Collection 6.1 Active Fire Product User's Guide, version 1.0. University of Maryland / NASA.
+- IPCC (2019). 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories, Volume 4, Chapter 5: Cropland (section 5.5, Rice cultivation).
+- IPCC (2021). Climate Change 2021: The Physical Science Basis, WG1, Chapter 7, Table 7.15.
+- Lasko, K., Vadrevu, K. P., Tran, V. T., Ellicott, E., Nguyen, T. T. N., Bui, H. Q., & Justice, C. (2017). Satellites may underestimate rice residue and associated burning emissions in Vietnam. *Environmental Research Letters*, 12, 085006. https://doi.org/10.1088/1748-9326/aa751d
+- Lasko, K., & Vadrevu, K. (2018). Improved rice residue burning emissions estimates: Accounting for practice-specific emission factors in air pollution assessments of Vietnam. *Environmental Pollution*, 236, 795–806. https://doi.org/10.1016/j.envpol.2018.01.098
+- Lorente, A. et al. (2021). Methane retrieved from TROPOMI: improvement of the data product and validation of the first 2 years of measurements. *Atmospheric Measurement Techniques*, 14, 665–684. https://doi.org/10.5194/amt-14-665-2021
+- Nguyen-Van-Hung et al. (2019). An assessment of irrigated rice production energy efficiency and environmental footprint with in-field and off-field rice straw management practices. *Scientific Reports*, 9, 16887. https://doi.org/10.1038/s41598-019-53072-x
+- Prime Minister of Viet Nam (2023). Decision 1490/QĐ-TTg of 27 November 2023 approving the programme "Sustainable development of one million hectares of high-quality, low-emission rice associated with green growth in the Mekong Delta by 2030".
+- Schroeder, W., Oliva, P., Giglio, L., & Csiszar, I. A. (2014). The New VIIRS 375 m active fire detection data product. *Remote Sensing of Environment*, 143, 85–96. https://doi.org/10.1016/j.rse.2013.12.008
+- Tariq, A. et al. (2017). Mitigating CH₄ and N₂O emissions from intensive rice production systems in northern Vietnam: Efficiency of drainage patterns in combination with rice residue incorporation. *Agriculture, Ecosystems & Environment*, 249, 101–111. https://doi.org/10.1016/j.agee.2017.08.011
+- Viet Nam (2021). Third Biennial Update Report (BUR3) to the UNFCCC, submitted 16 April 2021 (inventory year 2016).
+- Vo, T. B. T. et al. (2020). Methane Emission Factors from Vietnamese Rice Production: Pooling Data of 36 Field Sites for Meta-Analysis. *Climate*, 8(6), 74. https://doi.org/10.3390/cli8060074 (correction: *Climate*, 8(10), 113, https://doi.org/10.3390/cli8100113)
+- Wójcik-Gront, E., Wnuk, A., & Gozdowski, D. (2025). Spatio-Temporal Patterns of Methane Emissions from 2019 Onwards: A Satellite-Based Comparison of High- and Low-Emission Regions. *Atmosphere*, 16(6), 670. https://doi.org/10.3390/atmos16060670

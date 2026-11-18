@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Bản đồ điểm cháy MODIS ở ĐBSH cho thấy rất ít điểm cháy trên đồng lúa. Kết luận nào đúng nhất?", "en": "The MODIS fire map of the Red River Delta shows very few fires on rice land. Which conclusion is most sound?" },
+  "options": [
+   { "vi": "Nông dân ĐBSH không đốt rơm", "en": "Red River farmers do not burn straw" },
+   { "vi": "MODIS bỏ sót phần lớn đám cháy nhỏ, cháy ngắn hoặc dưới mây; ít điểm cháy không có nghĩa là ít đốt", "en": "MODIS misses most small, short or cloud-covered fires; few detections do not mean little burning" },
+   { "vi": "Rơm ở ĐBSH không cháy được", "en": "Red River straw cannot burn" },
+   { "vi": "Vệ tinh không bay qua miền Bắc", "en": "The satellites do not pass over the north" }
+  ],
+  "answer": 1,
+  "why": { "vi": "So với ảnh ASTER 30 m, MODIS bỏ sót 86,2 % số đám cháy, chủ yếu là đám nhỏ (Giglio và cs., 2016). Tháng 1–3 ở ĐBSH còn rất nhiều mây. Số điểm cháy là chỉ số tương đối, không phải số đo lượng rơm bị đốt.", "en": "Against 30 m ASTER images, MODIS misses 86.2 % of fires, mostly small ones (Giglio et al., 2016), and the Red River Delta is very cloudy in January–March. Fire counts are a relative index, not a measure of how much straw burns." }
+ },
+ {
+  "q": { "vi": "Một ô 1 km ở ĐBSCL có điểm cháy MODIS 14 ngày mỗi năm. Đó nhiều khả năng là gì?", "en": "A 1 km cell in the Mekong Delta has MODIS fire detections on 14 days a year. What is it most likely?" },
+  "options": [
+   { "vi": "Ruộng lúa ba vụ đốt rơm mỗi vụ", "en": "A triple-cropped rice field burning straw each season" },
+   { "vi": "Một nguồn nhiệt cố định như nhà máy hay lò nung", "en": "A fixed heat source such as a factory or kiln" },
+   { "vi": "Rừng tràm cháy mỗi năm", "en": "A melaleuca forest that burns every year" },
+   { "vi": "Lỗi do mây", "en": "A cloud artefact" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Ruộng bị đốt một, hai lần mỗi vụ. Điểm nóng lặp lại ở cùng một chỗ hàng chục ngày mỗi năm là nguồn nhiệt cố định; sản phẩm MODIS chuẩn gắn nhãn 'nguồn nhiệt tĩnh' cho điểm xuất hiện từ 16 ngày trở lên trong năm. Phải loại chúng ra trước khi đếm đốt rơm.", "en": "A field burns once or twice a season. A hot spot recurring at the same place on many days a year is a fixed heat source; the standard MODIS product labels spots seen on 16 or more days of a year as 'static'. Remove them before counting straw fires." }
+ },
+ {
+  "q": { "vi": "Vì sao bản đồ NO₂ của Sentinel-5P không chỉ ra được vùng đốt rơm ở ĐBSCL?", "en": "Why does the Sentinel-5P NO₂ map not reveal the straw-burning areas of the Mekong Delta?" },
+  "options": [
+   { "vi": "NO₂ chủ yếu từ đốt nhiên liệu (xe, nhà máy điện, công nghiệp), nên đô thị nổi lên, còn đồng ruộng thì không", "en": "NO₂ comes mainly from burning fuel (traffic, power plants, industry), so cities stand out and fields do not" },
+   { "vi": "Đốt rơm không thải ra khí nào", "en": "Burning straw emits no gas" },
+   { "vi": "Sentinel-5P không đo NO₂", "en": "Sentinel-5P does not measure NO₂" },
+   { "vi": "ĐBSCL không có đô thị", "en": "The Mekong Delta has no cities" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Trung bình 2019–2025, NO₂ trên ĐBSH (64,8 µmol/m²) gấp hơn ba lần ĐBSCL (20,2), cao nhất quanh Hải Phòng, Hà Nội và sát TP Hồ Chí Minh. Đốt rơm ngắn và rải rác, nên chìm trong nền của nguồn nhiên liệu.", "en": "Averaged over 2019–2025, NO₂ over the Red River Delta (64.8 µmol/m²) is more than three times the Mekong (20.2), highest around Hai Phong, Ha Noi and next to Ho Chi Minh City. Straw fires are brief and scattered, and vanish against the fuel sources." }
+ },
+ {
+  "q": { "vi": "Theo hệ số mặc định IPCC 2019, chuyển một ruộng từ ngập liên tục sang tưới ướt khô xen kẽ, giữ nguyên mọi thứ khác, thì CH₄ một vụ thay đổi thế nào?", "en": "With the IPCC 2019 default factors, switching a field from continuous flooding to alternate wetting and drying, all else equal, changes seasonal CH₄ how?" },
+  "options": [
+   { "vi": "Giảm khoảng 45 %", "en": "Down by about 45 %" },
+   { "vi": "Giảm 100 %", "en": "Down by 100 %" },
+   { "vi": "Không đổi", "en": "No change" },
+   { "vi": "Tăng gấp đôi", "en": "Doubles" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Hệ số chế độ nước của 'rút nước nhiều lần' (gồm AWD) là 0,55, nên 124,4 kg CH₄/ha giảm còn 68,4 kg. Thí nghiệm 15 vụ ở ĐBSCL đo được mức giảm 51 % (Arai, 2022).", "en": "The water-regime factor for 'multiple drainage' (which includes AWD) is 0.55, so 124.4 kg CH₄/ha becomes 68.4 kg. A 15-season trial in the Mekong Delta measured a 51 % cut (Arai, 2022)." }
+ }
+]

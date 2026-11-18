@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Năng suất lúa Đông Xuân của một tỉnh tăng đều suốt 20 năm, EVI cực đại cũng tăng. Tương quan giữa hai chuỗi rất cao. Kết luận nào thận trọng nhất?", "en": "A province's winter–spring rice yield rose steadily for 20 years, and so did its peak EVI. The two series correlate strongly. What is the most careful conclusion?" },
+  "options": [
+   { "vi": "EVI dự báo năng suất rất tốt", "en": "EVI forecasts yield very well" },
+   { "vi": "Phần lớn tương quan có thể chỉ do cả hai cùng có xu thế; phải bỏ xu thế rồi mới đánh giá được khả năng dự báo năm tốt, năm xấu", "en": "Much of the correlation may come from both sharing a trend; remove the trends before judging whether EVI can tell good years from bad" },
+   { "vi": "Năng suất tăng là do EVI tăng", "en": "Yield rose because EVI rose" },
+   { "vi": "Không cần thống kê năng suất nữa", "en": "Yield statistics are no longer needed" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Hai chuỗi cùng đi lên theo thời gian luôn tương quan cao, kể cả khi chúng không liên quan gì đến nhau. Mô hình cảnh báo sớm cần biết năm nay cao hay thấp hơn xu thế, nên phải làm việc trên phần lệch khỏi xu thế (FAO 2017, mục 6.4.1).", "en": "Two series that both climb over time always correlate, even if unrelated. Early warning needs to know whether this year is above or below the trend, so models work on departures from the trend (FAO 2017, 6.4.1)." }
+ },
+ {
+  "q": { "vi": "Năng suất Đông Xuân của Bến Tre năm 2016 là 0,05 tấn/ha. Vì sao con số này thấp đến vậy?", "en": "Ben Tre's winter–spring yield in 2016 was 0.05 t/ha. Why so low?" },
+  "options": [
+   { "vi": "Lỗi nhập liệu", "en": "A data entry error" },
+   { "vi": "Năng suất được tính trên diện tích gieo trồng: lúa mất trắng vì hạn mặn vẫn nằm trong diện tích, nên năng suất gần bằng 0", "en": "Yield is per sown area: rice lost to drought and salinity stays in the area, so yield is close to zero" },
+   { "vi": "Bến Tre không trồng lúa năm 2016", "en": "Ben Tre grew no rice in 2016" },
+   { "vi": "Vệ tinh đo sai", "en": "The satellite measured wrong" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Theo Cục Thống kê, Bến Tre gieo khoảng 15 nghìn ha lúa Đông Xuân 2016 nhưng chỉ thu được khoảng 0,8 nghìn tấn: gần như mất trắng trong đợt hạn mặn 2015–2016 (Chương 10). Một vụ chết sớm có thể không bao giờ xanh lên, nên chỉ số thực vật lúc đó đo 'không có lúa' chứ không phải 'lúa kém'.", "en": "According to the National Statistics Office, Ben Tre sowed about 15 thousand ha of winter–spring rice in 2016 but harvested only about 0.8 thousand tonnes: an almost total loss in the 2015–16 drought and salinity (Chapter 10). A crop that dies early may never green up, so the index then measures 'no rice', not 'poor rice'." }
+ },
+ {
+  "q": { "vi": "Một mô hình năng suất có R² = 0,6 trên dữ liệu hiệu chỉnh, nhưng sai số dự báo bỏ-một-năm lại lớn hơn sai số khi chỉ đoán bằng trung bình. Nên hiểu thế nào?", "en": "A yield model has R² = 0.6 on its calibration data, but its leave-one-year-out error is larger than just guessing the mean. How should this be read?" },
+  "options": [
+   { "vi": "Mô hình tốt, vì R² cao", "en": "The model is good, because R² is high" },
+   { "vi": "Mô hình khớp dữ liệu cũ nhờ vài năm đặc biệt nhưng không dự báo được năm chưa thấy; chưa dùng để cảnh báo được", "en": "The model fits the past thanks to a few unusual years but cannot forecast an unseen year; not yet fit for early warning" },
+   { "vi": "Phải bỏ kiểm định chéo", "en": "Drop the cross-validation" },
+   { "vi": "Sai số bỏ-một-năm luôn lớn hơn, không có ý nghĩa", "en": "Leave-one-out error is always larger and means nothing" }
+  ],
+  "answer": 1,
+  "why": { "vi": "R² trên dữ liệu hiệu chỉnh luôn lạc quan, nhất là khi một hai năm cực đoan (mất mùa) kéo đường hồi quy. Kiểm định chéo bỏ-một-năm mô phỏng tình huống thật: dự báo một năm mô hình chưa từng thấy.", "en": "Calibration R² is always optimistic, especially when one or two extreme years (crop failures) pull the line. Leave-one-year-out validation mimics the real task: forecasting a year the model has never seen." }
+ },
+ {
+  "q": { "vi": "Hệ thống ASIS của FAO báo động cho một huyện khi nào?", "en": "When does FAO's ASIS raise an alert for a district?" },
+  "options": [
+   { "vi": "Khi giá gạo tăng", "en": "When rice prices rise" },
+   { "vi": "Khi một tỉ lệ lớn diện tích canh tác có chỉ số sức khỏe thực vật VHI dưới 35 trong mùa vụ", "en": "When a large share of the cropland has a vegetation health index VHI below 35 during the season" },
+   { "vi": "Khi có bão", "en": "When a typhoon arrives" },
+   { "vi": "Khi năng suất chính thức được công bố", "en": "When official yields are published" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Chỉ số ASI là phần trăm diện tích canh tác của đơn vị hành chính có VHI < 35, tích lũy qua mùa vụ (Rojas và cs., 2011). Chương 9 đã cho thấy VHI ở ĐBSH mùa xuân bị mây và việc cấy lúa chi phối, nên cảnh báo kiểu này phải đọc cùng lịch mùa vụ.", "en": "The ASI is the percentage of an administrative unit's cropland with VHI < 35, integrated over the season (Rojas et al., 2011). Chapter 9 showed that spring VHI in the Red River Delta is dominated by cloud and transplanting, so such alerts must be read with the crop calendar." }
+ }
+]

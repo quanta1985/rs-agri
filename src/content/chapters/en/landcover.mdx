@@ -1,0 +1,187 @@
+---
+title: "Land cover & agricultural land"
+n: 3
+summary: "Three free 10 m land cover maps of the whole world, all made from 2021 Sentinel images, give three different answers for cropland and built-up land in the two deltas. This chapter explains why: cropland is a land use rather than a land cover, each map defines it its own way, and orchards, villages and flooded paddies are where they disagree most."
+objectives:
+  - Tell land cover from land use, and state the cropland definitions used in statistics and in remote sensing.
+  - Compare ESA WorldCover, Dynamic World and Esri LULC by method, legend and published accuracy.
+  - Read an agreement map between products and explain why they disagree over orchards, villages and flooded paddies.
+  - Explain why two land cover maps must not be subtracted to measure change.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import LandcoverChart from '../../../islands/LandcoverChart.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/landcover.json';
+
+Counting rice, stratifying a sampling frame (Chapter 5), knowing how much farmland has gone under houses: all of it starts from a <Term id="land-cover">land cover</Term> map. Since 2021 anyone has three free 10 m maps of the whole world: **ESA WorldCover**, **Google Dynamic World** and **Esri / Impact Observatory LULC**. All three come from Sentinel images, for the same year, at the same resolution. Yet over the two deltas they disagree on the things that matter most for agriculture. This chapter follows chapter 2 of the FAO (2017) handbook: the concept of land cover, agriculture in legends, and the products available.
+
+<Stats items={[
+  { v: '1,409–2,160', u: 'thousand ha', l: 'cropland in the Mekong Delta in 2021 according to the three maps (WorldCover / Dynamic World / Esri)' },
+  { v: '245–537', u: 'thousand ha', l: 'built-up land in the Red River Delta in 2021 according to the three maps: more than twofold apart' },
+  { v: '32.4', u: '%', l: 'of the compared Mekong area that all three maps call cropland' },
+  { v: '82.1', u: '%', l: 'overall accuracy of WorldCover 2021 in Asia, according to ESA’s validation report' },
+]} caption="Areas computed by scripts/landcover_numbers.ts from the three 10 m maps, over the part of each region outline inside the map frame; accuracy from Tsendbazar et al. (2022)." />
+
+## 3.1 Land cover and land use
+
+Land cover is what is **seen** on the ground: grass, trees, water, roofs. <Term id="land-use">Land use</Term> is what people **do** there: grow rice, farm shrimp, live. The FAO handbook stresses that "cultivated land" is really a land use class: as cover, a rice field is dense herbaceous vegetation, and for a few weeks a year open water. Yet every land cover map has agricultural classes, because users need them. That is the root of many disagreements.
+
+To make two maps "speak the same language", FAO built <Term id="lccs">LCCS</Term> and then LCML (standard ISO 19144-2): each class is defined by independent criteria such as life form, cover, height and flooding, not just by a name. Agricultural statistics (the World Programme for the Census of Agriculture 2020) use these definitions:
+
+| Concept | Includes |
+|---|---|
+| Arable land | land under temporary crops during the year, including temporary fallow |
+| Cropland | arable land + land under permanent crops (fruit trees, coffee, rubber…) |
+| Agricultural land | cropland + permanent meadows and pastures |
+
+Remote sensing works with a narrower definition, from the JECAM network: <Term id="annual-cropland">annual cropland</Term> is land of at least 0.25 ha sown and harvested at least once within 12 months. Woody perennials are excluded. In the Mekong Delta, where fruit orchards and coconut cover whole districts, the difference is large. The table summarises how the three products define the classes, from the producers' documents and the comparison by Venter et al. (2022).
+
+| Case | WorldCover | Dynamic World | Esri |
+|---|---|---|---|
+| Fruit orchards, coconut | Tree cover | Trees ("plantations… citrus") | Definition: trees ("plantations"); in practice in Ben Tre: mostly built area or crops (section 3.4) |
+| Flooded rice paddies | Cropland | Crops or flooded vegetation | Definition: flooded vegetation ("rice paddies"); in practice in the Mekong: mostly crops |
+| Fallow fields | Grassland | Crops ("fallow plots") | Crops ("fallow plots") |
+| Greenhouses | Built-up | — | — |
+
+<Note kind="key">
+
+Before taking the "cropland" figure of any map, read its class definitions. Perennial orchards, flooded paddies and fallow land are classed differently in each product, and in the two deltas they cover hundreds of thousands of hectares.
+
+</Note>
+
+## 3.2 Three global 10 m maps
+
+<Tiles items={[
+  { t: 'ESA WorldCover', d: 'Sentinel-1 + Sentinel-2, editions 2020 and 2021, 11 LCCS-based classes. Overall accuracy of the 2021 edition: 76.7 % globally, 82.1 % in Asia; cropland in Asia: user’s accuracy 80.6 %, producer’s 82.7 %.' },
+  { t: 'Google Dynamic World', d: 'Sentinel-2, one label per image (near real time), 9 classes; here the most frequent label of the year. 73.8 % agreement with expert labels; crops: 88.9 % user’s, 60.0 % producer’s accuracy.' },
+  { t: 'Esri / Impact Observatory', d: 'Sentinel-2, deep learning, one map a year since 2017, 9 classes. The producer reports an average accuracy above 75 %.' },
+]} />
+
+The three maps are brought to a shared seven-class legend (<Term id="legend-harmonisation">legend harmonisation</Term>): WorldCover's mangroves go to trees; grass, shrub and "rangeland" are merged. The map below asks one question only: is this cell called cropland, and by which maps?
+
+<Figure
+  title="Figure 3.1 — Which products call it cropland, 2021"
+  try="In the Mekong, where is the green 'All three'? Look for patches of 'WorldCover + Esri' and 'Esri only' along the large rivers and the coast: what kind of land is it? Switch to the Red River Delta: which colour surrounds the villages?"
+  source="ESA WorldCover 10 m 2021 v200 (class 40), Dynamic World V1 (most frequent 2021 label, class 4 crops), Esri / Impact Observatory 10 m Annual LULC 2021 (class 5 crops); code = WorldCover ×1 + Dynamic World ×2 + Esri ×4 at 10 m, then the most frequent code in each ~250 m cell (small patches vanish); clipped to the region outline (geoBoundaries). All three CC BY 4.0."
+>
+  <DeltaMap client:visible lang="en" label="Cropland agreement between the three maps" choices={[
+    { key: 'agree', label: { vi: 'Đồng thuận đất trồng trọt', en: 'Cropland agreement' }, ids: { mekong: 'lc-agree-mekong', red: 'lc-agree-red' } },
+    { key: 'frac', label: { vi: 'Tỉ lệ đất trồng trọt', en: 'Cropland share' }, ids: { mekong: 'lc-cropfrac-mekong', red: 'lc-cropfrac-red' } },
+  ]} />
+</Figure>
+
+In the Mekong Delta, all three maps call 32.4 % of the compared area cropland. Of the 2,414 thousand ha that at least one map calls cropland, all three agree on only 52.8 %. The most common disagreement is 'WorldCover + Esri' (11.1 % of the area), then 'Esri only' (8.9 %) and 'WorldCover only' (5.6 %); Dynamic World almost never calls a cell cropland on its own (0.4 %). In the Red River Delta all three agree on 28.3 % of the area, that is 58.2 % of the part at least one map calls cropland. Over all seven classes, each pair of maps agrees on 58.6–70.0 % of the Mekong and 66.7–84.7 % of the Red River Delta; the most similar pair in both is Dynamic World and Esri.
+
+<Note kind="tip">
+
+High agreement does not mean correct: two maps can be wrong in the same place. But low agreement means at least one map is wrong. 'All three' areas are safe places for training samples; areas of disagreement are where to go and check (<Term id="map-agreement">map agreement</Term>).
+
+</Note>
+
+## 3.3 How much cropland?
+
+<Figure
+  title="Figure 3.2 — Area of each class in the three maps, 2021"
+  try="In the Mekong, which class differs most between the maps? Add 'Crops' and 'Flooded vegetation': does the gap between Esri and WorldCover close? Switch to the Red River Delta and compare 'Built-up'."
+  source="Area of the 10 m cells inside the statistical region outline (geoBoundaries), the part inside the map frame, in the shared seven-class legend; cells with no data in any map are left out of the agreement comparison. Computed in Earth Engine (scripts/data/export_landcover.py)."
+>
+  <LandcoverChart client:visible lang="en" view="classes" />
+</Figure>
+
+In the Mekong Delta, cropland is 1,949 thousand ha on WorldCover, 1,409 on Dynamic World and 2,160 on Esri. Trees differ even more: 1,081, 523 and only 150 thousand ha. Built-up goes the other way: 175 thousand ha on WorldCover, 772 on Dynamic World and 800 on Esri, more than four times as much. Dynamic World puts 297 thousand ha into flooded vegetation, probably mostly flooded paddies; adding them brings its cropland to 1,706 thousand ha. Esri, although its definition places rice paddies in flooded vegetation, has only 17 thousand ha of that class in the Mekong: paddies sit in its crops class. In the Red River Delta, cropland is closer (658, 573 and 677 thousand ha), but built-up still differs more than twofold (245, 511 and 537 thousand ha), and so do trees (512, 280 and 219 thousand ha).
+
+The comparison covers the part of each region outline inside the map frame: 3,926 thousand ha in the Mekong, 1,659 thousand ha in the Red River Delta (the frame leaves out most of Quang Ninh and the islands, Chapter 1).
+
+<Predict client:visible lang="en"
+  title="The official figure"
+  q="The 2023 Statistical Yearbook gives 2,569.1 thousand ha of agricultural production land in the Mekong Delta. Which map is closest, and why does none match?"
+  options={['WorldCover, because it is the most accurate', 'None matches: agricultural production land includes perennial crops, while the "cropland" class of all three maps leaves orchards out', 'Esri, because it is the newest', 'All three match']} answer={1}
+  why="Agricultural production land in the land statistics covers annual and perennial crops, by registered parcel. Land cover maps put orchards in trees, and they see the surface, not parcel boundaries. Comparing the two figures only makes sense once the definitions are aligned." />
+
+## 3.4 Where and why they disagree
+
+<Figure
+  title="Figure 3.3 — The three maps at 10 m: Giong Trom – Ba Tri (Ben Tre) and Giao Thuy – Hai Hau (Nam Dinh)"
+  try="In Ben Tre, turn on Compare: WorldCover on the left, Esri on the right. What does each map call the same orchard hamlet? In Nam Dinh, which class do the coastal ponds and the villages along the dyke fall into?"
+  source="The same three 2021 products in the shared seven-class legend; 10.24 × 10.24 km frames, 10 m, Web Mercator grid. Time steps = products (WorldCover, Dynamic World, Esri)."
+>
+  <DeltaMap client:visible lang="en" label="Three land cover maps at two 10 m sites" compare time={2} compareTime={0} boundaries={false} choices={[
+    { key: 'lc3', label: { vi: 'Lớp phủ 2021', en: 'Land cover 2021' }, ids: { bentre: 'lc3-bentre', namdinh: 'lc3-namdinh' } },
+  ]} />
+</Figure>
+
+The Ben Tre frame is orchard country: coconut and fruit trees mixed with houses and ditches. WorldCover calls 75.3 % of it trees and only 3.3 % built-up; Dynamic World 53.1 % trees and 29.3 % built-up; Esri 25.4 % trees, 43.3 % built-up and 28.7 % crops. The same land, three answers. The Nam Dinh frame holds rice fields, dyke villages, ponds and sea: the maps agree better on water (38.7–47.6 % including the sea), but cropland still ranges from 22.4 % (Dynamic World) to 32.9 % (WorldCover), and built-up from 15.2 % to 27.4 %. Red River villages are blocks of houses, gardens and ponds: whether a map lumps the whole block into 'built-up' or splits it depends on the model.
+
+<Predict client:visible lang="en"
+  title="One place, three answers"
+  q="In the Ben Tre frame, trees cover 75 / 53 / 25 % according to the three maps. What best explains the gap?"
+  options={['The images of the three maps were taken on different days', 'Orchard hamlets mix houses, fruit trees and ditches narrower than 10 m: each model resolves the mixture its own way', 'One of the maps has a technical fault', 'Ben Tre changed very fast during 2021']} answer={1}
+  why="Houses sit under the orchard canopy, ditches run between the raised beds. At 10 m many cells are mixed. The results show WorldCover leaning towards canopy, Esri towards settlement, and Dynamic World in between. None is entirely 'wrong': they answer slightly different questions." />
+
+## 3.5 Do not subtract two maps to measure change
+
+Esri provides a map every year since 2017, so it is tempting to subtract two years. The FAO handbook (section 2.4.3) warns that with accuracies of 70–85 %, the real yearly change is much smaller than each map's error rate, so the difference of two maps is mostly error. The Esri cropland series of the two deltas shows it.
+
+<Figure
+  title="Figure 3.4 — Cropland, trees, built-up and flooded vegetation on the Esri map, each year 2017–2025"
+  try="How much does Red River cropland fall from 2017 to 2024? Which years jump oddly? In the Mekong, when cropland falls, which class rises to match?"
+  source="Esri / Impact Observatory 10 m Annual LULC (sat-io on Earth Engine), one map per year; areas at 30 m over the whole region outline (including the part outside the map frame, so the 2021 values differ slightly from Figure 3.2); shared legend (crops = class 5, flooded vegetation = class 4)."
+>
+  <LandcoverChart client:visible lang="en" view="series" />
+</Figure>
+
+According to Esri, Mekong cropland fell from 2,289 thousand ha in 2017 to 2,024 thousand ha in 2024 (−11.6 %), while built-up rose from 612 to 900 thousand ha. In the Red River Delta, cropland fell from 779 to 656 thousand ha (−15.7 %), built-up from 472 to 611 thousand ha. Part of this is real: cities, industrial zones and roads take farmland in both deltas. But look at the steps: the Mekong gains 89 thousand ha in 2018, loses 135 thousand ha in 2019 and 116 thousand ha in 2020, then gains 81 thousand ha in 2025. A whole delta's cropland does not swing by a hundred thousand hectares a year. And 900 thousand ha of built-up land is nearly a quarter of the Mekong Delta, where WorldCover sees 175 thousand ha in 2021.
+
+<Predict client:visible lang="en"
+  title="135 thousand ha lost in a year?"
+  q="The Esri map shows Mekong cropland falling by 135 thousand ha from 2018 to 2019, then rising by 81 thousand ha from 2024 to 2025. How should this be read?"
+  options={['The Mekong lost 135 thousand ha of fields in a year and then reclaimed them', 'Mostly differences between model runs and image conditions from year to year; real change must be measured with change detection and a check sample', 'There was a big flood in 2019', 'Esri is only right for 2025']} answer={1}
+  why="The FAO handbook (section 2.4.3) notes that even the fastest cropland expansion in the world (Brazil, Argentina) stayed below 4 % a year, while global maps are 70–85 % accurate. Each yearly map's error is far larger than the real change, which is why the handbook advises decoupling mapping from change detection." />
+
+<Note kind="warn">
+
+A change on a yearly map can be real change, a new model version, or a cloudier year. To measure rice land lost, detect change directly in the image time series (as Chapter 4 counts rice seasons from radar) and estimate the area with a check sample (Chapter 5), rather than subtracting two maps.
+
+</Note>
+
+## 3.6 Choosing a map for agriculture
+
+<Steps items={[
+  { t: 'Read the class definitions', d: 'Does cropland include orchards, flooded paddies, fallow land? Does it match the statistical concept to be measured?' },
+  { t: 'Look on the ground', d: 'Open the three maps at a few familiar places (as in Figure 3.3) and compare with very high resolution images. Where do they disagree?' },
+  { t: 'Use for strata, not for numbers', d: 'Global maps are good for stratifying a sampling frame and as auxiliary variables (Chapter 5), not as a replacement for the statistic.' },
+  { t: 'Crop-specific maps', d: 'Rice has a very clear temporal signature: a rice map from radar time series (Chapter 4) beats any generic "cropland" class.' },
+]} />
+
+The FAO handbook (section 2.5) presents efforts dedicated to agriculture: the USGS 30 m global cropland map GFSAD30, the Sen2-Agri system producing in-season 10 m cropland masks and crop type maps, and radar rice monitoring programmes such as Asia-RiCE. For rice, the handbook notes, radar mapping has matured: rice has such a specific temporal signature that it is usually treated not as a land cover problem but as crop monitoring.
+
+<Note kind="key">
+
+Three maps from the same images and the same year still give three different numbers, because they define classes differently and resolve mixed landscapes differently. In the two deltas, orchards, villages and flooded paddies are the hard cases. Use global maps as auxiliary variables and as the big picture; the numbers themselves have to be estimated.
+
+</Note>
+
+## 3.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Brown, C. F. et al. (2022). Dynamic World, Near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251. https://doi.org/10.1038/s41597-022-01307-4
+- Di Gregorio, A. (2005). *Land Cover Classification System: Classification concepts and user manual, Software version 2*. FAO Environment and Natural Resources Series 8, Rome.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chapter 2: Land cover mapping and monitoring.
+- General Statistics Office (2024). *Statistical Yearbook of Viet Nam 2023*, Table 3: Land use by province (as of 31 Dec 2023). Statistical Publishing House.
+- ISO (2023). ISO 19144-2:2023 Geographic information — Classification systems — Part 2: Land Cover Meta Language (LCML).
+- Karra, K., Kontgis, C., Statman-Weil, Z., Mazzariello, J. C., Mathis, M., & Brumby, S. P. (2021). Global land use / land cover with Sentinel 2 and deep learning. *2021 IEEE International Geoscience and Remote Sensing Symposium (IGARSS)*, 4704–4707. https://doi.org/10.1109/IGARSS47720.2021.9553499
+- Tsendbazar, N.-E., Xu, P., Herold, M. et al. (2022). *ESA WorldCover 10 m 2021 v200: Product Validation Report v2.0*. ESA WorldCover consortium.
+- Venter, Z. S., Barton, D. N., Chakraborty, T., Simensen, T., & Singh, G. (2022). Global 10 m Land Use Land Cover Datasets: A Comparison of Dynamic World, World Cover and Esri Land Cover. *Remote Sensing*, 14(16), 4101. https://doi.org/10.3390/rs14164101
+- Zanaga, D. et al. (2022). ESA WorldCover 10 m 2021 v200. Zenodo. https://doi.org/10.5281/zenodo.7254221

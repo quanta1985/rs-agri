@@ -1,0 +1,183 @@
+---
+title: "Đa rủi ro & phân vùng thích ứng"
+n: 14
+summary: "Lũ, hạn, cây trồng suy giảm mùa khô và đất thấp không đến riêng lẻ. Chương này chồng các lớp hiểm họa đã làm ở chương 7–13 lên đất trồng trọt của hai châu thổ thành một chỉ số tổng hợp, để bạn tự chỉnh trọng số và thấy thứ hạng các tỉnh đổi theo. Bài học chính: bản đồ rủi ro phản ánh lựa chọn của người làm nó (chỉ số nào, thang điểm nào, trọng số nào) và chỉ thấy những hiểm họa đo được; với ĐBSCL, thiếu nhất là độ mặn."
+objectives:
+  - Phân biệt hiểm họa, mức phơi nhiễm và tính dễ bị tổn thương, và nêu vệ tinh đo được phần nào.
+  - Xây một chỉ số hiểm họa tổng hợp bằng chồng lớp có trọng số, và giải thích cách đưa từng chỉ số về thang 0–100.
+  - Đánh giá độ nhạy của thứ hạng các tỉnh với trọng số, và nhận ra chỉ số gần như không đổi trong không gian.
+  - Liên hệ bản đồ hiểm họa trội với định hướng tiểu vùng sinh thái của Nghị quyết 120/NQ-CP, và nêu những gì bản đồ còn thiếu.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import M from '../../../components/M.astro';
+import Depth from '../../../components/Depth.astro';
+import RiskLab from '../../../islands/RiskLab.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/risk.json';
+
+Mỗi chương của Phần C nhìn một hiểm họa: mưa và nhiệt (Chương 7), lũ (Chương 8), hạn (Chương 9), mặn (Chương 10), đất thấp và sụt lún (Chương 11), bờ biển (Chương 12). Người làm quy hoạch thì phải nhìn tất cả cùng lúc: tỉnh nào chịu nhiều hiểm họa nhất, và hiểm họa nào nặng nhất ở đâu? Cách làm phổ biến là chồng các lớp lên nhau với một bộ trọng số. Cách này dễ, nhưng con số cuối cùng phụ thuộc vào những lựa chọn không nằm trong dữ liệu. Chương này làm một bản đồ như vậy rồi tháo nó ra để thấy các lựa chọn đó.
+
+<Stats items={[
+  { v: '1 940', u: 'nghìn ha', l: 'đất trồng trọt ĐBSCL được chấm điểm (ô ~250 m có ít nhất 50 % đất trồng trọt WorldCover 2021)' },
+  { v: '35,2', u: '%', l: 'diện tích đó có chỉ số tổng hợp từ 50 trở lên khi bốn hiểm họa có trọng số bằng nhau' },
+  { v: '0–49,5', u: '%', l: 'tỉ lệ đất trồng trọt Bến Tre ở mức cao, tùy trọng số đặt cho lũ hay cho đất thấp' },
+  { v: '0', u: 'lớp', l: 'bản đồ độ mặn đo từ vệ tinh dùng được: hiểm họa lớn nhất của vùng ven biển ĐBSCL không có trong chỉ số' },
+]} caption="Tính bằng scripts/risk_numbers.ts trên các lớp risk-* (scripts/data/export_risk.py)." />
+
+## 14.1 Hiểm họa, phơi nhiễm, tính dễ bị tổn thương
+
+Sách FAO (2017, mục 6.2) viết gọn: một đợt hạn, tự nó, chưa gây ra khẩn cấp; nó thành thảm họa hay không tùy vào tác động lên cộng đồng và môi trường, tức tùy vào tính dễ bị tổn thương của con người trước cú sốc đó. Mục 6.3 thêm rằng rủi ro thiên tai là tương tác giữa hiểm họa và tính dễ bị tổn thương, và cả hai đều thay đổi theo thời gian. Khung phổ biến hiện nay (IPCC, 2014; UNDRR, 2016) tách ba thành phần:
+
+<Steps items={[
+  { t: 'Hiểm họa', d: 'Hiện tượng có thể gây hại: lũ, hạn, mặn, nước dâng. Viễn thám đo khá tốt phần này (mặt nước, mưa, chỉ số thực vật, độ cao).' },
+  { t: 'Phơi nhiễm', d: 'Cái gì nằm trong vùng hiểm họa: ruộng lúa, vườn cây, nhà, người. Bản đồ lớp phủ (Chương 3), bản đồ lúa (Chương 4) và dân số (Chương 1) trả lời phần này.' },
+  { t: 'Tính dễ bị tổn thương', d: 'Bị ảnh hưởng nặng hay nhẹ khi gặp hiểm họa: có đê bao không, có cống ngăn mặn không, có vốn chuyển đổi không. Vệ tinh gần như không thấy phần này.' },
+]} />
+
+<Term id="hazard">Hiểm họa</Term>, <Term id="exposure">phơi nhiễm</Term> và <Term id="vulnerability">tính dễ bị tổn thương</Term> gộp lại thành <Term id="disaster-risk">rủi ro</Term>. Chương này chỉ làm phần đầu và một phần của phần hai: chấm điểm hiểm họa **trên đất trồng trọt**. Vì vậy kết quả là một **chỉ số hiểm họa trên đất nông nghiệp**, chưa phải bản đồ rủi ro theo nghĩa đầy đủ. Gọi đúng tên là bước đầu tiên để không đọc nó quá mức.
+
+<Note kind="key">
+
+Một bản đồ ghi "rủi ro" mà chỉ dựng từ dữ liệu vệ tinh hầu như luôn là bản đồ hiểm họa, có khi có thêm phơi nhiễm. Hai tỉnh cùng màu đỏ có thể có rủi ro rất khác nhau nếu một tỉnh có đê bao, cống và nguồn nước ngọt dự phòng còn tỉnh kia không có.
+
+</Note>
+
+## 14.2 Bốn chỉ số từ các chương trước
+
+Mỗi chỉ số được đưa về **điểm 0–100** theo một quy tắc cố định, chỉ tính trên các ô ~250 m có ít nhất 50 % là đất trồng trọt theo WorldCover 2021 (cùng mặt nạ với bản đồ lúa, Chương 4). Quy tắc đưa về thang điểm (<Term id="normalisation">chuẩn hóa</Term>) là lựa chọn của người làm bản đồ; bảng dưới ghi rõ từng lựa chọn.
+
+| Chỉ số | Lấy từ | Điểm 0–100 | Có ở |
+|---|---|---|---|
+| Ngập lũ | Chương 8: tỉ lệ mặt nước Sentinel-1 theo tháng | ĐBSCL: tỉ lệ mặt nước lớn nhất trong tháng 7–12/2018 (một năm lũ lớn). ĐBSH: mặt nước mới sau bão Yagi, 12/9 trừ 31/8/2024 | cả hai |
+| Thiếu mưa mùa khô | Chương 9: SPI-3 tháng 2–4 (CHIRPS, Funk và cs., 2015; ô 5 km) | trung bình SPI-3 của 2016, 2020, 2024: 0 điểm khi ≥ 0, 100 điểm khi ≤ −2 | ĐBSCL |
+| Cây trồng suy giảm mùa khô | Chương 10: dị thường EVI tháng 2–4 | tỉ lệ trong ba năm 2016, 2020, 2024 có dị thường ≤ −0,05 (0, 33, 67 hay 100) | ĐBSCL |
+| Đất thấp | Chương 11: DeltaDTM | 100 điểm khi ≤ 1 m, 0 điểm khi ≥ 3 m trên mực EGM2008, tuyến tính ở giữa | cả hai |
+
+ĐBSH chỉ có hai chỉ số. Ba mùa khô 2016, 2020, 2024 ở miền Bắc lại ẩm hơn bình thường (SPI-3 tháng 2–4 trung bình toàn vùng từ +0,4 đến +1,4, Chương 9), nên chỉ số thiếu mưa bằng 0 ở mọi ô. EVI mùa xuân ở ĐBSH thì bị mây che gần hết (Chương 9).
+
+Trên 1 940 nghìn ha đất trồng trọt ĐBSCL, bốn chỉ số trông rất khác nhau:
+
+- **Ngập lũ**: 26,9 % diện tích từ 50 điểm trở lên, 48,1 % bằng 0. Rất tập trung, ở vùng ngập sâu phía trên.
+- **Cây trồng suy giảm**: 33,8 % diện tích suy giảm ít nhất hai trong ba mùa khô; 35,2 % chưa bao giờ.
+- **Đất thấp**: 68,4 % diện tích từ 50 điểm trở lên, tức thấp hơn 2 m theo DeltaDTM.
+- **Thiếu mưa**: 99,5 % diện tích từ 50 điểm trở lên, nhưng điểm chỉ dao động trong khoảng 52–72 (2 % đến 98 % các ô). Cả vùng cùng khô như nhau vào ba năm đó.
+
+<Predict client:visible lang="vi"
+  title="Chỉ số không phân biệt được"
+  q="Chỉ số thiếu mưa ở ĐBSCL gần như bằng nhau khắp vùng (khoảng 52–72 điểm). Nếu tăng trọng số của nó, điều gì xảy ra với thứ hạng các tỉnh?"
+  options={['Thứ hạng đảo lộn hoàn toàn', 'Mọi ô bị kéo về gần cùng một giá trị: nhiều ô vượt ngưỡng 50 chỉ vì thế, các khác biệt thật bị pha loãng, mà không có thông tin mới nào về nơi nào hơn nơi nào', 'Tỉnh khô nhất lên đầu', 'Chỉ số tổng hợp không đổi']} answer={1}
+  why="Một chỉ số gần như hằng số không mang thông tin về nơi nào hơn nơi nào. Đặt trọng số của nó lên 3, chỉ số trung bình tăng từ 45,6 lên 50,7 và diện tích từ 50 điểm trở lên tăng từ 35,2 % lên 48,3 %, chỉ vì nhiều ô được đẩy qua ngưỡng; Cà Mau nhảy từ hạng 9 lên hạng 4. Ba tỉnh đầu vẫn là Hậu Giang, Kiên Giang, Long An. Bỏ nó đi (trọng số 0), diện tích ở mức cao giảm xuống 29,8 % và ba tỉnh đầu vẫn vậy. Ở ô 5 km, mưa không đủ chi tiết để xếp hạng trong một châu thổ." />
+
+## 14.3 Chồng lớp có trọng số
+
+Cách đơn giản nhất để gộp nhiều chỉ số là lấy trung bình có trọng số, một dạng <Term id="mcda">phân tích đa tiêu chí</Term> dùng rất nhiều trong GIS (Malczewski, 2006):
+
+<Formula label="Chỉ số hiểm họa tổng hợp của một ô" tex="R = \frac{\sum_k w_k\, s_k}{\sum_k w_k}, \qquad 0 \le s_k \le 100" where="
+s_k :: điểm của chỉ số k trong ô (0–100)
+w_k :: trọng số của chỉ số k; tổng chỉ lấy trên các chỉ số có dữ liệu ở ô đó
+R :: chỉ số tổng hợp, cùng thang 0–100
+" />
+
+Ở mỗi ô, hiểm họa nào có <M tex="w_k s_k" /> lớn nhất được gọi là **hiểm họa trội** của ô đó. Một tỉnh được tóm tắt bằng ba con số: chỉ số trung bình (theo diện tích), tỉ lệ diện tích có R ≥ 50, và hiểm họa trội trên nhiều diện tích nhất.
+
+<Figure
+  title="Hình 14.1 — Chỉ số hiểm họa tổng hợp trên đất trồng trọt: tự chỉnh trọng số"
+  try="Để trọng số bằng nhau rồi xem bảng tỉnh. Kéo 'Ngập lũ' lên 3: Long An và Đồng Tháp leo lên đầu, Bến Tre rơi về 0 %. Trả lại 1 rồi kéo 'Đất thấp' lên 3: Hậu Giang, Cà Mau, Bạc Liêu dẫn đầu. Đặt 'Thiếu mưa' bằng 0: bản đồ đổi bao nhiêu? Chuyển sang ĐBSH: vì sao gần như không có gì vượt 50?"
+  source="Điểm 0–100 trên các ô ~250 m có ≥ 50 % đất trồng trọt WorldCover 2021: ngập lũ từ Sentinel-1 (ĐBSCL: tỉ lệ mặt nước tháng lớn nhất 7–12/2018; ĐBSH: mặt nước mới 31/8 → 12/9/2024), thiếu mưa từ SPI-3 tháng 2–4 CHIRPS (2016, 2020, 2024; ô 5 km), cây trồng suy giảm từ dị thường EVI MODIS tháng 2–4 (≤ −0,05), đất thấp từ DeltaDTM (Pronk và cs., 2024; CC BY 4.0); tỉnh theo ranh trước 2025 (geoBoundaries). Trọng số do người dùng đặt; scripts/data/export_risk.py, scripts/risk_numbers.ts."
+>
+  <RiskLab client:visible lang="vi" label="Bản đồ chỉ số hiểm họa tổng hợp với trọng số tự chỉnh" />
+</Figure>
+
+Với bốn trọng số bằng nhau, chỉ số trung bình của đất trồng trọt ĐBSCL là 45,6 và 35,2 % diện tích từ 50 trở lên. Đứng đầu là Hậu Giang (52,6 % diện tích ở mức cao), Long An (48,6 %) và Kiên Giang (43,9 %). Cuối bảng là Trà Vinh (6,4 %), Vĩnh Long (15,1 %) và Tiền Giang (19,4 %). Hiểm họa trội trên nhiều diện tích nhất là đất thấp (39,3 % diện tích), rồi thiếu mưa (26,0 %), cây trồng suy giảm (17,7 %) và ngập lũ (17,0 %).
+
+## 14.4 Trọng số quyết định kết quả
+
+Không có dữ liệu nào nói lũ "nặng" gấp mấy lần đất thấp. Trọng số là một phán đoán: của chuyên gia, của người dân được hỏi ý kiến, hay của chính sách. Thử ba bộ trọng số khác nhau thì thấy ngay hệ quả:
+
+| Trọng số (lũ / mưa / cây trồng / đất thấp) | Diện tích R ≥ 50 | Ba tỉnh đầu | Bến Tre | Trà Vinh |
+|---|---|---|---|---|
+| 1 / 1 / 1 / 1 | 35,2 % | Hậu Giang, Long An, Kiên Giang | 23,2 % | 6,4 % |
+| 3 / 1 / 1 / 1 | 28,5 % | Long An, Đồng Tháp, Kiên Giang | 0,0 % | 0,4 % |
+| 1 / 1 / 1 / 3 | 49,6 % | Hậu Giang, Cà Mau, Bạc Liêu | 49,5 % | 32,8 % |
+
+Khi lũ được coi trọng, vùng ngập sâu phía trên (Long An, Đồng Tháp) dẫn đầu. Khi đất thấp được coi trọng, bán đảo Cà Mau và vùng trũng giữa sông Hậu và vịnh Thái Lan lên đầu, còn An Giang tụt xuống cuối bảng (21,7 %). Cùng dữ liệu, ba câu trả lời khác nhau cho câu hỏi "tỉnh nào rủi ro nhất".
+
+<Note kind="warn">
+
+Trước khi công bố một bản đồ đa tiêu chí, hãy thử nhiều bộ trọng số (<Term id="sensitivity-analysis">phân tích độ nhạy</Term>) và báo cáo những tỉnh luôn đứng đầu dù trọng số thế nào. Những kết luận chỉ đúng với một bộ trọng số thì nên nói rõ là như vậy (Saisana và cs., 2005; OECD/JRC, 2008).
+
+</Note>
+
+<Predict client:visible lang="vi"
+  title="Đổi thang điểm"
+  q="Thay vì 100 điểm ở ≤ 1 m và 0 điểm ở ≥ 3 m, ta chấm đất thấp theo thứ hạng: ô thấp nhất của vùng 100 điểm, ô cao nhất 0 điểm (chuẩn hóa min–max). Điều gì thay đổi?"
+  options={['Không có gì thay đổi', 'Điểm phụ thuộc vào ô cực trị của vùng, nên cùng một ô có điểm khác nhau ở ĐBSH và ĐBSCL; hai vùng không còn so sánh được với nhau', 'Bản đồ chính xác hơn', 'Chỉ đổi màu']} answer={1}
+  why="Chuẩn hóa min–max làm điểm phụ thuộc vào ô cao nhất và thấp nhất trong vùng đang xét. Một ruộng ở độ cao 1,5 m sẽ có điểm khác nhau tùy nó nằm ở châu thổ nào, và chỉ một ô lỗi cũng đủ kéo lệch cả thang. Thang cố định theo đơn vị vật lý (mét, SPI) giữ cho điểm so sánh được giữa các vùng và các năm." />
+
+## 14.5 Điều bản đồ không thấy
+
+Phần quan trọng nhất của một bản đồ rủi ro là danh sách những gì không có trong đó.
+
+<Steps items={[
+  { t: 'Độ mặn', d: 'Không có sản phẩm vệ tinh nào đo độ mặn nước sông hay nước ruộng (Chương 10). Chỉ số cây trồng suy giảm chỉ thấy hậu quả, và Chương 10 đã cho thấy nó mạnh ở trong đất liền hơn ven biển. Vì vậy Bến Tre, tỉnh bị mặn nặng nhất năm 2016, và Trà Vinh, một tỉnh ven biển khác, lại nằm ở nửa dưới của bảng khi trọng số bằng nhau.' },
+  { t: 'Một năm lũ, một cơn bão', d: 'Ngập lũ ở ĐBSCL lấy từ năm 2018. Ở ĐBSH chỉ có một sự kiện là bão Yagi 2024, và radar bỏ sót lúa đang trổ bị ngập (Chương 8): chỉ 1,7 % đất trồng trọt ĐBSH có điểm lũ từ 50 trở lên.' },
+  { t: 'Độ cao và mốc', d: 'DeltaDTM tính trên mặt EGM2008, khác mốc Hòn Dấu; Minderhoud và cs. (2019) cho thấy ĐBSCL thấp hơn nhiều so với các DEM toàn cầu (Chương 11). Ngưỡng 1 m và 3 m vì vậy cũng là ước lệ.' },
+  { t: 'Sụt lún, xói lở', d: 'Tốc độ sụt lún (Chương 11) và xói lở bờ biển (Chương 12) chưa thành lớp phủ kín cả vùng nên chưa đưa vào.' },
+  { t: 'Tính dễ bị tổn thương', d: 'Đê bao ba vụ, cống ngăn mặn, hồ trữ ngọt, bảo hiểm, thu nhập: tất cả quyết định một hiểm họa có thành thiệt hại hay không, và đều nằm ngoài dữ liệu vệ tinh.' },
+]} />
+
+<Predict client:visible lang="vi"
+  title="Bến Tre ở nửa dưới bảng"
+  q="Với trọng số bằng nhau, Bến Tre chỉ có 23,2 % đất trồng trọt ở mức cao, Trà Vinh 6,4 %, thấp hơn hầu hết các tỉnh. Kết luận nào đúng?"
+  options={['Hai tỉnh này ít rủi ro', 'Bản đồ thiếu chỉ số độ mặn, là hiểm họa chính của hai tỉnh này; cần bổ sung số liệu trạm đo mặn trước khi kết luận', 'Dữ liệu vệ tinh sai', 'Nên giảm trọng số lũ']} answer={1}
+  why="Cuối tháng 3/2016, ranh mặn 4 g/L vào sâu 78 km trên sông Hàm Luông và 81 km trên sông Cổ Chiên, hai nhánh chảy qua Bến Tre và Trà Vinh (Chương 10). Một chỉ số tổng hợp chỉ có thể xếp hạng theo những hiểm họa nằm trong nó. Ở đây, hiểm họa đặc trưng của vùng ven biển vắng mặt, nên thứ hạng của các tỉnh ven biển là sai một cách có hệ thống." />
+
+## 14.6 Phân vùng thích ứng và Nghị quyết 120
+
+<Term id="resolution-120">Nghị quyết 120/NQ-CP</Term> ngày 17/11/2017 về phát triển bền vững ĐBSCL thích ứng với biến đổi khí hậu (Chương 10) yêu cầu "tôn trọng quy luật tự nhiên… tránh can thiệp thô bạo vào tự nhiên" và chuyển từ "sống chung với lũ" sang "chủ động sống chung với lũ, ngập, nước lợ, nước mặn". Nghị quyết yêu cầu hình thành các <Term id="ecological-subregion">tiểu vùng sinh thái</Term> "(vùng đồng bằng ngập lũ, vùng sinh thái nước ngọt, vùng sinh thái nước lợ, nước mặn,...)" làm định hướng phát triển; xây dựng cơ cấu nông nghiệp theo ba trọng tâm "thủy sản - cây ăn quả - lúa" gắn với các tiểu vùng đó; "dành không gian thoát lũ"; coi nước lợ, nước mặn "cũng là nguồn tài nguyên thiên nhiên"; và giao Bộ Nông nghiệp "giảm diện tích trồng lúa và các cây trồng sử dụng nhiều nước ngọt nhưng giá trị thương mại thấp".
+
+Bản đồ hiểm họa trội cho thấy một phần logic của cách phân vùng đó, nhưng chỉ khi bỏ chỉ số thiếu mưa. Với trọng số bằng nhau, chỉ số gần như đều khắp vùng ấy (khoảng 61 điểm) thắng ở mọi ô mà các hiểm họa khác thấp hơn, nên nó phủ màu cam lên cả vùng trũng phía trên. Đặt trọng số thiếu mưa bằng 0: ngập lũ thành hiểm họa trội của Đồng Tháp, cây trồng suy giảm của An Giang và Long An, còn đất thấp trội ở mười tỉnh còn lại, từ Hậu Giang, Kiên Giang tới bán đảo Cà Mau. Nhưng nó cũng cho thấy giới hạn của từ "hiểm họa". Với Nghị quyết 120, lũ ở vùng đồng bằng ngập lũ vừa là hiểm họa vừa là nguồn phù sa, nguồn cá và không gian chứa nước cần giữ lại. Nước mặn ở ven biển là điều kiện để nuôi tôm. Một chỉ số "càng cao càng xấu" không diễn đạt được điều đó.
+
+<Figure
+  title="Hình 14.2 — Hiểm họa trội trên đất trồng trọt"
+  try="Với trọng số bằng nhau, màu nào phủ vùng trũng phía trên Long An – Đồng Tháp? Kéo 'Thiếu mưa' về 0: màu cam (thiếu mưa) được thay bằng màu gì, ở đâu? Đâu là vùng đồng bằng ngập lũ, đâu là vùng ven biển nước lợ trong cách nói của Nghị quyết 120?"
+  source="Như Hình 14.1; mỗi ô tô màu theo chỉ số có w·s lớn nhất; xám = mọi chỉ số bằng 0. Màu Okabe-Ito."
+>
+  <RiskLab client:visible lang="vi" view="dom" label="Bản đồ hiểm họa trội với trọng số tự chỉnh" />
+</Figure>
+
+<Note kind="why">
+
+Bản đồ đa tiêu chí có ích nhất khi dùng để **thảo luận**, không phải để **phán quyết**. Đặt các bên (nông dân, thủy lợi, quy hoạch) trước cùng một bản đồ, để mỗi bên chỉnh trọng số theo cách mình nghĩ, rồi xem chỗ nào bản đồ luôn đỏ và chỗ nào chỉ đỏ với một bộ trọng số. Đó là cách sách FAO (2017, mục 6.3) gắn cảnh báo sớm với hành động sớm: thông tin chỉ có giá trị khi người ra quyết định hiểu và tin nó.
+
+</Note>
+
+<Depth level="advanced" title="ĐBSH: hai chỉ số, ít tín hiệu">
+
+Trên 657 nghìn ha đất trồng trọt ĐBSH, chỉ số tổng hợp với hai trọng số bằng nhau chỉ vượt 50 trên 1,1 % diện tích, nhiều nhất ở Nam Định (5,3 %) và Ninh Bình (3,0 %). Đặt trọng số đất thấp lên 3, Nam Định có 30,6 % diện tích ở mức cao và Thái Bình 16,2 %: dải ven biển thấp của châu thổ sông Hồng. Kết quả nhỏ không có nghĩa ĐBSH an toàn. Rủi ro chính của vùng này (bão, mưa lớn, ngập úng nội đồng, hạn do thiếu nước sông mùa kiệt) hoặc không đo được qua mây bằng ảnh quang học, hoặc chỉ có một sự kiện trong dữ liệu.
+
+</Depth>
+
+## 14.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Chính phủ (2017). *Nghị quyết số 120/NQ-CP ngày 17/11/2017 về phát triển bền vững đồng bằng sông Cửu Long thích ứng với biến đổi khí hậu*.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Mục 6.2, 6.3.
+- Funk, C. và cs. (2015). The climate hazards infrared precipitation with stations — a new environmental record for monitoring extremes. *Scientific Data*, 2, 150066. https://doi.org/10.1038/sdata.2015.66
+- IPCC (2014). Summary for Policymakers. Trong: *Climate Change 2014: Impacts, Adaptation, and Vulnerability. Part A* (WG II AR5). Cambridge University Press.
+- Malczewski, J. (2006). GIS-based multicriteria decision analysis: a survey of the literature. *International Journal of Geographical Information Science*, 20(7), 703–726. https://doi.org/10.1080/13658810600661508
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- OECD & JRC (2008). *Handbook on Constructing Composite Indicators: Methodology and User Guide*. OECD Publishing, Paris.
+- Pronk, M., Hooijer, A., Eilander, D., Haag, A., de Jong, T., Vousdoukas, M., Vernimmen, R., Ledoux, H., & Eleveld, M. (2024). DeltaDTM: A global coastal digital terrain model. *Scientific Data*, 11, 273. https://doi.org/10.1038/s41597-024-03091-9
+- Saisana, M., Saltelli, A., & Tarantola, S. (2005). Uncertainty and sensitivity analysis techniques as tools for the quality assessment of composite indicators. *Journal of the Royal Statistical Society: Series A*, 168(2), 307–323. https://doi.org/10.1111/j.1467-985X.2005.00350.x
+- UNDRR (2016). *Report of the open-ended intergovernmental expert working group on indicators and terminology relating to disaster risk reduction* (A/71/644). Liên Hợp Quốc.

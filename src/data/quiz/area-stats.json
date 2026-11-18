@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Một tỉnh có danh sách hộ từ tổng điều tra năm 2016. Vì sao ngành thống kê vẫn cần khung mẫu diện tích?", "en": "A province has a list of households from the 2016 census. Why would statisticians still want an area frame?" },
+  "options": [
+   { "vi": "Danh sách hộ lỗi thời, thiếu hoặc trùng hộ; khung diện tích phủ kín lãnh thổ, không trùng và không phụ thuộc danh sách", "en": "The list goes out of date, misses or duplicates farms; an area frame covers the territory with no gaps or overlaps and needs no list" },
+   { "vi": "Khung diện tích không cần đi thực địa", "en": "An area frame needs no field visits" },
+   { "vi": "Khung diện tích cho biết giá lúa", "en": "An area frame gives rice prices" },
+   { "vi": "Danh sách hộ không được phép dùng trong thống kê", "en": "Household lists may not be used in statistics" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Khung danh sách tốt để hỏi về sản lượng, giá, lao động, nhưng chất lượng phụ thuộc danh sách. Khung diện tích (điểm, ô) phủ kín mặt đất; ảnh vệ tinh giúp vẽ và phân tầng nó. Nhiều nước kết hợp cả hai (khung kép).", "en": "List frames are good for asking about output, prices and labour, but they are only as good as the list. Area frames (points, segments) cover the ground completely; satellite images help draw and stratify them. Many countries combine both (multiple frames)." }
+ },
+ {
+  "q": { "vi": "Bản đồ dùng để phân tầng có nhiều lỗi. Điều gì xảy ra với ước lượng diện tích từ mẫu phân tầng theo bản đồ đó?", "en": "The map used for stratification has many errors. What happens to an area estimate from a sample stratified with it?" },
+  "options": [
+   { "vi": "Ước lượng bị chệch theo đúng lỗi của bản đồ", "en": "The estimate is biased by the map's errors" },
+   { "vi": "Ước lượng vẫn không chệch, chỉ là phân tầng kém hiệu quả hơn (sai số lớn hơn)", "en": "The estimate stays unbiased; the stratification is just less efficient (larger error)" },
+   { "vi": "Không thể tính được sai số chuẩn", "en": "The standard error cannot be computed" },
+   { "vi": "Phải chuyển ô mẫu sang tầng đúng sau khi đi thực địa", "en": "Sampled units must be moved to the right stratum after the field visit" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Phân tầng chỉ chia tổng thể trước khi lấy mẫu; mỗi tầng vẫn được ước lượng riêng, không chệch. Bản đồ sai làm tầng kém đồng nhất nên giảm được ít sai số hơn. Chuyển ô sang tầng khác sau khi điều tra thì lại gây chệch (FAO 2017, mục 3.1.2).", "en": "Strata only divide the population before sampling; each stratum is still estimated without bias. A poor map makes strata less homogeneous, so they cut the error less. Moving units to another stratum after the survey is what causes bias (FAO 2017, 3.1.2)." }
+ },
+ {
+  "q": { "vi": "Diện tích trên bản đồ vệ tinh (x) và diện tích đo thực địa (y) trên các ô mẫu có tương quan r = 0,9. Ước lượng hồi quy cần khoảng bao nhiêu ô để đạt cùng độ chính xác như mẫu ngẫu nhiên đơn 500 ô?", "en": "Map area (x) and field-measured area (y) on the sample segments correlate at r = 0.9. About how many segments does the regression estimator need for the precision of a 500-segment simple random sample?" },
+  "options": [
+   { "vi": "Khoảng 95", "en": "About 95" },
+   { "vi": "Khoảng 450", "en": "About 450" },
+   { "vi": "Khoảng 50", "en": "About 50" },
+   { "vi": "Vẫn 500", "en": "Still 500" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Hiệu quả tương đối ≈ 1/(1 − r²) = 1/(1 − 0,81) ≈ 5,3, nên chỉ cần khoảng 500/5,3 ≈ 95 ô. Bản đồ càng tương quan với thực địa, vệ tinh càng tiết kiệm công điều tra.", "en": "Relative efficiency ≈ 1/(1 − r²) = 1/(1 − 0.81) ≈ 5.3, so about 500/5.3 ≈ 95 segments. The more the map correlates with the field, the more survey effort the satellite saves." }
+ },
+ {
+  "q": { "vi": "Vì sao không lấy luôn số pixel lúa trên bản đồ nhân với diện tích pixel làm số liệu thống kê chính thức?", "en": "Why not simply publish the number of rice pixels times the pixel area as the official statistic?" },
+  "options": [
+   { "vi": "Vì đếm pixel bị chệch theo lỗi phân loại và pixel hỗn hợp, mà không có sai số chuẩn đi kèm", "en": "Pixel counts are biased by classification errors and mixed pixels, and come with no standard error" },
+   { "vi": "Vì pixel không có diện tích", "en": "Pixels have no area" },
+   { "vi": "Vì bản đồ vệ tinh luôn đúng hơn điều tra", "en": "Satellite maps are always more accurate than surveys" },
+   { "vi": "Vì luật cấm dùng ảnh vệ tinh", "en": "The law forbids satellite images" }
+  ],
+  "answer": 0,
+  "why": { "vi": "Lỗi bỏ sót và lỗi gán nhầm hiếm khi triệt tiêu nhau, nên đếm pixel lệch một chiều. Mẫu thực địa xác suất cho phép sửa độ lệch đó và tính khoảng tin cậy (Chương 4 mục 4.5, FAO 2017 mục 5.2).", "en": "Omission and commission errors rarely cancel, so pixel counts are biased one way. A probability field sample corrects that bias and gives a confidence interval (Chapter 4, 4.5; FAO 2017, 5.2)." }
+ }
+]

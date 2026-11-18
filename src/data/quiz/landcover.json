@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Một vườn bưởi ở Bến Tre được ESA WorldCover xếp vào lớp nào?", "en": "Which ESA WorldCover class does a pomelo orchard in Ben Tre fall into?" },
+  "options": [
+   { "vi": "Đất trồng trọt (cropland)", "en": "Cropland" },
+   { "vi": "Cây gỗ (tree cover), vì cây lâu năm thân gỗ không thuộc đất trồng trọt", "en": "Tree cover, because woody perennial crops are not cropland" },
+   { "vi": "Cỏ", "en": "Grassland" },
+   { "vi": "Đất ngập nước", "en": "Herbaceous wetland" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Theo hướng dẫn sử dụng WorldCover, đất trồng trọt chỉ gồm cây hằng năm gieo và thu hoạch trong 12 tháng; cây lâu năm thân gỗ được xếp vào cây gỗ hoặc cây bụi. Vì vậy một tỉnh trồng nhiều cây ăn trái như Bến Tre có rất ít 'đất trồng trọt' trên bản đồ, dù nông nghiệp chiếm gần hết đất.", "en": "According to the WorldCover user manual, cropland covers only annual crops sown and harvested within 12 months; woody perennials go to tree cover or shrubland. So an orchard province like Ben Tre shows very little 'cropland' on the map, even though farming covers almost all of it." }
+ },
+ {
+  "q": { "vi": "Ở khung Giồng Trôm – Ba Tri (Bến Tre), lớp 'xây dựng' chiếm 3 % trên WorldCover nhưng 43 % trên Esri. Nguyên nhân hợp lý nhất?", "en": "In the Giong Trom – Ba Tri frame (Ben Tre), 'built-up' is 3 % on WorldCover but 43 % on Esri. The most likely reason?" },
+  "options": [
+   { "vi": "Esri dùng ảnh năm khác", "en": "Esri used images from another year" },
+   { "vi": "Nhà ở đây nằm rải rác dưới tán vườn: mô hình của Esri gộp cả xóm vườn thành vùng xây dựng, WorldCover thấy chủ yếu tán cây", "en": "Houses here are scattered under orchard canopy: Esri's model lumps whole hamlets into built area, while WorldCover mostly sees the canopy" },
+   { "vi": "WorldCover không có lớp xây dựng", "en": "WorldCover has no built-up class" },
+   { "vi": "Bến Tre vừa đô thị hóa trong một năm", "en": "Ben Tre urbanised within one year" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Cả ba bản đồ cùng năm 2021. Khác biệt nằm ở cách mỗi mô hình xử lý cảnh quan hỗn hợp nhà–vườn–kênh. Đó là lý do phải so định nghĩa lớp và nhìn tận nơi trước khi dùng một bản đồ toàn cầu cho thống kê.", "en": "All three maps are for 2021. The difference lies in how each model handles mixed house–orchard–canal landscapes. That is why class definitions must be compared, and the map checked on the ground, before a global map is used for statistics." }
+ },
+ {
+  "q": { "vi": "Bản đồ lớp phủ toàn cầu có độ chính xác tổng thể khoảng 75–85 %. Lấy bản đồ năm 2017 trừ bản đồ năm 2024 để tính diện tích đất lúa mất đi có đáng tin không?", "en": "Global land cover maps are about 75–85 % accurate overall. Is subtracting a 2017 map from a 2024 map a reliable way to measure rice land lost?" },
+  "options": [
+   { "vi": "Đáng tin, vì hai bản đồ cùng nguồn", "en": "Yes, both maps come from the same producer" },
+   { "vi": "Không: tỉ lệ thay đổi thật mỗi năm nhỏ hơn nhiều so với tỉ lệ lỗi của từng bản đồ, nên hiệu hai bản đồ chủ yếu là lỗi", "en": "No: the real yearly change is far smaller than each map's error rate, so the difference of two maps is mostly error" },
+   { "vi": "Đáng tin nếu dùng ảnh 10 m", "en": "Yes, if the images are 10 m" },
+   { "vi": "Chỉ đáng tin ở ĐBSH", "en": "Only in the Red River Delta" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Sách FAO (mục 2.4.3) nêu rõ: với độ chính xác 70–85 %, không thể suy ra thay đổi lớp phủ bằng cách so trực tiếp hai bản đồ. Phát hiện thay đổi cần phương pháp riêng trên chuỗi ảnh, và diện tích thay đổi phải được ước lượng bằng mẫu (Chương 5).", "en": "The FAO handbook (section 2.4.3) is explicit: with 70–85 % accuracy, land cover change cannot be derived by comparing two maps directly. Change detection needs its own methods on image time series, and changed area must be estimated with a sample (Chapter 5)." }
+ },
+ {
+  "q": { "vi": "Vì sao ruộng lúa có thể rơi vào lớp 'thực vật ngập nước' trên Dynamic World hay Esri?", "en": "Why can paddy fields end up as 'flooded vegetation' on Dynamic World or Esri?" },
+  "options": [
+   { "vi": "Vì lúa không phải cây trồng", "en": "Because rice is not a crop" },
+   { "vi": "Vì định nghĩa lớp: ruộng có lúa đứng trong nước trông giống thực vật xen lẫn mặt nước, và Esri ghi rõ lớp này gồm cả ruộng lúa", "en": "Because of the class definitions: rice standing in water looks like vegetation mixed with water, and Esri states this class includes rice paddies" },
+   { "vi": "Vì vệ tinh chụp ban đêm", "en": "Because the satellite images at night" },
+   { "vi": "Vì ruộng lúa luôn khô", "en": "Because paddies are always dry" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Lúa nước là trường hợp khó cho mọi chú giải dựa trên lớp phủ: nó vừa là cây trồng (sử dụng đất), vừa là thực vật trên mặt nước (lớp phủ). Khi so diện tích 'đất trồng trọt' giữa các bản đồ ở châu thổ, phải xem lớp ngập nước đã được tính vào đâu.", "en": "Paddy rice is a hard case for any cover-based legend: it is a crop (land use) and vegetation over water (land cover). When comparing 'cropland' areas between maps in a delta, check where the flooded class went." }
+ }
+]

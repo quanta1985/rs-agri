@@ -1,0 +1,83 @@
+{
+ "id": "fire-red",
+ "region": "red",
+ "title": {
+  "vi": "Số ngày có điểm cháy mỗi năm (MODIS)",
+  "en": "Fire days per year (MODIS)"
+ },
+ "units": {
+  "vi": "ngày/năm",
+  "en": "days/yr"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  4
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721299.644,
+  2463814.832
+ ],
+ "res": 1069.364077,
+ "ground_res_m": 1000,
+ "width": 183,
+ "height": 190,
+ "dtype": "uint8",
+ "scale": 0.2,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2006–2010",
+  "2011–2015",
+  "2016–2020",
+  "2021–2025"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 17158,
+   "mean": 0.0897,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.2,
+   "min": 0.0,
+   "max": 11.4
+  },
+  {
+   "valid": 17158,
+   "mean": 0.1182,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.4,
+   "min": 0.0,
+   "max": 11.8
+  },
+  {
+   "valid": 17158,
+   "mean": 0.1654,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.8,
+   "min": 0.0,
+   "max": 16.6
+  },
+  {
+   "valid": 17158,
+   "mean": 0.2049,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 2.2,
+   "min": 0.0,
+   "max": 13.8
+  }
+ ],
+ "provenance": {
+  "source": "NASA FIRMS, MODIS Collection 6.1 active fire (Giglio et al. 2016), Terra (+ Aqua from Jul 2002), 1 km daily raster",
+  "method": "days with >= 1 detection per cell, mean per year of each 5-year period; nearest-neighbour onto the 1 km Mercator grid; capped at 50.8",
+  "exported": "2026-11-17T15:43:34+00:00",
+  "script": "scripts/data/export_emissions.py"
+ }
+}

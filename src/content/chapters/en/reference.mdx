@@ -1,0 +1,77 @@
+---
+title: "Formulas & references"
+n: 16
+summary: "Every formula of the handbook in one place, the data sources and how to credit them, a concordance with the FAO (2017) handbook, and the reference list merged from all chapters."
+objectives:
+  - Look up a formula quickly and find the chapter that explains it.
+  - Know where each dataset comes from, which chapters use it and how to credit it.
+  - Find the part of the FAO (2017) handbook behind each chapter.
+updated: "2026-11-18"
+---
+import FormulaIndex from '../../../components/FormulaIndex.astro';
+import RefList from '../../../components/RefList.astro';
+import Note from '../../../components/Note.astro';
+
+## 16.1 Formulas
+
+The list is collected from the chapters when the site is built, in chapter order. Click a chapter title for the explanation. The full glossary is on the [Glossary](../glossary/) page.
+
+<FormulaIndex />
+
+## 16.2 Data and credits
+
+Every map and chart in the handbook is computed from open data on Google Earth Engine, with the scripts in the `scripts/data/` folder of the source code. Each figure caption gives its own sources.
+
+| Data | Provider, credit | Chapters |
+|---|---|---|
+| Sentinel-1 GRD, Sentinel-2 L2A, Sentinel-5P L3 | ESA / Copernicus: *Contains modified Copernicus Sentinel data (2015–2025)* | 1–4, 8, 10, 12–14 |
+| Cloud Score+ | Google | 2, 4, 8, 10 |
+| Landsat 5, 7, 8, 9 Collection 2 Level 2 | U.S. Geological Survey | 2, 12 |
+| MODIS MOD13Q1, MYD13Q1, MOD11A2 | NASA LP DAAC | 4, 6, 7, 9, 10, 14 |
+| FIRMS (MODIS active fires) | NASA FIRMS | 13 |
+| SMAP L4 soil moisture | NASA | 9 |
+| CHIRPS v2.0 | UCSB Climate Hazards Center (Funk et al., 2015) | 7, 9, 13, 14 |
+| ERA5-Land | ECMWF: *Contains modified Copernicus Climate Change Service information* | 7, 9 |
+| ONI index | NOAA Climate Prediction Center | 7, 9 |
+| ESA WorldCover 2021 | ESA, CC BY 4.0 | 1–9, 13, 14 |
+| Dynamic World | Google & World Resources Institute, CC BY 4.0 | 3, 10 |
+| Esri 10 m Annual LULC | Esri / Impact Observatory, CC BY 4.0 | 3, 5 |
+| GHS-POP | European Commission JRC (GHSL) | 1 |
+| Global Surface Water | European Commission JRC | 8 |
+| SoilGrids 2.0 | ISRIC, CC BY 4.0 | 11 |
+| DeltaDTM v1 | Deltares (Pronk et al., 2024), CC BY 4.0 | 11, 14 |
+| Copernicus DEM GLO-30 | ESA / Copernicus | 11 |
+| Global Mangrove Watch v3 | Global Mangrove Watch, CC BY 4.0 | 12 |
+| Provincial rice yield and area | National Statistics Office (PX-Web, tables V06.16–V06.18) | 6 |
+| Province boundaries | geoBoundaries gbOpen ADM1 | every map |
+| Basemaps | Esri World Imagery, Esri Light Gray Canvas | every map |
+
+<Note kind="warn">
+
+Province boundaries are those before the 2025 mergers, to match historical statistics. The handbook does not use GADM, whose licence forbids redistribution. Every map shows the Hoang Sa (Paracel) and Truong Sa (Spratly) archipelagos as part of Viet Nam.
+
+</Note>
+
+## 16.3 This handbook and the FAO (2017) handbook
+
+This handbook is developed from the *Handbook on Remote Sensing for Agricultural Statistics* (FAO, 2017) of the Global Strategy to improve Agricultural and Rural Statistics (GSARS). The text is rewritten for the two Vietnamese deltas, not translated; tables and figures taken from the book cite FAO. Part C (environment) is mostly new material that the book does not cover.
+
+| Chapter of this handbook | Corresponding part of FAO (2017) |
+|---|---|
+| 1 Two deltas | Overview |
+| 2 Data | Sections 1.2, 1.4, 1.5, 9.1, 9.3 |
+| 3 Land cover | Chapter 2: Land cover mapping and monitoring |
+| 4 Rice | Sections 2.5.3, 5.2.1, 5.2.3, 5.2.5 and the annex on the bias of pixel counting |
+| 5 Area | Chapter 3 (sampling frames) and Chapter 5 (crop area estimation) |
+| 6 Yield | Chapter 6: Early Warning Systems and crop yield estimation |
+| 9 Drought | Sections 6.2, 6.4.2 |
+| 11 Soil & subsidence | Section 1.4, Table 2 |
+| 14 Risk | Sections 6.2, 6.3 |
+
+The handbook's content is licensed [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Remote sensing basics (spectra, indices, radar, classification, pre-processing) are in the sister app [GIS and Remote Sensing Knowledge](https://quanta1985.github.io/rs-knowledge/).
+
+## 16.4 References of the whole handbook
+
+The list is merged automatically from the "References" section of every chapter. Each work lists the chapters that cite it.
+
+<RefList />

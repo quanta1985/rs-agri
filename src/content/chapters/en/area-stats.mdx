@@ -1,0 +1,173 @@
+---
+title: "Sampling frames & area estimation"
+n: 5
+summary: "A satellite map covers everywhere but contains errors; a field survey is accurate but only at a few places. This chapter builds a sampling frame, stratifies it with a land cover map, then samples the real rice maps of both deltas hundreds of times to show how the standard error shrinks with sample size, with stratification and with a regression estimator."
+objectives:
+  - Tell list frames from area frames, and explain how satellite images help build an area frame.
+  - Stratify a region with a land cover map and explain why map errors do not bias the estimate.
+  - Compute an area estimate, its standard error and confidence interval from a simple random sample, a stratified sample and a regression estimator.
+  - Choose a sample size for a target coefficient of variation and judge how much survey effort the satellite saves.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import SamplingLab from '../../../islands/SamplingLab.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/area-stats.json';
+
+Chapter 4 counted 1,692 thousand ha with rice on the 2024 Mekong map, 14 % more than the winter–spring sown area published by the General Statistics Office. Which number is right? A map, however good it looks, does not say how wrong it is. Official statistics need a number with a **standard error**, and that takes a **probability sample** in the field. This chapter follows chapters 3 and 5 of the FAO (2017) handbook: satellite images are used to build and stratify the sampling frame, and then as an auxiliary variable that shrinks the error of the estimate.
+
+<Stats items={[
+  { v: '8.3', u: '%', l: 'coefficient of variation of the Mekong rice area estimated from 200 random 250 m cells (500 repeats)' },
+  { v: '2.53', u: '×', l: 'efficiency of a Neyman-stratified sample (strata from the Esri map) relative to a simple random sample of the same size (best case, see section 5.3)' },
+  { v: '2.12', u: '×', l: 'efficiency of a regression estimator with Esri cropland area as the auxiliary variable' },
+  { v: '3,343', u: 'cells', l: 'simple random sample needed for a 2 % coefficient of variation of the Mekong rice area' },
+]} caption="Computed by scripts/area-stats_numbers.ts on the 2024 rice map (Chapter 4) and the Esri 2021 map; the rice map plays the 'truth' so the estimators can be checked." />
+
+## 5.1 From a map to a statistic
+
+There are two ways to turn a map into an area. The first is **pixel counting**: rice pixels times the pixel area. It is quick, but biased by classification errors and mixed pixels, and it says nothing about its own error (Chapter 4, section 4.5). The second takes a **field sample** as the measurement and uses the map to make the sample more efficient. The FAO handbook (2017, section 5.3) describes it as combining "exhaustive but inaccurate information from satellite images with accurate information on a sample".
+
+<Tiles items={[
+  { t: 'Build the frame', d: 'Images show where farmland is, to split the territory into segments or points and leave out areas that need no survey.' },
+  { t: 'Stratify', d: 'A land cover map sorts cells into much, some and little cropland. The sample is spread over these groups.' },
+  { t: 'Auxiliary variable', d: 'The map area in every cell (x) is used with the field measurement in the sampled cells (y) in a regression or calibration estimator.' },
+  { t: 'Small areas', d: 'Where a district or commune has too few sampled cells, a model with satellite covariates borrows strength from elsewhere.' },
+]} />
+
+<Note kind="key">
+
+The probability field sample is the "truth"; the map is an **auxiliary variable**. A good map gives a smaller error for the same number of field visits. A poor map only loses that advantage; it does not bias the estimate, as long as the map is used **before** the sample is drawn and by a fixed rule.
+
+</Note>
+
+## 5.2 List frames and area frames
+
+A <Term id="list-frame">list frame</Term> is a list of households or farms from a census or register. It is convenient for asking about output, prices and labour, but it is only as good as the list: new farms are missing, some are duplicated, and it ages fast. An <Term id="area-frame">area frame</Term> uses the land itself as the unit: points, transects or <Term id="segment">segments</Term>. It covers the territory with no gaps or overlaps and does not need to know who farms. The line between the two is not sharp: many countries use enumeration areas as the first stage of a list frame, and enumeration areas with boundaries in a GIS behave like an area frame (FAO 2017, section 3.1).
+
+| Area frame type | Unit | Strength | Weakness |
+|---|---|---|---|
+| Segments with physical boundaries | block bounded by roads, canals | surveyors find the boundary easily | much photo-interpretation to draw them |
+| Square grid | square cell on a projection | cheap, built in a GIS | cell edges cut across fields |
+| Points | one point, cover recorded there | very cheap, suits small fields | little information per point |
+| Clustered points | a few nearby points | less travel | points in a cluster are alike |
+
+A rule of thumb quoted in the FAO handbook: a segment should contain on average 10–20 fields or cover patches, so a surveyor can finish it in under half a day (Taylor et al., 1997). Fields in both deltas are small (Chapter 2), so the 250 m cells used below are a reasonable size: one 6.25 ha cell holds dozens of fields.
+
+<Predict client:visible lang="en"
+  title="Change the stratum after the survey?"
+  q="A cell was put in the 'much cropland' stratum by the map, but the surveyor finds it is almost all houses and ponds. Should the cell be moved to the 'little cropland' stratum before computing?"
+  options={['Yes, to make the strata more correct', 'No: the strata must stay as they were when the sample was drawn, or the estimate is biased', 'Yes, if it is noted down', 'Only if the error is large']} answer={1}
+  why="The reassignment rule cannot be applied to cells outside the sample, so the new strata no longer describe the population. A wrong map only makes the stratification less efficient; to fix it, redo the stratification for the next survey with one rule for the whole region (FAO 2017, section 3.1.2)." />
+
+## 5.3 Sampling a real rice map
+
+The simulation below treats the 2024 rice map of Chapter 4 as the "truth": each 250 m cell inside the region outline has y = its rice area (the whole cell if the map gives at least one season, 0 if not). The Mekong Delta has 636,121 cells, 42.7 % of them with rice, 1,692 thousand ha in all. We pretend not to know that total, draw a sample of cells, "visit" them to read y, and estimate the total.
+
+The auxiliary variable x is the cropland area of the cell on the Esri 2021 map (Chapter 3). WorldCover is not used, because WorldCover itself delimited the cropland when the rice map was made: as the auxiliary variable it would leave the 'little cropland' stratum with no rice by construction, and stratification would look more efficient than it is. Strata follow the Esri cropland share: below 25 %, 25–75 %, 75 % and above. In the Mekong Delta the three strata have 228,418 / 112,594 / 295,109 cells, and 2.2 / 30.9 / 78.4 % of their cells have rice.
+
+<Formula label="Simple random sample" tex="\hat{Y} = N\,\bar{y}, \qquad SE(\hat{Y}) = N\sqrt{\left(1-\tfrac{n}{N}\right)\tfrac{s_y^2}{n}}" where="N: cells in the region, n: sampled cells, ȳ and s_y²: mean and variance of y in the sample." />
+
+<Formula label="Stratified sample" tex="\hat{Y}_{st} = \sum_h N_h\,\bar{y}_h, \qquad SE^2 = \sum_h N_h^2\left(1-\tfrac{n_h}{N_h}\right)\tfrac{s_h^2}{n_h}" where="h: stratum. Proportional allocation: n_h ∝ N_h. Neyman allocation: n_h ∝ N_h·S_h, so variable strata get more cells." />
+
+<Figure
+  title="Figure 5.1 — Sampling the 2024 rice map: one sample and 500 samples"
+  try="Keep 'Simple random', size 200, press 'Repeat 500×': how wide is the spread of estimates around the true line? Switch to 'Stratified (Neyman)', then 'Regression', and repeat: how much does the standard deviation drop? Raise the size to 800: does the error halve, as the square root of 4 says?"
+  source="Population: ~250 m cells inside the region outline; y = cell area if the 2024 rice-season map (MODIS EVI in the Mekong, Sentinel-1 in the Red River Delta, Chapter 4) has at least one season; x = cropland area in the cell on the Esri/Impact Observatory 10 m Annual LULC 2021; strata by % cropland (< 25, 25–75, ≥ 75). Sampling without replacement; at least 2 cells per stratum; 500 repeats with the fixed seed 2026 (as in scripts/area-stats_numbers.ts). Simulated: the map stands in for field measurements."
+>
+  <SamplingLab client:visible lang="en" label="Sampling simulation on the rice map" />
+</Figure>
+
+With 200 cells in the Mekong Delta, the simple random sample gives a standard deviation of 141.2 thousand ha over 500 repeats, a coefficient of variation of 8.3 %. Proportional stratification brings it down to 97.7, Neyman stratification to 88.8 and the regression estimator to 97.0 thousand ha. The mean of the 500 estimates sits close to the true value for all four: they are unbiased and differ only in spread. The standard error computed from each single sample also matches the real spread (on average 138.6 against 141.2 thousand ha for the simple sample), so one sample already tells how precise it is. The Neyman allocation here uses the true standard deviation of each stratum, which a real survey does not know in advance; in the field S_h comes from a pilot or an earlier survey, so 2.53× is the best case.
+
+<Predict client:visible lang="en"
+  title="Double the cells"
+  q="A 200-cell sample gives a standard error of about S. How many cells give S/2?"
+  options={['400', '800', '300', '2,000']} answer={1}
+  why="The standard error scales with 1/√n. Halving it takes four times the sample, 800 cells. That is why a good map is valuable: the 2× efficiency of stratification or regression is worth doubling the field sample without a single extra trip." />
+
+<Note kind="tip">
+
+Rice in the Red River Delta is scarcer and more scattered: 27.9 % of the cells have rice, against 42.7 % in the Mekong. With the same 200 cells, the coefficient of variation is 11.1 % in the Red River Delta and 8.3 % in the Mekong. The smaller and more scattered the target, the more cells it needs, and the more the satellite is worth: Neyman stratification there reaches an efficiency of 2.77×.
+
+</Note>
+
+## 5.4 Regression, calibration and small areas
+
+The <Term id="regression-estimator">regression estimator</Term> fits a line y = a + b·x on the sampled cells, then plugs in the true mean of x over the whole region, known because the map covers every cell:
+
+<Formula label="Regression estimator (FAO 2017, section 5.3)" tex="\hat{\bar{Y}}_{reg} = \bar{y} + b\,(\bar{X} - \bar{x}), \qquad E \approx \frac{1}{1-r^2}" where="ȳ, x̄: sample means; X̄: mean of x over all N cells; b: slope of y on x in the sample; r: correlation between y and x; E: efficiency relative to a simple random sample." />
+
+In the Mekong Delta the per-cell correlation between rice area and Esri cropland area is r = 0.72, so theory promises an efficiency of about 2.1×; the simulation gives 2.12×. The FAO handbook cites two operational examples: rice area estimation in Afghanistan, with R² = 0.96 between rice pixels and rice area in the sample segments, and China's CAERSS project, with coefficients of variation of 4.2–7.0 % for maize, rice and soybean.
+
+<Term id="relative-efficiency">Relative efficiency</Term> translates directly into money: an efficiency of 2× means the same precision with half the field segments.
+
+Two other families also use the map as an auxiliary variable:
+
+- **Calibration estimators** use a confusion matrix from a check sample to correct pixel-counted area, through user's accuracy (direct estimator) or producer's accuracy (inverse estimator). Figure 4.5 of Chapter 4 does exactly this, following Olofsson et al. (2014). The condition: the matrix must come from a probability sample, and the extrapolation must follow the sampling design.
+- **<Term id="small-area-estimation">Small area estimation</Term>** is used when numbers are needed for districts or communes with only a few sampled cells each. A regression model with satellite covariates "borrows" information from other districts (FAO 2017, section 5.5).
+
+<Depth level="advanced">
+
+**Why regression beats stratification here.** Stratification uses x only to form groups (three levels), while regression uses each cell's own x. When the relation between x and y is close to linear, regression extracts more information. The two can be combined: a separate regression in each stratum (the stratified regression estimator), as in the formula of Sud et al. (2015) presented in the FAO handbook. The regression estimator is slightly biased in small samples (of order 1/n), negligible with a few hundred cells.
+
+</Depth>
+
+<Predict client:visible lang="en"
+  title="Old map, new sample"
+  q="The Esri map is from 2021, while the rice to estimate is from 2024. Does using the older map as the auxiliary variable bias the 2024 estimate?"
+  options={['Yes, the map is out of date', 'No: x only has to be known for every cell and measured the same way; an older map just weakens the correlation', 'Yes, unless the map is 100 % correct', 'A map from another year cannot be used']} answer={1}
+  why="The regression estimator is unbiased (for large enough n) whether x is good or bad, because y is still measured on a probability sample. The closer x is to the survey year, the higher r and the larger the gain. The FAO handbook (section 3.2.4) also suggests stratifying with detailed data from the previous year." />
+
+## 5.5 Sample size and cost
+
+For a rice area with a given <Term id="coefficient-of-variation">coefficient of variation</Term> CV, a simple random sample needs:
+
+<Formula label="Sample size for a target CV" tex="n_0 = \left(\frac{S_y}{CV\cdot\bar{Y}}\right)^2, \qquad n = \frac{n_0}{1 + n_0/N}" where="S_y: standard deviation of y between cells, Ȳ: mean of y. Stratification or regression divide n by their efficiency." />
+
+In the Mekong Delta a 5 % CV needs 538 and a 2 % CV 3,343 random 250 m cells. The Red River Delta has fewer and more scattered rice cells, so it needs 1,030 and 6,306. Divided by the regression estimator's efficiency, these numbers shrink accordingly. They are for a whole delta; the same CV in every province needs roughly that sample in each province, and the cost multiplies by the number of provinces. The FAO handbook (section 5.7) stresses that satellites pay off only when the efficiency gain exceeds the cost of images and processing; with free Sentinel and Landsat images the balance has tipped firmly towards using them.
+
+<Note kind="warn">
+
+This simulation is lenient in one respect: the "field measurement" y comes from a map, so there is no measurement error, no cell is missed and every cell can be reached. In the field there are surveyor errors, unreachable cells and segment boundaries that are hard to find on the ground. These errors do not go away when satellites are added, and they can cause real bias.
+
+</Note>
+
+## 5.6 Programmes in operation
+
+<Tiles items={[
+  { t: 'United States: NASS CDL', d: 'Crop maps since 1997, used as the auxiliary variable in a regression estimator of crop area; in 2009 in-season for 15 crops in 27 states.' },
+  { t: 'India: FASAL', d: 'Since 2007, production forecasts for 11 major crops. Rice and jute use radar with 5 × 5 km segments, a 15 % sampling fraction and 4 strata by crop cover.' },
+  { t: 'European Union: LUCAS', d: 'A two-phase point survey: about 270 thousand points photo-interpreted, then a subset visited in the field; repeated every few years.' },
+  { t: 'China: CropWatch', d: 'Assessments from global to province level; area = satellite arable land × cropped fraction × crop-type share from surveys.' },
+]} />
+
+In Viet Nam, sown rice area still comes from the statistical system's reports and surveys. Rice remote sensing is present through GEOGLAM's Asia-RiCE component, led by JAXA: a radar rice monitoring scheme over the Mekong Delta with ALOS-2 and Sentinel-1, with the Vietnam National Space Center (VNSC), the Vietnam Academy of Science and Technology and the Ministry of Agriculture and Rural Development (CEOS, 2016). The gap between the map and the official figure (Chapter 4: +14 %) is exactly what a satellite-assisted area frame could narrow.
+
+<Note kind="key">
+
+Satellites do not replace surveys; they make surveys cheaper and give numbers with errors attached. Three steps: build and stratify the frame with a map, measure y on a probability sample, use the map as an auxiliary variable. The standard error falls only with the square root of the sample, so a good auxiliary variable is worth hundreds of field trips.
+
+</Note>
+
+## 5.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- CEOS (2016). Asia-RiCE: Asian Rice Crop Estimation & Monitoring. Presentation at the SIT-31 side meeting, 21 April 2016. https://ceos.org/document_management/Ad_Hoc_Teams/GEOGLAM/Meetings/SIT-31%20Side%20Meeting/20160421_CEOS_Asia-RiCE.pdf
+- Cochran, W. G. (1977). *Sampling Techniques*, 3rd edition. Wiley, New York.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chapter 3 (Gallego, J., Use of remote sensing for the design of sampling frames) and Chapter 5 (Crop area estimation with remote sensing).
+- Gallego, F. J. (2004). Remote sensing and land cover area estimation. *International Journal of Remote Sensing*, 25, 3019–3047.
+- Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. *Remote Sensing of Environment*, 148, 42–57. https://doi.org/10.1016/j.rse.2014.02.015
+- Oyoshi, K., Tomiyama, N., Okumura, T., Sobue, S., & Sato, J. (2016). Mapping rice-planted areas using time-series synthetic aperture radar data for the Asia-RiCE activity. *Paddy and Water Environment*, 14, 463–472. https://doi.org/10.1007/s10333-015-0515-x
+- Taylor, J., Sannier, C., Delincé, J., & Gallego, F. J. (1997). *Regional crop inventories in Europe assisted by remote sensing: 1988–1993*. Synthesis Report, EUR 17319 EN. Office for Publications of the EC, Luxembourg.

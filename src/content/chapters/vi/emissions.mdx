@@ -1,0 +1,245 @@
+---
+title: "Đốt rơm, CH₄ ruộng lúa & phát thải"
+n: 13
+summary: "Ruộng lúa là nguồn khí nhà kính lớn của Việt Nam, và rơm rạ bị đốt ngay trên đồng sau mỗi vụ gặt. Chương này đếm điểm cháy MODIS trên hai châu thổ suốt 23 năm, đọc NO₂, CO và CH₄ từ Sentinel-5P, chỉ ra vệ tinh thấy được gì và bỏ sót gì, rồi tính CH₄ một vụ lúa theo phương pháp IPCC để thấy tưới ướt khô xen kẽ giảm được bao nhiêu."
+objectives:
+  - Giải thích vệ tinh phát hiện điểm cháy thế nào và vì sao nó bỏ sót phần lớn các đống rơm nhỏ.
+  - Đọc lịch đốt rơm của hai châu thổ từ chuỗi điểm cháy và liên hệ nó với mùa vụ và lượng mưa mùa khô.
+  - Phân biệt nguồn NO₂ (nhiên liệu) với nguồn CH₄ (ruộng ngập) trên bản đồ Sentinel-5P, và nêu giới hạn của CH₄ đo từ vũ trụ ở vùng nhiều mây.
+  - Tính CH₄ của một vụ lúa theo IPCC Tier 1 và ước lượng mức giảm khi tưới ướt khô xen kẽ.
+updated: "2026-11-17"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import EmissionSeries from '../../../islands/EmissionSeries.tsx';
+import RiceMethane from '../../../islands/RiceMethane.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/emissions.json';
+
+Ruộng lúa ngập nước sinh ra khí mê-tan (CH₄). Sau mỗi vụ gặt, rơm rạ thường bị đốt ngay trên đồng, tỏa khói và khí. Cả hai đều là phát thải của nông nghiệp. Vệ tinh nhìn thấy một phần: ngọn lửa đủ nóng, đủ lớn, đúng lúc vệ tinh bay qua; và lượng khí trong cả cột không khí phía trên một ô vài kilômét. Phần còn lại phải tính từ diện tích lúa, cách tưới và hệ số phát thải.
+
+<Stats items={[
+  { v: '15,7', u: '%', l: 'tổng phát thải khí nhà kính ròng của Việt Nam năm 2016 đến từ canh tác lúa (BUR3)' },
+  { v: '78', u: '%', l: 'số ngày có điểm cháy trên đất trồng trọt ĐBSCL rơi vào tháng 2–4, 2003–2025 (MODIS)' },
+  { v: '−0,68', u: '', l: 'hệ số tương quan giữa mưa mùa khô và số ngày cháy tháng 2–4 trên đất trồng trọt ĐBSCL, 23 năm' },
+  { v: '−45', u: '%', l: 'CH₄ một vụ lúa khi chuyển từ ngập liên tục sang tưới ướt khô xen kẽ, theo hệ số mặc định IPCC 2019' },
+]} caption="Tính từ FIRMS MODIS, CHIRPS và hệ số IPCC bằng scripts/emissions_numbers.ts; tỉ lệ 15,7 % từ báo cáo BUR3 của Việt Nam." />
+
+## 13.1 Nông nghiệp phát thải gì, vệ tinh thấy gì
+
+Theo báo cáo cập nhật hai năm một lần lần thứ ba (BUR3) của Việt Nam gửi Công ước khung về biến đổi khí hậu, năm 2016 canh tác lúa phát thải 1 774,75 nghìn tấn CH₄, tương đương 49,7 triệu tấn CO₂ (quy đổi theo hệ số <Term id="gwp">tiềm năng nóng lên toàn cầu</Term> 28 của IPCC AR5). Con số này bằng 15,7 % tổng phát thải ròng cả nước và gần 60 % phát thải của ngành nông nghiệp (không tính đất rừng). Canh tác lúa là nguồn phát thải chủ chốt thứ hai trong <Term id="ghg-inventory">kiểm kê khí nhà kính</Term> quốc gia.
+
+CH₄ sinh ra khi vi khuẩn phân hủy chất hữu cơ trong đất ngập, thiếu ôxy. Ruộng càng ngập lâu, càng nhiều rơm vùi xuống trước khi cấy, thì càng phát thải nhiều. Rơm còn một số phận khác: bị đốt. ĐBSCL sản xuất khoảng 29,16 triệu tấn rơm khô năm 2019, trên tổng số 53,3 triệu tấn của cả nước (Cuong và cs., 2021). Ở ĐBSCL, 50–60 % lượng rơm bị đốt ngoài đồng (Nguyen-Van-Hung và cs., 2019, dẫn lại khảo sát của IRRI năm 2014).
+
+| Nguồn | Vệ tinh thấy gì | Bỏ sót gì |
+|---|---|---|
+| Đốt rơm | Điểm nóng (MODIS, VIIRS); khói và khí NO₂, CO trong cột không khí (Sentinel-5P) | Đống lửa nhỏ, cháy ngắn, cháy dưới mây hoặc giữa hai lượt bay |
+| CH₄ ruộng ngập | Nồng độ CH₄ trung bình cả cột không khí, ô 5,5 × 7 km (Sentinel-5P) | Phát thải của từng ruộng; gần như mọi ngày có mây |
+| Gián tiếp | Diện tích và lịch vụ lúa, ruộng ngập hay khô (Chương 4, 8) | Lượng phân, giống, cách tưới thực tế |
+| N₂O từ phân đạm | Không thấy | Toàn bộ |
+
+<Predict client:visible lang="vi"
+  title="Đo CH₄ ruộng lúa từ vũ trụ?"
+  q="Vệ tinh Sentinel-5P đo CH₄ trong cả cột không khí. Vì sao nó khó đo CH₄ ở ĐBSCL vào tháng 7–10, đúng lúc ruộng ngập nhiều nhất?"
+  options={['Vì CH₄ không hấp thụ ánh sáng', 'Vì đó là mùa mưa: gần như ngày nào cũng có mây, và mặt nước tối làm hỏng phép đo', 'Vì vệ tinh không bay qua Việt Nam vào mùa mưa', 'Vì ruộng lúa không phát thải vào mùa mưa']} answer={1}
+  why="Phép đo CH₄ của TROPOMI cần trời quang hẳn và bề mặt đủ sáng. Trong 7 năm 2019–2025, ĐBSCL không có một số đo CH₄ hợp lệ nào vào tháng 9; tháng 7, 8 và 10 chỉ có 2–5 năm có số liệu. Đúng mùa phát thải thì vệ tinh 'mù'." />
+
+<Note kind="key">
+
+Vệ tinh không đo phát thải. Nó đo **dấu hiệu**: một điểm nóng, một cột khí đậm hơn xung quanh, một ruộng đang ngập. Đổi dấu hiệu thành tấn CH₄ hay tấn bụi phải qua mô hình và hệ số phát thải. Vai trò mạnh nhất của viễn thám ở đây là cung cấp **dữ liệu hoạt động**: diện tích lúa, số vụ, lịch ngập, diện tích đốt.
+
+</Note>
+
+## 13.2 Bắt điểm cháy từ vũ trụ
+
+Lửa nóng vài trăm độ phát mạnh ở bước sóng hồng ngoại trung, quanh 4 µm. Một pixel MODIS 1 km chỉ cần một đám cháy nhỏ cũng nóng lên rõ ở kênh này so với kênh hồng ngoại nhiệt 11 µm và so với các pixel xung quanh. Thuật toán <Term id="active-fire">điểm cháy hoạt động</Term> dựa vào sự chênh lệch đó. Theo hướng dẫn sử dụng sản phẩm điểm cháy MODIS (Giglio và cs., 2021), MODIS thường phát hiện được đám cháy cỡ 1 000 m²; trong điều kiện rất tốt thì nhỏ hơn mười lần; và trong điều kiện lý tưởng, đám lửa đang cháy ngọn chỉ khoảng 50 m².
+
+Nhưng "phát hiện được" không có nghĩa là "phát hiện hết". So với ảnh ASTER 30 m chụp cùng lúc, MODIS bỏ sót 86,2 % số đám cháy, chủ yếu là đám nhỏ; đám cháy lớn thì gần như không sót (Giglio và cs., 2016). Terra bay qua lúc khoảng 10:30 và 22:30, Aqua lúc khoảng 13:30 và 01:30. Một đống rơm đốt lúc 16 giờ, cháy trong một giờ, hoặc cháy dưới mây, sẽ không có trong dữ liệu. Lasko và cs. (2017) cho rằng mây, đám cháy nhỏ, cháy ngắn và cháy sau giờ vệ tinh bay qua là lý do các kiểm kê toàn cầu đánh giá thấp lượng đốt rơm ở Việt Nam. Cảm biến VIIRS 375 m thấy nhiều pixel cháy hơn: gấp 3 lần ban ngày và 25 lần ban đêm so với sản phẩm 750 m cùng cảm biến (Schroeder và cs., 2014).
+
+Hình 13.1 đếm số ngày trong năm mà mỗi ô 1 km có ít nhất một điểm cháy MODIS, trung bình theo từng giai đoạn năm năm. Năm 2001–2002 chỉ có Terra (Aqua có dữ liệu từ tháng 7/2002), nên các con số trong chương bắt đầu từ năm 2003.
+
+<Figure
+  title="Hình 13.1 — Số ngày có điểm cháy mỗi năm, ô 1 km, 2006–2025"
+  try="Ở ĐBSCL, bật So sánh: 2006–2010 bên trái, 2016–2020 bên phải. Vùng nào sáng lên? Chuyển sang ĐBSH: điểm cháy nằm trên đồng lúa hay ở đâu? Tìm những ô cháy hơn 10 ngày một năm."
+  source="NASA FIRMS, MODIS Collection 6.1 điểm cháy hoạt động (Terra + Aqua), raster 1 km theo ngày. Giá trị = số ngày có ≥ 1 điểm cháy trong ô, chia cho số năm của giai đoạn; gán lân cận gần nhất vào lưới Mercator 1 km; ô dưới 0,1 ngày/năm để trong suốt."
+>
+  <DeltaMap client:visible lang="vi" label="Ngày có điểm cháy" region="mekong" compare time={3} compareTime={0} choices={[
+    { key: 'fire', label: { vi: 'Ngày cháy/năm', en: 'Fire days/yr' }, ids: { red: 'fire-red', mekong: 'fire-mekong' }, palette: 'ylorrd', range: [0, 4], clearBelow: 0.1 },
+  ]} />
+</Figure>
+
+Trong 2003–2025, 75 % số ngày cháy ở ĐBSCL nằm trên đất trồng trọt (ô có ít nhất một nửa diện tích là đất trồng trọt theo ESA WorldCover 2021), 8 % trên rừng và đất ngập nước, 17 % trên đất khác. ĐBSH ngược hẳn: chỉ 10 % trên đất trồng trọt, 57 % trên rừng và đất ngập nước, 33 % trên đất khác. Những ngày nhiều điểm cháy nhất mà chúng tôi kiểm tra (tháng 12/2024, tháng 1/2025) tập trung trên vùng đồi Quảng Ninh, nằm trong ranh vùng thống kê ĐBSH.
+
+<Note kind="warn">
+
+Một ruộng lúa bị đốt một, hai lần mỗi vụ. Những ô "cháy" hơn 10 ngày mỗi năm, như ô ở 106,13° Đ; 21,24° B (ĐBSH, 13,8 ngày/năm trong 2021–2025) hay ô ở 106,32° Đ; 10,47° B (ĐBSCL, 14,2 ngày/năm), nhiều khả năng không phải đốt rơm mà là nguồn nhiệt lặp lại ở cùng một chỗ, như nhà máy hay lò nung. Sản phẩm MODIS chuẩn gắn nhãn "nguồn nhiệt tĩnh khác trên đất liền" cho điểm nóng xuất hiện từ 16 ngày trở lên trong một năm, hoặc nằm trong đô thị (Giglio và cs., 2021). Dữ liệu FIRMS gần thời gian thực dùng ở đây không có nhãn đó, nên trước khi đếm "đốt rơm" phải tự loại chúng ra.
+
+</Note>
+
+## 13.3 Lịch đốt rơm theo mùa vụ
+
+Ở ĐBSCL, lúa Đông Xuân gieo sau khi lũ rút, tháng 11–12 (Chương 4), và gặt khoảng 100 ngày sau. Điểm cháy trên đất trồng trọt bám đúng lịch đó: tháng 3 có trung bình 146 ngày cháy trên 1 000 ô 1 km, tháng 2 có 35, tháng 4 có 71. Ba tháng 2–4 chiếm 78 % số ngày cháy cả năm. Lúa Hè Thu và Thu Đông được gặt trong mùa mưa, khi rơm ướt và trời nhiều mây, nên gần như không thấy điểm cháy.
+
+<Figure
+  title="Hình 13.2 — Ngày có điểm cháy theo tháng, theo loại đất, 2003–2025"
+  try="Ở ĐBSCL, tháng nào cao nhất, và cao gấp mấy lần tháng 7? Chuyển sang ĐBSH: đường đất trồng trọt có đỉnh rõ không? Tháng 1–3 ở đó thấp vì không ai đốt, hay vì lý do khác?"
+  source="NASA FIRMS MODIS C6.1 (Terra + Aqua). Ngày có ≥ 1 điểm cháy trong mỗi ô 1 km, cộng theo tháng, trung bình 2003–2025, chia cho số ô của loại đất (×1 000). Loại đất = loại chiếm ≥ 50 % ô theo ESA WorldCover 2021 (trồng trọt; rừng + đất ngập nước + rừng ngập mặn; còn lại). Ô của mọi năm xếp theo bản đồ 2021."
+>
+  <EmissionSeries client:visible lang="vi" view="fire-months" region="mekong" />
+</Figure>
+
+ĐBSH khác hẳn. Trên đất trồng trọt chỉ có 54 ngày cháy trên 1 000 ô mỗi năm, so với 324 ở ĐBSCL. Chúng trải đều từ tháng 5 đến tháng 9 (81 % số ngày cháy) và gần như bằng không trong tháng 1–3. Tháng 1–3 ở miền Bắc cũng là thời kỳ ít ảnh quang học dùng được nhất (Chương 2): mây và mưa phùn che mất cả lửa lẫn mặt đất. Vì vậy chuỗi điểm cháy ĐBSH vừa phản ánh lịch đốt, vừa phản ánh lịch mây. Không thể đọc nó như lịch đốt rơm thật.
+
+<Predict client:visible lang="vi"
+  title="Năm nào đốt nhiều?"
+  q="Ở ĐBSCL, số ngày cháy tháng 2–4 trên đất trồng trọt dao động từ 1 902 (năm 2006) đến 11 003 (năm 2020). Yếu tố nào đi kèm những năm nhiều điểm cháy?"
+  options={['Mùa khô mưa ít', 'Mùa khô mưa nhiều', 'Năm có lũ lớn vào tháng 10', 'Không liên quan đến thời tiết']} answer={0}
+  why="Tương quan giữa lượng mưa tháng 12–4 (CHIRPS) và số ngày cháy tháng 2–4 là −0,68 qua 23 năm. Năm 2020: mưa mùa khô 98 mm, 11 003 ngày cháy; năm 2022: 238 mm, 2 070 ngày cháy. Rơm khô thì dễ đốt; trời quang thì vệ tinh cũng dễ thấy lửa hơn. Hai tác động này cộng vào nhau." />
+
+<Figure
+  title="Hình 13.3 — Ngày có điểm cháy trên đất trồng trọt mỗi năm, 2003–2025"
+  try="Tìm năm cao nhất và thấp nhất ở ĐBSCL, rồi so với lượng mưa mùa khô ở Chương 7 và 9. Ở ĐBSH, đường đi lên hay đi ngang?"
+  source="NASA FIRMS MODIS C6.1 (Terra + Aqua). Tổng số ngày có ≥ 1 điểm cháy trong các ô 1 km là đất trồng trọt (≥ 50 % theo ESA WorldCover 2021), trên 1 000 ô."
+>
+  <EmissionSeries client:visible lang="vi" view="fire-years" />
+</Figure>
+
+Ở ĐBSCL, số ngày cháy trên đất trồng trọt lên xuống theo thời tiết, từ 96 trên 1 000 ô (năm 2006) đến 586 (năm 2020). Ở ĐBSH, con số tăng đều: từ trung bình 8 trên 1 000 ô mỗi năm trong 2003–2007 lên 92 trong 2021–2025. Vệ tinh không cho biết lý do. Có thể người dân đốt nhiều hơn, cũng có thể đám cháy lớn hơn hoặc gần giờ bay hơn. Muốn biết, cần khảo sát thực địa.
+
+<Note kind="key">
+
+Lịch điểm cháy ĐBSCL đọc được như lịch thu hoạch lúa Đông Xuân, và độ lớn của nó đi theo độ khô của mùa khô. Đó là thông tin vệ tinh cho chắc chắn. Diện tích bị đốt, lượng rơm cháy và tấn khói thì không: MODIS bỏ sót phần lớn đám cháy nhỏ, nên số điểm cháy chỉ là **chỉ số tương đối**, dùng để so năm với năm, vùng với vùng.
+
+</Note>
+
+## 13.4 Khói, NO₂ và CO
+
+Sentinel-5P mang cảm biến TROPOMI, mỗi ngày phủ gần hết Trái Đất, bay qua lúc khoảng 13:30 giờ địa phương (ESA). Nó đo ánh sáng Mặt Trời phản xạ qua cả cột khí quyển, rồi tính ra lượng khí trên mỗi mét vuông mặt đất: nitơ điôxít (NO₂), cacbon mônôxít (CO), mê-tan (CH₄) và nhiều khí khác. Đó là <Term id="column-amount">lượng cột</Term>, không phải nồng độ ở mặt đất mà người dân hít thở.
+
+NO₂ sinh ra chủ yếu khi đốt nhiên liệu: xe cộ, nhà máy điện, công nghiệp. Nó chỉ tồn tại vài giờ trong khí quyển, nên bản đồ NO₂ chỉ đúng chỗ đang đốt. Trung bình các tháng 2019–2025 trên toàn vùng, cột NO₂ tầng đối lưu trên ĐBSH là 64,8 µmol/m², gấp hơn ba lần ĐBSCL (20,2 µmol/m²). Ô cao nhất ĐBSH (185 µmol/m²) nằm ở phía bắc nội thành Hải Phòng; Hà Nội khoảng 85 µmol/m². Ở ĐBSCL, ô cao nhất (47,6 µmol/m²) nằm sát rìa đông, giáp TP Hồ Chí Minh. Không đồng lúa nào nổi lên trên bản đồ.
+
+<Figure
+  title="Hình 13.4 — NO₂ tầng đối lưu, trung bình 2019–2025"
+  try="So màu hai châu thổ trên cùng một thang. Ở ĐBSH, rê chuột từ Hà Nội về Hải Phòng rồi xuống Nam Định, Thái Bình: NO₂ giảm thế nào khi đi xa đô thị?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 NO₂ tầng đối lưu (lưới ~1,1 km, vết đo gốc 5,5 × 3,5 km), trung bình mọi ảnh 2019–2025; 1 km, lưới Mercator. Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="vi" label="NO₂ tầng đối lưu" region="red" choices={[
+    { key: 'no2', label: { vi: 'NO₂', en: 'NO₂' }, ids: { red: 'no2-red', mekong: 'no2-mekong' } },
+  ]} />
+</Figure>
+
+CO sống lâu hơn NO₂ nhiều, đủ để gió mang đi xa. Trên ĐBSCL, cột CO cao nhất trong tháng 1–4 (khoảng 38–39 mmol/m²) và thấp nhất tháng 7 (24,5), trùng mùa đốt rơm tại chỗ. Trên ĐBSH, CO cao nhất tháng 3–4 (66,0 và 63,6 mmol/m²), gấp đôi tháng 7, trong khi điểm cháy trên đồng ruộng ĐBSH lúc đó rất ít (Hình 13.2); điểm cháy trên đất rừng thì nhiều nhất trong tháng 1–5. Cột CO của một vùng gồm cả CO sinh tại chỗ lẫn CO gió mang tới, và số liệu ở đây không tách được hai phần đó.
+
+<Figure
+  title="Hình 13.5 — NO₂ và CO trung bình tháng trên hai châu thổ, 2019–2025"
+  try="Chọn CO. Đỉnh của ĐBSH rơi vào tháng mấy, và có trùng với đỉnh điểm cháy của chính ĐBSH ở Hình 13.2 không? Chọn NO₂: vì sao mùa đông cao hơn mùa hè dù xe cộ không đổi?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 NO₂ tầng đối lưu và CO cột tổng; trung bình tháng trên toàn vùng (lấy mẫu 7 km) trong ranh hai vùng thống kê. Contains modified Copernicus Sentinel data."
+>
+  <EmissionSeries client:visible lang="vi" view="air" />
+</Figure>
+
+Bụi mịn từ đốt rơm thì Sentinel-5P không đo trực tiếp. Lasko và Vadrevu (2018) ước tính đốt phụ phẩm lúa ở Việt Nam thải khoảng 150 nghìn tấn PM2.5 năm 2015, tức 14–18 % tổng lượng PM2.5 phát thải của cả nước. Ước tính đó dựa trên diện tích lúa, tỉ lệ đốt giả định và hệ số phát thải, không phải trên số điểm cháy, vì số điểm cháy quá thấp so với thực tế.
+
+## 13.5 CH₄ ruộng lúa: nhìn từ trên và tính từ dưới
+
+TROPOMI đo <Term id="xch4">XCH₄</Term>, tỉ lệ trộn CH₄ trung bình trong cả cột không khí khô, theo đơn vị ppb (phần tỉ). Ô đo rộng 5,5 × 7 km (từ tháng 8/2019). Phép đo chỉ được giữ khi gần như không có mây, bề mặt đủ sáng và ít sol khí (Lorente và cs., 2021). Ở vùng nhiệt đới nhiều mây và ruộng ngập tối màu, điều kiện đó hiếm.
+
+<Figure
+  title="Hình 13.6 — CH₄ cột khí trung bình 2019–2025, và số lần đo hợp lệ"
+  try="Ở lớp XCH₄, tìm ĐBSH và ĐBSCL: có đậm hơn vùng đồi núi cùng vĩ độ không? Chuyển sang 'Số lần đo': mỗi ô ở ĐBSCL có bao nhiêu lần đo trong 7 năm, so với Đông Bắc Thái Lan?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 XCH₄ đã hiệu chỉnh sai lệch, mọi ảnh ngày 2019–2025; ô 10 km, khung 1 800 km lưới Mercator; số lần đo và XCH₄ tính trên lưới L3 ~1,1 km, giữ ô 1,1 km có ≥ 10 lần đo, rồi lấy trung bình lên ô 10 km. Contains modified Copernicus Sentinel data."
+>
+  <DeltaMap client:visible lang="vi" label="CH₄ cột khí" region="vietnam" boundaries={false} choices={[
+    { key: 'ch4', label: { vi: 'XCH₄', en: 'XCH₄' }, ids: { vietnam: 'ch4-vietnam' } },
+    { key: 'looks', label: { vi: 'Số lần đo', en: 'Looks' }, ids: { vietnam: 'ch4looks-vietnam' } },
+  ]} />
+</Figure>
+
+Trung bình 2019–2025, XCH₄ trên ĐBSH là 1 951 ppb, cao hơn 20,9 ppb so với dải cùng vĩ độ (100–112° Đ) bên ngoài châu thổ. ĐBSCL cao hơn dải cùng vĩ độ 12,7 ppb. Dải so sánh gồm cả đồi núi, rừng, đô thị và mặt đất sáng tối khác nhau, nên chênh lệch này không phải là tín hiệu riêng của ruộng lúa. Số lần đo cũng rất khác: trong bảy năm, một ô 1,1 km ở ĐBSH có trung vị 49 lần đo hợp lệ, ở ĐBSCL chỉ 17 lần (vùng lúa phía tây chỉ khoảng 6), trong khi Đông Bắc Thái Lan có khoảng 170. Các ô 10 km cao nhất cả khung (khoảng 1 970 ppb) nằm ở châu thổ Châu Giang (Trung Quốc) và khu vực Hà Nội.
+
+<Figure
+  title="Hình 13.7 — XCH₄ trung bình tháng trên hai châu thổ, 2019–2025"
+  try="Ở ĐBSH, XCH₄ tháng 9–11 cao hơn tháng 1–7 bao nhiêu? Ở ĐBSCL, tìm những tháng không có điểm nào. Đó là mùa gì?"
+  source="Copernicus Sentinel-5P TROPOMI, OFFL L3 XCH₄ đã hiệu chỉnh sai lệch; trung bình tháng trong ranh mỗi vùng, trên lưới L3 ~1,1 km. Tháng không có số đo để trống. Contains modified Copernicus Sentinel data."
+>
+  <EmissionSeries client:visible lang="vi" view="ch4" />
+</Figure>
+
+Trên ĐBSH, XCH₄ tháng 9–11 (1 948–1 957 ppb, trung bình các năm) cao hơn tháng 1–7 (1 905–1 918 ppb; tháng 7 chỉ có 4 năm có số đo). Đỉnh rơi vào giữa và ngay sau thời kỳ ruộng lúa Mùa ngập nước (tháng 7–10). Wójcik-Gront và cs. (2025) cũng thấy XCH₄ trên các vùng phát thải lớn, trong đó có ĐBSCL, dao động theo mùa khoảng 30 ppb và đạt đỉnh vào quý 4, so với khoảng 17 ppb ở vùng phát thải thấp. Tuy vậy, một phần chu kỳ mùa đó là của cả khí quyển, không riêng ruộng lúa. Chuỗi còn đi lên đều qua các năm: trên ĐBSH, từ 1 861–1 893 ppb trong tháng 1–4/2019 lên 1 944–1 970 ppb trong tháng 10–12/2025, nên chỉ so các tháng trong cùng năm. Ở ĐBSCL, tháng 9 không có một số đo nào trong bảy năm. Vệ tinh vắng mặt đúng lúc ruộng ngập nhiều nhất.
+
+Vì vậy, kiểm kê quốc gia không đo CH₄ từ vũ trụ mà tính từ dưới lên, theo phương pháp của IPCC:
+
+<Formula label="CH₄ từ một vụ lúa (IPCC 2019, Tier 1)" tex="\mathrm{CH_4} = EF_c \times SF_w \times SF_p \times SF_o \times t \times A" where="EFc: hệ số nền, kg CH₄/ha/ngày (ruộng ngập liên tục, không vùi chất hữu cơ; Đông Nam Á 1,22); SFw: hệ số chế độ nước trong vụ (ngập liên tục 1; rút nước một lần 0,71; rút nhiều lần, gồm ướt khô xen kẽ, 0,55); SFp: chế độ nước trước vụ (khô dưới 180 ngày 1; ngập trên 30 ngày 2,41); SFo = (1 + Σ lượng × CFOA)^0,59: chất hữu cơ vùi (rơm vùi dưới 30 ngày trước cấy CFOA = 1; trên 30 ngày 0,19; rơm đốt hoặc để trên mặt không tính); t: số ngày vụ (Đông Nam Á mặc định 102); A: diện tích (ha)" />
+
+Với hệ số mặc định cho Đông Nam Á, một ha lúa ngập liên tục trong 102 ngày phát thải 124,4 kg CH₄, tương đương 3,36 tấn CO₂ (theo hệ số 27 của IPCC AR6). Nhân với 1 487,7 nghìn ha lúa Đông Xuân 2024 ở ĐBSCL (Tổng cục Thống kê, Chương 4) được khoảng 185 nghìn tấn CH₄ cho một vụ, nếu giả định toàn bộ ruộng ngập liên tục và không vùi rơm. Vùi 3 tấn rơm khô mỗi ha ngay trước khi cấy làm con số tăng 2,27 lần; nếu vùi sớm hơn 30 ngày thì chỉ tăng 1,30 lần.
+
+<Figure
+  title="Hình 13.8 — Tính CH₄ một vụ lúa theo IPCC Tier 1"
+  try="Bắt đầu từ ngập liên tục, đốt rơm. Chuyển sang 'Vùi < 30 ngày trước cấy' với 5 tấn/ha: CH₄ tăng mấy lần? Giữ nguyên rơm, chuyển sang ướt khô xen kẽ: giảm bao nhiêu? Đổi chế độ trước vụ sang 'Ngập > 30 ngày'."
+  source="Phương trình 5.1–5.3 và hệ số mặc định Bảng 5.11–5.14, IPCC (2019) Refinement, Tập 4, Chương 5.5; GWP-100 của CH₄ không hóa thạch = 27 (IPCC AR6 WG1, Bảng 7.15). Minh họa, không phải số đo."
+>
+  <RiceMethane client:visible lang="vi" />
+</Figure>
+
+<Depth level="advanced" title="Tier 1, Tier 2 và hệ số đo ở Việt Nam">
+
+Tier 1 dùng hệ số mặc định toàn cầu hoặc khu vực. Tier 2 thay chúng bằng hệ số đo trong nước. Vo và cs. (2020) tổng hợp các phép đo buồng kín ở Việt Nam và đưa ra hệ số nền từ 1,72 đến 3,89 kg CH₄/ha/ngày tùy vùng và vụ trong năm (đầu, giữa, cuối năm), đều cao hơn mức mặc định 1,22 của IPCC cho Đông Nam Á. Arai (2022) đo 15 vụ liên tiếp ở một ruộng ba vụ tại ĐBSCL và thấy phát thải khi ngập liên tục bằng 1,1–2,7 lần các hệ số dùng ở Việt Nam. Hai điều rút ra: hệ số mặc định có thể đánh giá thấp phát thải ở đây, và sai số của bất kỳ ước tính CH₄ lúa nào cũng lớn. Viễn thám làm giảm sai số về **diện tích và lịch vụ**, chứ không làm giảm sai số của hệ số.
+
+</Depth>
+
+## 13.6 Tưới ướt khô xen kẽ và lúa phát thải thấp
+
+<Term id="awd">Tưới ướt khô xen kẽ</Term> (AWD) để ruộng khô dần đến khi mực nước xuống dưới mặt đất rồi mới tưới lại, nhiều lần trong vụ. Đất được thoáng khí, vi khuẩn sinh CH₄ hoạt động kém đi. IPCC xếp AWD vào nhóm "rút nước nhiều lần", hệ số 0,55, tức giảm 45 % so với ngập liên tục. Thí nghiệm ở Việt Nam cho kết quả cùng chiều: trong 5 năm (15 vụ) ở một ruộng ba vụ tại ĐBSCL, AWD giảm 51 % CH₄ cả năm và tăng 9 % năng suất (Arai, 2022). Ở miền Bắc, rút nước đầu vụ và giữa vụ giảm 67 % CH₄ khi quản lý nước tốt và 43 % khi quản lý kém (Tariq và cs., 2017).
+
+<Predict client:visible lang="vi"
+  title="1 triệu ha lúa phát thải thấp"
+  q="Đề án 1 triệu ha lúa chất lượng cao, phát thải thấp ở ĐBSCL đặt mục tiêu năm 2030. Theo hệ số mặc định IPCC, nếu cả 1 triệu ha chuyển từ ngập liên tục sang AWD thì mỗi vụ giảm được khoảng bao nhiêu?"
+  options={['0,15 triệu tấn CO₂ tương đương', '1,5 triệu tấn CO₂ tương đương', '15 triệu tấn CO₂ tương đương', '150 triệu tấn CO₂ tương đương']} answer={1}
+  why="124,4 − 68,4 = 56 kg CH₄/ha/vụ; nhân 1 triệu ha được 56 nghìn tấn CH₄, nhân 27 được khoảng 1,51 triệu tấn CO₂ tương đương mỗi vụ. Với hai, ba vụ một năm, con số nhân lên tương ứng. Thử lại trên Hình 13.8." />
+
+Quyết định 1490/QĐ-TTg ngày 27/11/2023 phê duyệt Đề án phát triển bền vững 1 triệu ha lúa chất lượng cao, phát thải thấp ở 12 tỉnh ĐBSCL. Mục tiêu: 180 nghìn ha vào năm 2025 và 1 triệu ha vào năm 2030; phát thải khí nhà kính thấp hơn lúa canh tác thông thường trên 10 %; giảm 20 % lượng nước tưới; thu gom rơm ra khỏi ruộng để tái sử dụng 70 % vào năm 2025 và 100 % vào năm 2030; toàn bộ diện tích áp dụng ít nhất một quy trình canh tác bền vững như AWD.
+
+Một mục tiêu như vậy cần đo đạc, báo cáo và thẩm định (<Term id="mrv">MRV</Term>). Viễn thám góp vào từng bước:
+
+<Steps items={[
+  { t: 'Diện tích và lịch vụ', d: 'Bản đồ lúa và ngày xuống giống từ Sentinel-1 và MODIS (Chương 4) cho A và t trong công thức, theo từng vụ, từng tỉnh.' },
+  { t: 'Ruộng ngập hay khô', d: 'Radar Sentinel-1 phân biệt mặt nước với đất (Chương 4, 8), nên về nguyên tắc có thể theo dõi ruộng có được rút nước hay không. Nhưng ảnh cách nhau 12 ngày ở 10 m, một đợt phơi ruộng ngắn dễ lọt giữa hai lần chụp: cần kiểm chứng ngoài đồng.' },
+  { t: 'Rơm có bị đốt', d: 'Điểm cháy MODIS và VIIRS sau thu hoạch là chỉ số tương đối cho mục tiêu thu gom rơm, đặc biệt ở ĐBSCL mùa khô. Không thấy điểm cháy chưa chắc là không đốt.' },
+  { t: 'Đối chiếu từ trên', d: 'XCH₄ của Sentinel-5P chỉ hữu ích cho cả vùng và nhiều năm. Ở ĐBSCL số lần đo quá ít để kiểm chứng mức giảm 10 % của một đề án.' },
+]} />
+
+<Note kind="key">
+
+Mức giảm CH₄ của lúa phát thải thấp sẽ được **tính**, không được **đo** từ vệ tinh. Vệ tinh giúp con số tính ra đáng tin hơn bằng cách xác nhận diện tích, lịch vụ, việc rút nước và việc đốt rơm. Đó cũng là cách sách FAO (2017) đặt viễn thám vào thống kê nông nghiệp: cung cấp dữ liệu hoạt động và khung mẫu, còn số liệu cuối cùng vẫn cần đo đạc trên mặt đất.
+
+</Note>
+
+## 13.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Arai, H. (2022). Increased rice yield and reduced greenhouse gas emissions through alternate wetting and drying in a triple-cropped rice field in the Mekong Delta. *Science of the Total Environment*, 842, 156958. https://doi.org/10.1016/j.scitotenv.2022.156958
+- Cuong, T. T. và cs. (2021). Renewable energy from biomass surplus resource: potential of power generation from rice straw in Vietnam. *Scientific Reports*, 11, 792. https://doi.org/10.1038/s41598-020-80678-3
+- Giglio, L., Schroeder, W., & Justice, C. O. (2016). The collection 6 MODIS active fire detection algorithm and fire products. *Remote Sensing of Environment*, 178, 31–41. https://doi.org/10.1016/j.rse.2016.02.054
+- Giglio, L., Schroeder, W., Hall, J. V., & Justice, C. O. (2021). MODIS Collection 6 and Collection 6.1 Active Fire Product User's Guide, phiên bản 1.0. University of Maryland / NASA.
+- IPCC (2019). 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories, Tập 4, Chương 5: Cropland (mục 5.5, Rice cultivation).
+- IPCC (2021). Climate Change 2021: The Physical Science Basis, WG1, Chương 7, Bảng 7.15.
+- Lasko, K., Vadrevu, K. P., Tran, V. T., Ellicott, E., Nguyen, T. T. N., Bui, H. Q., & Justice, C. (2017). Satellites may underestimate rice residue and associated burning emissions in Vietnam. *Environmental Research Letters*, 12, 085006. https://doi.org/10.1088/1748-9326/aa751d
+- Lasko, K., & Vadrevu, K. (2018). Improved rice residue burning emissions estimates: Accounting for practice-specific emission factors in air pollution assessments of Vietnam. *Environmental Pollution*, 236, 795–806. https://doi.org/10.1016/j.envpol.2018.01.098
+- Lorente, A. và cs. (2021). Methane retrieved from TROPOMI: improvement of the data product and validation of the first 2 years of measurements. *Atmospheric Measurement Techniques*, 14, 665–684. https://doi.org/10.5194/amt-14-665-2021
+- Nguyen-Van-Hung và cs. (2019). An assessment of irrigated rice production energy efficiency and environmental footprint with in-field and off-field rice straw management practices. *Scientific Reports*, 9, 16887. https://doi.org/10.1038/s41598-019-53072-x
+- Schroeder, W., Oliva, P., Giglio, L., & Csiszar, I. A. (2014). The New VIIRS 375 m active fire detection data product. *Remote Sensing of Environment*, 143, 85–96. https://doi.org/10.1016/j.rse.2013.12.008
+- Tariq, A. và cs. (2017). Mitigating CH₄ and N₂O emissions from intensive rice production systems in northern Vietnam: Efficiency of drainage patterns in combination with rice residue incorporation. *Agriculture, Ecosystems & Environment*, 249, 101–111. https://doi.org/10.1016/j.agee.2017.08.011
+- Thủ tướng Chính phủ (2023). Quyết định 1490/QĐ-TTg ngày 27/11/2023 phê duyệt Đề án "Phát triển bền vững một triệu héc ta chuyên canh lúa chất lượng cao và phát thải thấp gắn với tăng trưởng xanh vùng ĐBSCL đến năm 2030".
+- Việt Nam (2021). Báo cáo cập nhật hai năm một lần lần thứ ba (BUR3) gửi UNFCCC, nộp ngày 16/4/2021 (kiểm kê năm 2016).
+- Vo, T. B. T. và cs. (2020). Methane Emission Factors from Vietnamese Rice Production: Pooling Data of 36 Field Sites for Meta-Analysis. *Climate*, 8(6), 74. https://doi.org/10.3390/cli8060074 (đính chính: *Climate*, 8(10), 113, https://doi.org/10.3390/cli8100113)
+- Wójcik-Gront, E., Wnuk, A., & Gozdowski, D. (2025). Spatio-Temporal Patterns of Methane Emissions from 2019 Onwards: A Satellite-Based Comparison of High- and Low-Emission Regions. *Atmosphere*, 16(6), 670. https://doi.org/10.3390/atmos16060670

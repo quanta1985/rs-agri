@@ -1,0 +1,28 @@
+---
+// Every <Formula label tex where /> in the chapters of this language, read at build time and grouped by chapter
+// (same idea as RefList): adding a formula to a chapter adds it here, no list to keep in sync.
+import fs from 'node:fs';
+import path from 'node:path';
+import { CHAPTERS } from '../data/chapters';
+import { langFromUrl, url } from '../i18n/ui';
+import Formula from './Formula.astro';
+
+const lang = langFromUrl(Astro.url);
+const dir = path.join(process.cwd(), 'src/content/chapters', lang);
+const groups = CHAPTERS.filter((c) => c.slug !== 'reference' && fs.existsSync(path.join(dir, `${c.slug}.mdx`))).map((c) => {
+  const src = fs.readFileSync(path.join(dir, `${c.slug}.mdx`), 'utf8').replace(/\r/g, '');
+  const items = [...src.matchAll(/<Formula\b([\s\S]*?)\/>/g)].map((m) => {
+    const attr = Object.fromEntries([...m[1].matchAll(/(\w+)="([^"]*)"/g)].map((a) => [a[1], a[2]]));
+    return { label: attr.label, tex: attr.tex, where: attr.where };
+  }).filter((f) => f.tex);
+  return { c, items };
+}).filter((g) => g.items.length > 0);
+const L = lang === 'vi' ? { ch: 'Chương', n: (k: number, m: number) => `${k} công thức từ ${m} chương` } : { ch: 'Chapter', n: (k: number, m: number) => `${k} formulas from ${m} chapters` };
+---
+<p class="muted">{L.n(groups.reduce((a, g) => a + g.items.length, 0), groups.length)}</p>
+{groups.map(({ c, items }) => (
+  <section>
+    <h3><a href={url(`${lang}/${c.slug}/`)}>{L.ch} {c.n} · {c.title[lang]}</a></h3>
+    {items.map((f) => <Formula label={f.label} tex={f.tex} where={f.where} />)}
+  </section>
+))}

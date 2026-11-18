@@ -1,0 +1,83 @@
+{
+ "id": "fire-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "Số ngày có điểm cháy mỗi năm (MODIS)",
+  "en": "Fire days per year (MODIS)"
+ },
+ "units": {
+  "vi": "ngày/năm",
+  "en": "days/yr"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  4
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 1014.731803,
+ "ground_res_m": 1000,
+ "width": 269,
+ "height": 285,
+ "dtype": "uint8",
+ "scale": 0.2,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2006–2010",
+  "2011–2015",
+  "2016–2020",
+  "2021–2025"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 40301,
+   "mean": 0.167,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.0,
+   "min": 0.0,
+   "max": 15.4
+  },
+  {
+   "valid": 40301,
+   "mean": 0.2421,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.4,
+   "min": 0.0,
+   "max": 16.6
+  },
+  {
+   "valid": 40301,
+   "mean": 0.2808,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.6,
+   "min": 0.0,
+   "max": 19.4
+  },
+  {
+   "valid": 40301,
+   "mean": 0.2179,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 1.4,
+   "min": 0.0,
+   "max": 14.2
+  }
+ ],
+ "provenance": {
+  "source": "NASA FIRMS, MODIS Collection 6.1 active fire (Giglio et al. 2016), Terra (+ Aqua from Jul 2002), 1 km daily raster",
+  "method": "days with >= 1 detection per cell, mean per year of each 5-year period; nearest-neighbour onto the 1 km Mercator grid; capped at 50.8",
+  "exported": "2026-11-17T15:44:01+00:00",
+  "script": "scripts/data/export_emissions.py"
+ }
+}

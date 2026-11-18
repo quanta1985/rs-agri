@@ -9,6 +9,7 @@
     "bentre": { "kind": "site", "delta": "mekong", "name": { "vi": "Giồng Trôm – Ba Tri (Bến Tre)", "en": "Giong Trom – Ba Tri (Ben Tre)" }, "center": [106.5, 10.1], "size_m": 10240 },
     "camau": { "kind": "site", "delta": "mekong", "name": { "vi": "Năm Căn – Ngọc Hiển (Cà Mau)", "en": "Nam Can – Ngoc Hien (Ca Mau)" }, "center": [105.0, 8.75], "size_m": 10240 },
     "ndcoast": { "kind": "frame", "delta": "red", "name": { "vi": "Bờ biển Nam Định", "en": "Nam Dinh coast" }, "center": [106.40, 20.12], "size_m": 52000 },
-    "cmcoast": { "kind": "frame", "delta": "mekong", "name": { "vi": "Mũi Cà Mau", "en": "Ca Mau Cape" }, "center": [105.03, 8.82], "size_m": 72000 }
+    "cmcoast": { "kind": "frame", "delta": "mekong", "name": { "vi": "Mũi Cà Mau", "en": "Ca Mau Cape" }, "center": [105.03, 8.82], "size_m": 72000 },
+    "vietnam": { "kind": "frame", "name": { "vi": "Việt Nam và lân cận", "en": "Viet Nam and neighbours" }, "center": [105.8, 15.8], "size_m": 1800000 }
   }
 }

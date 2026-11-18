@@ -1,0 +1,183 @@
+---
+title: "Multi-hazard risk & adaptation zoning"
+n: 14
+summary: "Floods, drought, dry-season crop decline and low land do not come one at a time. This chapter stacks the hazard layers of Chapters 7–13 on the cropland of both deltas into one composite index, lets you set the weights and watch the province ranking change. The main lesson: a risk map reflects the choices of its maker (which indicators, which scales, which weights) and only sees hazards that can be measured; for the Mekong Delta the biggest gap is salinity."
+objectives:
+  - Distinguish hazard, exposure and vulnerability, and say which part satellites can measure.
+  - Build a composite hazard index by weighted overlay, and explain how each indicator is put on a 0–100 scale.
+  - Assess how sensitive the province ranking is to the weights, and recognise an indicator that barely varies in space.
+  - Relate the dominant-hazard map to the ecological sub-regions of Resolution 120/NQ-CP, and list what the map is missing.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import M from '../../../components/M.astro';
+import Depth from '../../../components/Depth.astro';
+import RiskLab from '../../../islands/RiskLab.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/risk.json';
+
+Each chapter of Part C looked at one hazard: rain and heat (Chapter 7), floods (Chapter 8), drought (Chapter 9), salinity (Chapter 10), low land and subsidence (Chapter 11), the coast (Chapter 12). A planner has to look at all of them at once: which province faces the most hazards, and which hazard dominates where? The usual answer is to stack the layers with a set of weights. That is easy, but the final number depends on choices that are not in the data. This chapter builds such a map and then takes it apart to show those choices.
+
+<Stats items={[
+  { v: '1,940', u: 'thousand ha', l: 'Mekong cropland scored (~250 m cells with at least 50 % WorldCover 2021 cropland)' },
+  { v: '35.2', u: '%', l: 'of it has a composite index of 50 or more when the four hazards are weighted equally' },
+  { v: '0–49.5', u: '%', l: 'share of Ben Tre cropland rated high, depending on whether floods or low land get the weight' },
+  { v: '0', u: 'layers', l: 'of usable satellite salinity: the main hazard of the Mekong coast is not in the index' },
+]} caption="Computed by scripts/risk_numbers.ts from the risk-* layers (scripts/data/export_risk.py)." />
+
+## 14.1 Hazard, exposure, vulnerability
+
+The FAO handbook (2017, section 6.2) puts it plainly: a drought alone does not trigger an emergency; whether it becomes a disaster depends on its impact on communities and the environment, that is, on how vulnerable people are to the shock. Section 6.3 adds that disaster risk is the interaction between hazards and vulnerability, and both keep changing. The common framework today (IPCC, 2014; UNDRR, 2016) has three parts:
+
+<Steps items={[
+  { t: 'Hazard', d: 'The phenomenon that can do harm: floods, drought, salinity, storm surge. Remote sensing measures this part fairly well (surface water, rain, vegetation indices, elevation).' },
+  { t: 'Exposure', d: 'What lies in the hazard zone: paddies, orchards, houses, people. Land cover (Chapter 3), rice maps (Chapter 4) and population (Chapter 1) answer this.' },
+  { t: 'Vulnerability', d: 'How badly things suffer when the hazard comes: is there a high dyke, a salinity sluice, money to switch crops? Satellites hardly see this part.' },
+]} />
+
+<Term id="hazard">Hazard</Term>, <Term id="exposure">exposure</Term> and <Term id="vulnerability">vulnerability</Term> together make <Term id="disaster-risk">risk</Term>. This chapter only does the first part and some of the second: it scores hazards **on cropland**. The result is therefore a **hazard index on farmland**, not a risk map in the full sense. Naming it correctly is the first step to not over-reading it.
+
+<Note kind="key">
+
+A map labelled "risk" that is built from satellite data alone is almost always a hazard map, sometimes with exposure. Two provinces in the same red can carry very different risk if one has dykes, sluices and reserve fresh water and the other does not.
+
+</Note>
+
+## 14.2 Four indicators from earlier chapters
+
+Each indicator is turned into a **score of 0–100** by a fixed rule, only on ~250 m cells with at least 50 % cropland in WorldCover 2021 (the same mask as the rice maps, Chapter 4). The rule that puts an indicator on the scale (<Term id="normalisation">normalisation</Term>) is the map maker's choice; the table states each one.
+
+| Indicator | From | Score 0–100 | Available |
+|---|---|---|---|
+| Flooding | Chapter 8: monthly Sentinel-1 water share | Mekong: largest monthly water share in Jul–Dec 2018 (one of the large flood years). Red River: new water after typhoon Yagi, 12 Sep minus 31 Aug 2024 | both |
+| Dry-season rain deficit | Chapter 9: Feb–Apr SPI-3 (CHIRPS, Funk et al., 2015; 5 km cells) | mean SPI-3 of 2016, 2020, 2024: 0 at ≥ 0, 100 at ≤ −2 | Mekong |
+| Dry-season crop decline | Chapter 10: Feb–Apr EVI anomaly | share of 2016, 2020, 2024 with an anomaly ≤ −0.05 (0, 33, 67 or 100) | Mekong |
+| Low-lying land | Chapter 11: DeltaDTM | 100 at ≤ 1 m, 0 at ≥ 3 m above EGM2008, linear in between | both |
+
+The Red River Delta has only two indicators. The dry seasons of 2016, 2020 and 2024 were wetter than normal in the north (delta-mean Feb–Apr SPI-3 between +0.4 and +1.4, Chapter 9), so the rain-deficit score would be 0 everywhere. Spring EVI there is almost entirely hidden by cloud (Chapter 9).
+
+On the 1,940 thousand ha of Mekong cropland, the four indicators look very different:
+
+- **Flooding**: 26.9 % of the area scores 50 or more and 48.1 % scores 0. It is concentrated in the deeply flooded upper delta.
+- **Crop decline**: 33.8 % of the area declined in at least two of the three dry seasons, and 35.2 % never did.
+- **Low land**: 68.4 % scores 50 or more, meaning it lies below 2 m in DeltaDTM.
+- **Rain deficit**: 99.5 % scores 50 or more, but scores only range from 52 to 72 (2 % to 98 % of cells). The whole delta was equally dry in those years.
+
+<Predict client:visible lang="en"
+  title="An indicator that cannot tell places apart"
+  q="The Mekong rain-deficit score is almost the same everywhere (about 52–72). What happens to the province ranking if you raise its weight?"
+  options={['The ranking turns upside down', 'Every cell is pulled towards nearly the same value: many cells cross 50 for that reason alone and the real differences are diluted, with no new information about where is worse', 'The driest province goes to the top', 'The composite does not change']} answer={1}
+  why="An indicator that is nearly constant carries no information about where is worse. With its weight at 3, the mean index rises from 45.6 to 50.7 and the area scoring 50 or more from 35.2 % to 48.3 %, only because many cells are pushed over the threshold; Ca Mau jumps from 9th to 4th. The top three stay Hau Giang, Kien Giang and Long An. Dropping it (weight 0) brings the high area down to 29.8 % and the top three stay the same. At 5 km, rainfall is too coarse to rank places inside a delta." />
+
+## 14.3 Weighted overlay
+
+The simplest way to combine indicators is a weighted mean, a form of <Term id="mcda">multi-criteria analysis</Term> widely used in GIS (Malczewski, 2006):
+
+<Formula label="Composite hazard index of a cell" tex="R = \frac{\sum_k w_k\, s_k}{\sum_k w_k}, \qquad 0 \le s_k \le 100" where="
+s_k :: score of indicator k in the cell (0–100)
+w_k :: weight of indicator k; the sums only run over the indicators with data in that cell
+R :: composite index, on the same 0–100 scale
+" />
+
+In each cell, the hazard with the largest <M tex="w_k s_k" /> is the cell's **dominant hazard**. A province is summarised by three numbers: the area-weighted mean index, the share of its area with R ≥ 50, and the hazard that dominates the most area.
+
+<Figure
+  title="Figure 14.1 — Composite hazard index on cropland: set your own weights"
+  try="Keep equal weights and read the province table. Raise 'Flooding' to 3: Long An and Dong Thap climb to the top, Ben Tre drops to 0 %. Put it back to 1 and raise 'Low-lying land' to 3: Hau Giang, Ca Mau and Bac Lieu lead. Set 'Dry-season rain deficit' to 0: how much does the map change? Switch to the Red River: why does almost nothing pass 50?"
+  source="Scores 0–100 on ~250 m cells with ≥ 50 % WorldCover 2021 cropland: flooding from Sentinel-1 (Mekong: largest monthly water share Jul–Dec 2018; Red River: new water 31 Aug → 12 Sep 2024), rain deficit from Feb–Apr CHIRPS SPI-3 (2016, 2020, 2024; 5 km cells), crop decline from the Feb–Apr MODIS EVI anomaly (≤ −0.05), low land from DeltaDTM (Pronk et al., 2024; CC BY 4.0); provinces with pre-2025 boundaries (geoBoundaries). Weights set by the reader; scripts/data/export_risk.py, scripts/risk_numbers.ts."
+>
+  <RiskLab client:visible lang="en" label="Composite hazard index map with adjustable weights" />
+</Figure>
+
+With four equal weights, the mean index of Mekong cropland is 45.6 and 35.2 % of the area scores 50 or more. At the top are Hau Giang (52.6 % of its area high), Long An (48.6 %) and Kien Giang (43.9 %). At the bottom are Tra Vinh (6.4 %), Vinh Long (15.1 %) and Tien Giang (19.4 %). Low land dominates the most area (39.3 %), followed by rain deficit (26.0 %), crop decline (17.7 %) and flooding (17.0 %).
+
+## 14.4 The weights decide the answer
+
+No data say that floods are so many times "worse" than low land. A weight is a judgement: of experts, of farmers who were asked, or of policy. Three different sets show the consequences at once:
+
+| Weights (flood / rain / crop / low) | Area with R ≥ 50 | Top three | Ben Tre | Tra Vinh |
+|---|---|---|---|---|
+| 1 / 1 / 1 / 1 | 35.2 % | Hau Giang, Long An, Kien Giang | 23.2 % | 6.4 % |
+| 3 / 1 / 1 / 1 | 28.5 % | Long An, Dong Thap, Kien Giang | 0.0 % | 0.4 % |
+| 1 / 1 / 1 / 3 | 49.6 % | Hau Giang, Ca Mau, Bac Lieu | 49.5 % | 32.8 % |
+
+When floods weigh most, the deeply flooded upper delta (Long An, Dong Thap) leads. When low land weighs most, the Ca Mau peninsula and the depressions between the Hau River and the Gulf of Thailand come first, and An Giang falls to the bottom (21.7 %). Same data, three different answers to "which province is most at risk".
+
+<Note kind="warn">
+
+Before publishing a multi-criteria map, try several weight sets (<Term id="sensitivity-analysis">sensitivity analysis</Term>) and report which provinces stay near the top whatever the weights. Conclusions that hold for only one set should say so (Saisana et al., 2005; OECD/JRC, 2008).
+
+</Note>
+
+<Predict client:visible lang="en"
+  title="Changing the scale"
+  q="Instead of 100 at ≤ 1 m and 0 at ≥ 3 m, low land is scored by rank: the lowest cell of the region gets 100, the highest 0 (min–max scaling). What changes?"
+  options={['Nothing changes', 'Scores depend on the extreme cells of each region, so the same cell scores differently in the Red River and Mekong deltas; the two can no longer be compared', 'The map becomes more accurate', 'Only the colours change']} answer={1}
+  why="Min–max scaling ties each score to the highest and lowest cells of the region at hand. A paddy at 1.5 m would score differently depending on which delta it lies in, and a single bad cell can stretch the whole scale. A fixed scale in physical units (metres, SPI) keeps scores comparable across regions and years." />
+
+## 14.5 What the map cannot see
+
+The most important part of a risk map is the list of what it leaves out.
+
+<Steps items={[
+  { t: 'Salinity', d: 'No satellite product measures the salinity of river or field water (Chapter 10). The crop-decline indicator only sees consequences, and Chapter 10 showed it is stronger inland than on the coast. That is why Ben Tre, the worst salinity-hit province in 2016, and Tra Vinh, another coastal province, sit in the lower half of the table with equal weights.' },
+  { t: 'One flood year, one typhoon', d: 'Mekong flooding comes from 2018. The Red River has a single event, typhoon Yagi 2024, and radar misses flooded rice at heading (Chapter 8): only 1.7 % of Red River cropland scores 50 or more for flooding.' },
+  { t: 'Elevation and datum', d: 'DeltaDTM is referenced to EGM2008, not the Hon Dau datum; Minderhoud et al. (2019) showed the Mekong Delta is much lower than global DEMs suggest (Chapter 11). The 1 m and 3 m thresholds are therefore conventions too.' },
+  { t: 'Subsidence, erosion', d: 'Subsidence rates (Chapter 11) and coastal erosion (Chapter 12) are not yet wall-to-wall layers, so they are left out.' },
+  { t: 'Vulnerability', d: 'Triple-crop dykes, salinity sluices, freshwater reservoirs, insurance, income: all decide whether a hazard turns into loss, and none is in satellite data.' },
+]} />
+
+<Predict client:visible lang="en"
+  title="Ben Tre in the lower half"
+  q="With equal weights, only 23.2 % of Ben Tre cropland and 6.4 % of Tra Vinh cropland rate high, less than most provinces. Which conclusion is right?"
+  options={['These two provinces are low-risk', 'The map lacks a salinity indicator, the main hazard of these provinces; station salinity data are needed before concluding', 'The satellite data are wrong', 'The flood weight should be lowered']} answer={1}
+  why="At the end of March 2016 the 4 g/L salinity front reached 78 km up the Ham Luong and 81 km up the Co Chien, two branches that flow through Ben Tre and Tra Vinh (Chapter 10). A composite index can only rank by the hazards it contains. Here the defining hazard of the coast is missing, so the coastal provinces are ranked wrongly in a systematic way." />
+
+## 14.6 Adaptation zoning and Resolution 120
+
+<Term id="resolution-120">Resolution 120/NQ-CP</Term> of 17 November 2017 on sustainable and climate-resilient development of the Mekong Delta (Chapter 10) asks to respect natural laws and avoid rough intervention in nature, and to move from "living with floods" to "living proactively with floods, inundation, brackish and salt water". It calls for <Term id="ecological-subregion">ecological sub-regions</Term> (the flood plain, the freshwater zone, the brackish and saline zones) to guide development; for an agricultural structure built on three pillars, "aquaculture – fruit – rice", tied to those sub-regions; for room to drain floods; for brackish and salt water to be seen as a natural resource too; and it tasks the Ministry of Agriculture with reducing the area of rice and other crops that use much fresh water but have low commercial value (quotes translated from the Vietnamese text).
+
+The dominant-hazard map shows part of the logic of that zoning, but only once the rain indicator is dropped. With equal weights, that nearly uniform indicator (about 61 points) wins wherever the other hazards are lower, so it paints the whole low upper delta orange. Set the rain weight to 0: flooding becomes the dominant hazard of Dong Thap, crop decline of An Giang and Long An, and low land dominates the other ten provinces, from Hau Giang and Kien Giang to the Ca Mau peninsula. It also shows the limits of the word "hazard". For Resolution 120, the flood in the flood plain is a hazard and also a source of silt and fish and a storage space to be kept. Salt water on the coast is what makes shrimp farming possible. A "higher is worse" index cannot express that.
+
+<Figure
+  title="Figure 14.2 — Dominant hazard on cropland"
+  try="With equal weights, which colour covers the low upper delta of Long An – Dong Thap? Set 'Dry-season rain deficit' to 0: what replaces the orange (rain deficit), and where? Where is the flood plain, and where the brackish coast, in the words of Resolution 120?"
+  source="As Figure 14.1; each cell coloured by the indicator with the largest w·s; grey = every indicator 0. Okabe-Ito colours."
+>
+  <RiskLab client:visible lang="en" view="dom" label="Dominant hazard map with adjustable weights" />
+</Figure>
+
+<Note kind="why">
+
+A multi-criteria map is most useful for **discussion**, not for **verdicts**. Put the parties (farmers, irrigation, planners) in front of the same map, let each set the weights the way they think, and look at where the map is always red and where it is red for only one set. That is how the FAO handbook (2017, section 6.3) links early warning to early action: information is only worth something when decision makers understand and trust it.
+
+</Note>
+
+<Depth level="advanced" title="Red River Delta: two indicators, little signal">
+
+On 657 thousand ha of Red River cropland, the composite with two equal weights passes 50 on only 1.1 % of the area, most in Nam Dinh (5.3 %) and Ninh Binh (3.0 %). With low land weighted 3, Nam Dinh has 30.6 % of its area high and Thai Binh 16.2 %: the low coastal strip of the delta. A small result does not mean the Red River Delta is safe. Its main risks (typhoons, heavy rain, waterlogging inside the dykes, low river flow in the dry season) either cannot be seen through cloud by optical images or appear only once in the data.
+
+</Depth>
+
+## 14.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Sections 6.2, 6.3.
+- Funk, C. et al. (2015). The climate hazards infrared precipitation with stations — a new environmental record for monitoring extremes. *Scientific Data*, 2, 150066. https://doi.org/10.1038/sdata.2015.66
+- Government of Viet Nam (2017). *Resolution 120/NQ-CP of 17 November 2017 on sustainable and climate-resilient development of the Mekong Delta*.
+- IPCC (2014). Summary for Policymakers. In: *Climate Change 2014: Impacts, Adaptation, and Vulnerability. Part A* (WG II AR5). Cambridge University Press.
+- Malczewski, J. (2006). GIS-based multicriteria decision analysis: a survey of the literature. *International Journal of Geographical Information Science*, 20(7), 703–726. https://doi.org/10.1080/13658810600661508
+- Minderhoud, P. S. J., Coumou, L., Erkens, G., Middelkoop, H., & Stouthamer, E. (2019). Mekong delta much lower than previously assumed in sea-level rise impact assessments. *Nature Communications*, 10, 3847. https://doi.org/10.1038/s41467-019-11602-1
+- OECD & JRC (2008). *Handbook on Constructing Composite Indicators: Methodology and User Guide*. OECD Publishing, Paris.
+- Pronk, M., Hooijer, A., Eilander, D., Haag, A., de Jong, T., Vousdoukas, M., Vernimmen, R., Ledoux, H., & Eleveld, M. (2024). DeltaDTM: A global coastal digital terrain model. *Scientific Data*, 11, 273. https://doi.org/10.1038/s41597-024-03091-9
+- Saisana, M., Saltelli, A., & Tarantola, S. (2005). Uncertainty and sensitivity analysis techniques as tools for the quality assessment of composite indicators. *Journal of the Royal Statistical Society: Series A*, 168(2), 307–323. https://doi.org/10.1111/j.1467-985X.2005.00350.x
+- UNDRR (2016). *Report of the open-ended intergovernmental expert working group on indicators and terminology relating to disaster risk reduction* (A/71/644). United Nations.

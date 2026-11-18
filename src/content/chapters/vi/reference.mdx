@@ -1,0 +1,77 @@
+---
+title: "Công thức & tài liệu tham khảo"
+n: 16
+summary: "Mọi công thức của sổ tay ở một chỗ, nguồn dữ liệu và cách ghi công, mục lục đối chiếu với sách FAO (2017), và danh mục tài liệu tham khảo gộp từ tất cả các chương."
+objectives:
+  - Tra nhanh một công thức và tìm chương giải thích nó.
+  - Biết mỗi bộ dữ liệu đến từ đâu, dùng ở chương nào và cần ghi công thế nào.
+  - Tìm phần tương ứng trong sách FAO (2017) của từng chương.
+updated: "2026-11-18"
+---
+import FormulaIndex from '../../../components/FormulaIndex.astro';
+import RefList from '../../../components/RefList.astro';
+import Note from '../../../components/Note.astro';
+
+## 16.1 Công thức
+
+Danh sách được gom tự động từ các chương khi dựng trang, xếp theo thứ tự chương. Bấm tên chương để đọc phần giải thích. Thuật ngữ đầy đủ nằm ở trang [Thuật ngữ](../glossary/).
+
+<FormulaIndex />
+
+## 16.2 Dữ liệu và ghi công
+
+Mọi bản đồ và biểu đồ của sổ tay được tính từ dữ liệu mở trên Google Earth Engine, bằng các script trong thư mục `scripts/data/` của mã nguồn. Nguồn của từng hình ghi ở chú thích hình.
+
+| Dữ liệu | Nhà cung cấp, ghi công | Chương |
+|---|---|---|
+| Sentinel-1 GRD, Sentinel-2 L2A, Sentinel-5P L3 | ESA / Copernicus: *Contains modified Copernicus Sentinel data (2015–2025)* | 1–4, 8, 10, 12–14 |
+| Cloud Score+ | Google | 2, 4, 8, 10 |
+| Landsat 5, 7, 8, 9 Collection 2 Level 2 | U.S. Geological Survey | 2, 12 |
+| MODIS MOD13Q1, MYD13Q1, MOD11A2 | NASA LP DAAC | 4, 6, 7, 9, 10, 14 |
+| FIRMS (điểm cháy MODIS) | NASA FIRMS | 13 |
+| SMAP L4 độ ẩm đất | NASA | 9 |
+| CHIRPS v2.0 | UCSB Climate Hazards Center (Funk và cs., 2015) | 7, 9, 13, 14 |
+| ERA5-Land | ECMWF: *Contains modified Copernicus Climate Change Service information* | 7, 9 |
+| Chỉ số ONI | NOAA Climate Prediction Center | 7, 9 |
+| ESA WorldCover 2021 | ESA, CC BY 4.0 | 1–9, 13, 14 |
+| Dynamic World | Google & World Resources Institute, CC BY 4.0 | 3, 10 |
+| Esri 10 m Annual LULC | Esri / Impact Observatory, CC BY 4.0 | 3, 5 |
+| GHS-POP | European Commission JRC (GHSL) | 1 |
+| Global Surface Water | European Commission JRC | 8 |
+| SoilGrids 2.0 | ISRIC, CC BY 4.0 | 11 |
+| DeltaDTM v1 | Deltares (Pronk và cs., 2024), CC BY 4.0 | 11, 14 |
+| Copernicus DEM GLO-30 | ESA / Copernicus | 11 |
+| Global Mangrove Watch v3 | Global Mangrove Watch, CC BY 4.0 | 12 |
+| Năng suất, diện tích lúa theo tỉnh | Cục Thống kê (PX-Web, bảng V06.16–V06.18) | 6 |
+| Ranh giới tỉnh | geoBoundaries gbOpen ADM1 | mọi bản đồ |
+| Nền bản đồ | Esri World Imagery, Esri Light Gray Canvas | mọi bản đồ |
+
+<Note kind="warn">
+
+Ranh giới tỉnh là ranh trước khi sáp nhập năm 2025, để khớp với số liệu thống kê lịch sử. Sổ tay không dùng GADM, vì giấy phép của GADM không cho phép phân phối lại. Mọi bản đồ hiển thị quần đảo Hoàng Sa và Trường Sa thuộc Việt Nam.
+
+</Note>
+
+## 16.3 Sổ tay này và sách FAO (2017)
+
+Sổ tay được phát triển từ *Handbook on Remote Sensing for Agricultural Statistics* (FAO, 2017) của Chiến lược toàn cầu cải thiện thống kê nông nghiệp và nông thôn (GSARS). Nội dung được viết lại cho hai châu thổ Việt Nam, không dịch nguyên văn; các bảng, hình lấy từ sách đều ghi nguồn FAO. Phần C (môi trường) phần lớn là nội dung mới, không có trong sách.
+
+| Chương của sổ tay | Phần tương ứng trong sách FAO (2017) |
+|---|---|
+| 1 Hai châu thổ | Tổng quan |
+| 2 Dữ liệu | Mục 1.2, 1.4, 1.5, 9.1, 9.3 |
+| 3 Lớp phủ | Chương 2: Land cover mapping and monitoring |
+| 4 Lúa & mùa vụ | Mục 2.5.3, 5.2.1, 5.2.3, 5.2.5 và phụ lục về sai lệch của phép đếm pixel |
+| 5 Diện tích | Chương 3 (khung mẫu) và Chương 5 (ước lượng diện tích) |
+| 6 Năng suất | Chương 6: Early Warning Systems and crop yield estimation |
+| 9 Hạn hán | Mục 6.2, 6.4.2 |
+| 11 Đất & sụt lún | Mục 1.4, Bảng 2 |
+| 14 Rủi ro | Mục 6.2, 6.3 |
+
+Nội dung của sổ tay theo giấy phép [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Phần kiến thức nền về viễn thám (phổ, chỉ số, radar, phân loại, tiền xử lý) có ở ứng dụng anh em [GIS and Remote Sensing Knowledge](https://quanta1985.github.io/rs-knowledge/).
+
+## 16.4 Tài liệu tham khảo của toàn bộ sổ tay
+
+Danh mục được gộp tự động từ mục "Tài liệu tham khảo" của mọi chương. Mỗi tài liệu ghi kèm các chương trích dẫn nó.
+
+<RefList />

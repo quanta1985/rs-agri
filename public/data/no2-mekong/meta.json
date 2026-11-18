@@ -1,0 +1,53 @@
+{
+ "id": "no2-mekong",
+ "region": "mekong",
+ "title": {
+  "vi": "NO₂ tầng đối lưu, trung bình (Sentinel-5P)",
+  "en": "Tropospheric NO₂, mean (Sentinel-5P)"
+ },
+ "units": {
+  "vi": "µmol/m²",
+  "en": "µmol/m²"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  20,
+  120
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11621723.336,
+  1237972.799
+ ],
+ "res": 1014.731803,
+ "ground_res_m": 1000,
+ "width": 269,
+ "height": 285,
+ "dtype": "uint16",
+ "scale": 0.1,
+ "offset": 0.0,
+ "nodata": 65535,
+ "times": [
+  "2019–2025"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 40301,
+   "mean": 20.4653,
+   "p2": 10.0,
+   "p50": 20.1,
+   "p98": 32.5,
+   "min": 7.5,
+   "max": 47.6
+  }
+ ],
+ "provenance": {
+  "source": "Copernicus Sentinel-5P TROPOMI OFFL L3 (contains modified Copernicus Sentinel data)",
+  "method": "mean of all OFFL L3 NO2 images 2019-2025 (L3 grid ~1.1 km, native footprint 5.5 x 3.5 km), nearest sampling onto the 1 km Mercator grid",
+  "exported": "2026-11-17T15:50:14+00:00",
+  "script": "scripts/data/export_emissions.py"
+ }
+}

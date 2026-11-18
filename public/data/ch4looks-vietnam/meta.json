@@ -1,0 +1,53 @@
+{
+ "id": "ch4looks-vietnam",
+ "region": "vietnam",
+ "title": {
+  "vi": "Số lần đo CH₄ hợp lệ mỗi ô 1,1 km, 2019–2025",
+  "en": "Valid CH₄ looks per 1.1 km cell, 2019–2025"
+ },
+ "units": {
+  "vi": "lần đo",
+  "en": "looks"
+ },
+ "kind": "continuous",
+ "palette": "viridis",
+ "range": [
+  0,
+  200
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  10839539.554,
+  2722875.708
+ ],
+ "res": 10392.655373,
+ "ground_res_m": 10000,
+ "width": 180,
+ "height": 180,
+ "dtype": "uint16",
+ "scale": 0.1,
+ "offset": 0,
+ "nodata": 65535,
+ "times": [
+  "2019–2025"
+ ],
+ "clipped_to": null,
+ "stats": [
+  {
+   "valid": 29655,
+   "mean": 42.8421,
+   "p2": 1.0,
+   "p50": 9.7,
+   "p98": 235.368,
+   "min": 1.0,
+   "max": 459.1
+  }
+ ],
+ "provenance": {
+  "source": "Copernicus Sentinel-5P TROPOMI OFFL L3 (contains modified Copernicus Sentinel data)",
+  "method": "OFFL L3 XCH4 bias corrected, all daily images 2019-2025; looks counted and XCH4 averaged on the ~1.1 km L3 grid (EE asset), XCH4 kept where >= 10 looks, then mean of the 1.1 km cells to ~10 km",
+  "exported": "2026-11-17T17:05:36+00:00",
+  "script": "scripts/data/export_emissions.py"
+ }
+}

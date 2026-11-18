@@ -1,0 +1,168 @@
+---
+title: "Năng suất & cảnh báo sớm"
+n: 6
+summary: "Năng suất lúa đồng bằng tăng đều nhờ giống và thâm canh, nên câu hỏi của cảnh báo sớm là năm nay cao hay thấp hơn xu thế. Chương này đặt 24 năm năng suất Đông Xuân chính thức của từng tỉnh cạnh chỉ số EVI của MODIS, cho thấy mô hình đơn giản dự báo được gì, không được gì, và vì sao thời điểm của rủi ro quyết định chỉ số nào có ích."
+objectives:
+  - Mô tả các thành phần của một hệ thống cảnh báo sớm nông nghiệp và vai trò của viễn thám trong đó.
+  - Tách xu thế khỏi chuỗi năng suất chính thức và giải thích vì sao phải làm vậy trước khi dựng mô hình.
+  - Dựng và đánh giá một mô hình năng suất từ EVI bằng kiểm định chéo bỏ-một-năm.
+  - Chọn chỉ số và thời điểm quan sát phù hợp với loại rủi ro (hạn mặn cuối vụ, lũ, mây).
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import YieldModel from '../../../islands/YieldModel.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/yield.json';
+
+Năm 2001, ruộng lúa Đông Xuân ĐBSCL cho trung bình 5,04 tấn/ha; năm 2024 là 7,23 tấn/ha trên 1 487,7 nghìn ha gieo trồng. Phần lớn mức tăng ấy đến từ giống, phân bón, thủy lợi và cơ giới, đều đặn qua từng năm. Cảnh báo sớm không hỏi năng suất có tăng không, mà hỏi **năm nay** sẽ cao hay thấp hơn mức thường lệ, và hỏi đủ sớm để kịp làm gì đó. Chương này theo chương 6 của sách FAO (2017): hệ thống cảnh báo sớm và dự báo năng suất, thử trên số liệu thật của hai châu thổ.
+
+<Stats items={[
+  { v: '0,74', u: 'R²', l: 'giữa EVI cực đại của vụ và năng suất Đông Xuân Long An 2001–2024, khi chưa bỏ xu thế' },
+  { v: '0,14', u: 'R²', l: 'cũng cặp số liệu đó sau khi bỏ xu thế khỏi cả hai chuỗi: phần năm tốt, năm xấu mà EVI thật sự giải thích' },
+  { v: '6/13', u: '', l: 'tỉnh ĐBSCL nơi mô hình EVI cực đại dự báo năm chưa thấy tốt hơn việc chỉ đoán mức trung bình' },
+  { v: '0,05', u: 'tấn/ha', l: 'năng suất Đông Xuân 2016 của Bến Tre (hạn mặn), trong khi EVI cực đại của vụ gần như không đổi' },
+]} caption="Năng suất: Cục Thống kê (PX-Web, bảng V06.16–V06.18). EVI: MODIS MOD13Q1 + MYD13Q1 trên đất trồng trọt WorldCover. Tính bằng scripts/yield_numbers.ts." />
+
+## 6.1 Cảnh báo sớm là gì
+
+Theo sách FAO, mọi <Term id="early-warning">hệ thống cảnh báo sớm</Term> có ba khâu: **thu thập** dữ liệu, **phân tích và dự báo**, **truyền tin** đến người cần hành động. Giữa các khâu có một mâu thuẫn cố hữu: càng chờ thêm dữ liệu thì dự báo càng chắc, nhưng thời gian còn lại để hành động càng ngắn. Viễn thám giúp ở khâu đầu: nó quan sát mọi cánh đồng, đều đặn, không cần báo cáo từ dưới lên.
+
+<Tiles items={[
+  { t: 'GEOGLAM Crop Monitor', d: 'Đánh giá đồng thuận hằng tháng về lúa mì, ngô, lúa gạo, đậu tương ở các nước sản xuất chính, hơn 40 đối tác, cho AMIS từ tháng 9/2013.' },
+  { t: 'Asia-RiCE', d: 'Hợp phần lúa gạo của GEOGLAM do JAXA dẫn dắt; bản đồ lúa từ radar ALOS-2 và Sentinel-1, có chương trình riêng cho ĐBSCL.' },
+  { t: 'FAO ASIS', d: 'Chỉ số căng thẳng nông nghiệp: phần trăm đất canh tác có VHI dưới 35 trong mùa vụ, theo từng đơn vị hành chính.' },
+  { t: 'Thống kê chính thức', d: 'Năng suất, diện tích theo tỉnh, theo vụ. Không có nó thì không hiệu chỉnh được mô hình nào.' },
+]} />
+
+<Term id="crop-yield">Năng suất</Term> trong thống kê Việt Nam là sản lượng chia **diện tích gieo trồng**. Một vụ mất trắng vẫn nằm trong diện tích, nên năng suất tỉnh đó tụt gần về 0. Đây chính là thứ cảnh báo sớm muốn thấy trước.
+
+<Note kind="key">
+
+Một dự báo năng suất có ích phải trả lời được: so với xu thế, năm nay lệch bao nhiêu; dự báo đó sai trung bình bao nhiêu trên những năm mô hình chưa thấy; và nó có sẵn trước thu hoạch bao lâu. Thiếu một trong ba thì chưa phải cảnh báo sớm.
+
+</Note>
+
+## 6.2 Năng suất chính thức: xu thế và năm mất mùa
+
+<Figure
+  title="Hình 6.1 — Năng suất lúa Đông Xuân theo tỉnh, 2001–2024"
+  try="Xem An Giang rồi Kiên Giang: đường xu thế giải thích được bao nhiêu? Chuyển sang Bến Tre và Trà Vinh: hai năm nào tụt hẳn khỏi xu thế? Ở Bến Tre, xu thế còn ý nghĩa không?"
+  source="Cục Thống kê (Tổng cục Thống kê cũ), cơ sở dữ liệu PX-Web, bảng V06.17 'Năng suất lúa đông xuân phân theo địa phương' (tạ/ha, quy ra tấn/ha), tải 18/11/2026. Năng suất trên diện tích gieo trồng. Hà Nội trước 2008 = Hà Nội + Hà Tây (bình quân theo diện tích); Cần Thơ trước 2004 gồm cả Hậu Giang nên bỏ; Cà Mau thiếu 2007–2016 và 2018. Xu thế: đường thẳng bình phương nhỏ nhất."
+>
+  <YieldModel client:visible lang="vi" view="trend" label="Năng suất Đông Xuân theo tỉnh và xu thế" />
+</Figure>
+
+Ở các tỉnh trong đồng, xu thế giải thích phần lớn biến động: Kiên Giang tăng 0,102 tấn/ha mỗi năm (R² = 0,72), Long An 0,089 tấn/ha (R² = 0,80). Sách FAO cũng nêu điều này: ở nơi nông nghiệp đã thâm canh, xu thế chiếm phần lớn biến động năng suất, và phần còn lại sau khi bỏ xu thế phần lớn là do thời tiết. Ven biển thì khác. Theo số liệu Cục Thống kê, Bến Tre gieo 15,1 nghìn ha lúa Đông Xuân năm 2016 và chỉ thu 0,8 nghìn tấn, tức 0,05 tấn/ha; năm 2020 là 0,04 tấn/ha trên 5,3 nghìn ha. Trà Vinh tụt xuống 4,04 và 3,54 tấn/ha, so với khoảng 6,6–6,8 tấn/ha những năm bình thường. Đó là hai đợt hạn mặn của Chương 10.
+
+<Predict client:visible lang="vi"
+  title="Tương quan cao, dự báo kém?"
+  q="Năng suất và EVI cực đại của Long An cùng tăng suốt 24 năm, R² = 0,74. Vì sao như vậy chưa chứng tỏ EVI dự báo được năm tốt, năm xấu?"
+  options={['Vì R² = 0,74 là thấp', 'Vì hai chuỗi cùng có xu thế tăng: chúng tương quan cả khi năm tốt, năm xấu không khớp nhau', 'Vì EVI không đo được lúa', 'Vì Long An không trồng lúa Đông Xuân']} answer={1}
+  why="Bỏ xu thế khỏi cả hai chuỗi, R² của Long An chỉ còn 0,14. Phần lớn 'tương quan' ban đầu đến từ việc cả hai cùng tăng theo thời gian, không phải từ khả năng nhận ra năm bất thường." />
+
+## 6.3 Mùa vụ nhìn từ EVI
+
+<Figure
+  title="Hình 6.2 — Đường EVI của vụ chính trên đất trồng trọt, từng năm"
+  try="Ở ĐBSCL, EVI lên đỉnh vào khoảng nào của vụ Đông Xuân? So năm 2016 và 2020 với 2015 và 2019: khác nhau ở đầu vụ hay cuối vụ? Chuyển sang ĐBSH: đường cong có liền không, và vì sao?"
+  source="MODIS MOD13Q1 + MYD13Q1 v061, EVI × 0,0001, chỉ giữ SummaryQA ≤ 1; trung bình trên các ô 250 m có ≥ 50 % đất trồng trọt ESA WorldCover 2021 trong ranh vùng; mỗi điểm là một ảnh tổng hợp 16 ngày (Terra và Aqua lệch nhau 8 ngày), đặt vào giữa kỳ. ĐBSCL: vụ Đông Xuân 15/11 năm trước – 31/3; ĐBSH: vụ Xuân 15/2 – 31/5. Chỉ vẽ ảnh có ≥ 50 % số ô có giá trị tốt; không nối điểm cách nhau quá 20 ngày."
+>
+  <YieldModel client:visible lang="vi" view="curves" label="Đường EVI của vụ chính theo năm" />
+</Figure>
+
+Ở ĐBSCL, lúa Đông Xuân gieo sau lũ, nên EVI trung bình của đất trồng trọt lên đỉnh vào khoảng ngày thứ 63 kể từ 15/11, tức giữa tháng 1 (từ ngày 55 đến 103 tùy năm), rồi xuống nhanh khi gặt vào tháng 2–3. Mùa khô quang mây: chỉ 14 % ảnh tổng hợp bị bỏ vì dưới một nửa số ô có số liệu tốt. Ở ĐBSH thì ngược lại. Vụ Xuân cấy tháng 2, đúng mùa mưa phùn: 39 % ảnh bị bỏ, và trong tháng 2–3 trung bình chỉ 43 % ô có số liệu tốt. Đỉnh EVI rơi vào khoảng ngày thứ 75 kể từ 15/2, tức cuối tháng 4. Đường cong ĐBSH đứt đoạn, và EVI cực đại của nó phụ thuộc nhiều vào việc ảnh nào lọt qua mây.
+
+<Note kind="tip">
+
+Muốn biết vụ đang tốt hay xấu, phải biết nó **đang ở giai đoạn nào**. Cùng một giá trị EVI 0,4 có thể là lúa đang lên xanh hay lúa đã gặt một nửa. Vì thế mô hình năng suất luôn đi cùng lịch mùa vụ (Chương 4).
+
+</Note>
+
+## 6.4 Một mô hình năng suất đơn giản
+
+Mô hình viễn thám đơn giản nhất trong sách FAO (mục 6.4.2) là một <Term id="yield-forecast">hàm năng suất</Term>: hồi quy năng suất thống kê của các năm trước theo một chỉ số thực vật, rồi đặt chỉ số năm nay vào để dự báo. Ở đây chỉ số là <Term id="peak-evi">EVI cực đại của vụ</Term>, trung bình trên đất trồng trọt của tỉnh. Cả hai chuỗi được bỏ <Term id="yield-trend">xu thế</Term> trước, rồi mô hình được chấm bằng <Term id="loo-cv">kiểm định chéo bỏ-một-năm</Term>: mỗi năm được dự báo bằng đường hồi quy khớp trên các năm còn lại.
+
+<Formula label="Hàm năng suất trên phần lệch khỏi xu thế" tex="\Delta Y_t = a + b\,\Delta EVI_t, \qquad RMSE_{LOO} = \sqrt{\tfrac{1}{T}\sum_t \big(\Delta Y_t - \hat{\Delta Y}_{t,(-t)}\big)^2}" where="ΔY_t, ΔEVI_t: năng suất và chỉ số năm t trừ đường xu thế; Ŷ_(−t): dự báo cho năm t từ mô hình khớp trên các năm khác. So RMSE_LOO với sai số khi chỉ đoán trung bình các năm khác." />
+
+<Figure
+  title="Hình 6.3 — EVI và năng suất Đông Xuân theo tỉnh: mô hình có dự báo được không?"
+  try="Với An Giang, bật 'Số gốc' rồi 'Đã bỏ xu thế': R² thay đổi thế nào? Sai số bỏ-một-năm có nhỏ hơn sai số đoán trung bình không? Chuyển sang Bến Tre và Trà Vinh, rồi đổi chỉ số sang 'EVI tháng 2–3'."
+  source="Năng suất: Cục Thống kê, PX-Web bảng V06.17 (2001–2024, trên diện tích gieo trồng). EVI cực đại: giá trị lớn nhất của các ảnh MODIS tốt (SummaryQA ≤ 1) trong vụ (ĐBSCL 15/11 năm trước – 31/3, ĐBSH 15/2 – 31/5); EVI tháng 2–3 (chỉ ĐBSCL): trung bình các ảnh tốt 1/2–31/3; cả hai trung bình trên các ô 250 m có ≥ 50 % đất trồng trọt WorldCover 2021 trong ranh tỉnh (geoBoundaries, ranh trước 2025). Chỉ hiện tỉnh có ≥ 12 năm đủ số liệu. Xu thế bỏ bằng đường thẳng theo năm."
+>
+  <YieldModel client:visible lang="vi" view="scatter" label="Mô hình năng suất từ EVI theo tỉnh" />
+</Figure>
+
+Kết quả khiêm tốn. Với EVI cực đại, R² sau khi bỏ xu thế cao nhất ở An Giang (0,29) và Kiên Giang (0,22); ở An Giang sai số bỏ-một-năm là 0,31 tấn/ha, so với 0,35 tấn/ha nếu chỉ đoán trung bình. Mô hình thắng cách đoán trung bình ở 6 trên 13 tỉnh. Gộp mọi tỉnh lại, R² chỉ 0,01. Son và cs. (2014) dùng EVI MODIS cho ĐBSCL giai đoạn 2002–2011 và báo cáo R² 0,62–0,71 cho lúa Đông Xuân; con số ở mức đó chúng ta cũng gặp khi **chưa** bỏ xu thế (Long An 0,74, Kiên Giang 0,75, Sóc Trăng 0,73), nên muốn so sánh hai kết quả phải biết xu thế đã được xử lý thế nào.
+
+Ở ĐBSH, mô hình thắng cách đoán trung bình ở 8 trên 11 tỉnh, cao nhất Hưng Yên (R² = 0,48; sai số 0,12 so với 0,16 tấn/ha). Nghe có vẻ tốt hơn ĐBSCL, nhưng năng suất vụ Xuân ở đó dao động rất ít quanh xu thế: đoán trung bình đã chỉ sai 0,08 tấn/ha ở Nam Định và 0,40 tấn/ha ở Vĩnh Phúc. Ở Hưng Yên, vệ tinh chỉ bớt được 0,04 tấn/ha sai số.
+
+<Note kind="warn">
+
+Vì sao mô hình đơn giản yếu ở đây: ô MODIS 250 m trộn lúa với vườn, làng, kênh; trung bình cả tỉnh làm loãng những vùng bị hại; mây đầu vụ làm thiếu ảnh; và năng suất thống kê có sai số riêng. Mô hình vận hành thật dùng thêm thời tiết, ảnh 10 m, bản đồ lúa từng vụ, và hiệu chỉnh bằng điều tra cắt lúa.
+
+</Note>
+
+## 6.5 Sớm đến đâu: thời điểm của rủi ro
+
+Ở Bến Tre và Trà Vinh, EVI cực đại gần như không liên hệ với năm mất mùa: R² bằng 0,01 và 0,00. Lúa Đông Xuân lên xanh bình thường vào tháng 12–1, rồi mặn vào sông tháng 2–3, đúng lúc lúa trổ và làm hạt. Đỉnh EVI đã qua trước khi thiệt hại xảy ra. Với **EVI trung bình 1/2–31/3**, R² sau khi bỏ xu thế là 0,24 ở cả hai tỉnh, và sai số bỏ-một-năm thấp hơn cách đoán trung bình một chút (Bến Tre 1,40 so với 1,51 tấn/ha; Trà Vinh 0,80 so với 0,85). Đây chỉ là gợi ý: 24 năm số liệu, kết quả dựa chủ yếu vào hai năm mất mùa, và chỉ số này được chọn sau khi đã thử hai chỉ số trên 13 tỉnh. Diện tích lúa Đông Xuân của Bến Tre cũng đã rất nhỏ (12,8–17,2 nghìn ha các năm 2015, 2016, 2019 nhưng 0,77 nghìn ha năm 2024), nên những năm gần đây EVI đất trồng trọt của tỉnh phần lớn không đo lúa. EVI tháng 2–3 của Bến Tre năm 2016 là 0,30 và năm 2020 là 0,25, so với 0,37 năm 2015 và 0,39 năm 2019. Nhưng ở An Giang, chỉ số cuối vụ lại không giúp gì (R² 0,02). Và EVI tháng 2–3 thấp không chỉ có một nghĩa: lúa chết vì mặn, nhưng cũng có thể là ruộng đã gặt sớm để né mặn (Chương 10), hay chưa từng được gieo. Chỉ số cho biết cây kém xanh, không cho biết vì sao.
+
+<Figure
+  title="Hình 6.4 — Dị thường EVI tháng 2–4 ở ĐBSCL: 2016, 2020, 2024"
+  try="Bật So sánh: 2020 bên trái, 2016 bên phải. Vệt âm nằm ở đâu: dọc ven biển hay sâu trong đồng? Ghép với Hình 6.3: những tỉnh nào lẽ ra đã được cảnh báo?"
+  source="Cùng lớp với Hình 10.3 (Chương 10): MODIS MOD13Q1 + MYD13Q1 v061, EVI trung bình tháng 2–4 của năm trừ trung vị 2010–2024, 250 m, mọi loại đất. Thang màu cố định −0,2…+0,2."
+>
+  <DeltaMap client:visible lang="vi" label="Dị thường EVI mùa khô ĐBSCL" compare time={1} compareTime={0} choices={[
+    { key: 'anom', label: { vi: 'Dị thường EVI', en: 'EVI anomaly' }, ids: { mekong: 'sal-evianom-mekong' } },
+  ]} />
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Chỉ số nào cho cảnh báo mặn?"
+  q="Muốn cảnh báo sớm thiệt hại lúa Đông Xuân do mặn ở các tỉnh ven biển, nên theo dõi gì?"
+  options={['EVI cực đại của vụ', 'EVI và ảnh radar giai đoạn trổ–chín (tháng 2–3), cùng số đo mặn ở cửa sông và dự báo dòng chảy', 'Chỉ nhiệt độ bề mặt', 'Năng suất năm trước']} answer={1}
+  why="Thiệt hại do mặn đến cuối vụ, sau đỉnh EVI. Chỉ số cuối vụ bắt được nó nhưng khi đó đã muộn để cứu lúa; cảnh báo thật sự 'sớm' phải dựa vào số đo mặn, dòng chảy thượng nguồn và lịch xuống giống (Chương 10), còn vệ tinh dùng để xác nhận nơi bị hại và ước tính thiệt hại." />
+
+<Depth level="advanced">
+
+**Mô hình nông khí tượng.** Sách FAO (mục 6.4.1) mô tả một hướng khác: tính các biến của cây từ thời tiết, như bốc thoát hơi thực tế hay chỉ số thỏa mãn nhu cầu nước, rồi hồi quy năng suất theo chúng (<Term id="agromet-model">mô hình nông khí tượng</Term>). Ở Maroc, chỉ riêng mưa mùa vụ đã giải thích phần lớn biến động năng suất lúa mì; ở Bangladesh, mô hình lúa dùng bốc thoát hơi thực tế và nhiệt độ tối cao tháng 8. Ở hai châu thổ của chúng ta, lúa được tưới, nên mưa giải thích ít; rủi ro chính là mặn, lũ, bão và sâu bệnh, những thứ mô hình nước đơn giản không thấy. Dữ liệu cho hướng này có sẵn ở Chương 7 và 9.
+
+</Depth>
+
+## 6.6 Từ cảnh báo đến hành động
+
+Một cảnh báo chỉ có giá trị nếu có người hành động. Sách FAO dành mục 6.3 cho "cảnh báo sớm, hành động sớm": tách giai đoạn căng thẳng sinh kế khỏi giai đoạn khẩn cấp, và hành động ngay từ giai đoạn đầu. Ở ĐBSCL, bài học của 2016 đã thành hành động trong các mùa khô sau: dự báo mặn được phát từ đầu mùa, lịch xuống giống Đông Xuân được đẩy sớm để lúa trổ trước khi mặn lên (Chương 10).
+
+<Steps items={[
+  { t: 'Trước vụ', d: 'Dự báo dòng chảy, ENSO (Chương 7), dự báo mặn; khuyến cáo lịch xuống giống và diện tích nên gieo.' },
+  { t: 'Đầu vụ', d: 'Bản đồ diện tích đã gieo và ngày gieo từ Sentinel-1 (Chương 4): biết bao nhiêu ha sẽ trổ vào tháng có rủi ro.' },
+  { t: 'Giữa và cuối vụ', d: 'EVI, VHI và radar theo dõi tình trạng lúa; dị thường âm ở vùng bị mặn, lũ, hạn được đối chiếu với báo cáo địa phương.' },
+  { t: 'Sau vụ', d: 'Ước tính diện tích bị hại (Chương 8), so với thống kê; hiệu chỉnh lại mô hình cho năm sau.' },
+]} />
+
+<Note kind="key">
+
+Vệ tinh cho cảnh báo sớm nhiều nhất khi được dùng để biết **ở đâu** và **bao nhiêu ha** đang gặp rủi ro, theo đúng lịch mùa vụ. Dự báo năng suất từ một chỉ số đơn lẻ thì yếu: chỉ số phải được đo đúng lúc rủi ro xảy ra, và mô hình phải được chấm trên những năm nó chưa thấy.
+
+</Note>
+
+## 6.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Becker-Reshef, I. và cs. (2019). The GEOGLAM crop monitor for AMIS: Assessing crop conditions in the context of global markets. *Global Food Security*, 23, 173–181. https://doi.org/10.1016/j.gfs.2019.04.010
+- Cục Thống kê (2026). Cơ sở dữ liệu thống kê PX-Web, mục Nông nghiệp, lâm nghiệp và thủy sản, bảng V06.16–V06.18 (lúa đông xuân phân theo địa phương). https://pxweb.nso.gov.vn/pxweb/vi/ (truy cập 18/11/2026).
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chương 6: Early Warning Systems and crop yield estimation.
+- Oyoshi, K., Tomiyama, N., Okumura, T., Sobue, S., & Sato, J. (2016). Mapping rice-planted areas using time-series synthetic aperture radar data for the Asia-RiCE activity. *Paddy and Water Environment*, 14, 463–472. https://doi.org/10.1007/s10333-015-0515-x
+- Rojas, O., Vrieling, A., & Rembold, F. (2011). Assessing drought probability for agricultural areas in Africa with coarse resolution remote sensing imagery. *Remote Sensing of Environment*, 115, 343–352. https://doi.org/10.1016/j.rse.2010.09.006
+- Son, N. T., Chen, C. F., Chen, C. R., Minh, V. Q., & Trung, N. H. (2014). A comparative analysis of multitemporal MODIS EVI and NDVI data for large-scale rice yield estimation. *Agricultural and Forest Meteorology*, 197, 52–64. https://doi.org/10.1016/j.agrformet.2014.06.007

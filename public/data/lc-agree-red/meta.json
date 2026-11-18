@@ -1,0 +1,113 @@
+{
+ "id": "lc-agree-red",
+ "region": "red",
+ "title": {
+  "vi": "Sản phẩm nào gọi là đất trồng trọt (2021)",
+  "en": "Which products call it cropland (2021)"
+ },
+ "units": null,
+ "kind": "classes",
+ "palette": null,
+ "range": null,
+ "classes": [
+  {
+   "v": 0,
+   "color": "#f2f2f2",
+   "label": {
+    "vi": "Không sản phẩm nào",
+    "en": "None"
+   }
+  },
+  {
+   "v": 1,
+   "color": "#e69f00",
+   "label": {
+    "vi": "Chỉ WorldCover",
+    "en": "WorldCover only"
+   }
+  },
+  {
+   "v": 2,
+   "color": "#56b4e9",
+   "label": {
+    "vi": "Chỉ Dynamic World",
+    "en": "Dynamic World only"
+   }
+  },
+  {
+   "v": 3,
+   "color": "#0072b2",
+   "label": {
+    "vi": "WorldCover + Dynamic World",
+    "en": "WorldCover + Dynamic World"
+   }
+  },
+  {
+   "v": 4,
+   "color": "#cc79a7",
+   "label": {
+    "vi": "Chỉ Esri",
+    "en": "Esri only"
+   }
+  },
+  {
+   "v": 5,
+   "color": "#d55e00",
+   "label": {
+    "vi": "WorldCover + Esri",
+    "en": "WorldCover + Esri"
+   }
+  },
+  {
+   "v": 6,
+   "color": "#7b3294",
+   "label": {
+    "vi": "Dynamic World + Esri",
+    "en": "Dynamic World + Esri"
+   }
+  },
+  {
+   "v": 7,
+   "color": "#009e73",
+   "label": {
+    "vi": "Cả ba",
+    "en": "All three"
+   }
+  }
+ ],
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0.0,
+ "nodata": 255,
+ "times": [
+  "2021"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 268871,
+   "mean": 2.6791,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 7.0,
+   "min": 0.0,
+   "max": 7.0
+  }
+ ],
+ "provenance": {
+  "source": "ESA/WorldCover/v200, GOOGLE/DYNAMICWORLD/V1 (mode of 2021 labels), projects/sat-io/open-datasets/landcover/ESRI_Global-LULC_10m_TS (2021)",
+  "processing": "10 m: cropland flag of each product (WorldCover 40, Dynamic World 4, Esri 5) -> code WC x1 + DW x2 + Esri x4; most frequent code in each ~250 m cell",
+  "attribution": "ESA WorldCover 10 m 2021 v200 (Zanaga et al. 2022); Dynamic World V1 (Brown et al. 2022); Esri 10 m Annual Land Use Land Cover, Impact Observatory (Karra et al. 2021); all CC BY 4.0; contains modified Copernicus Sentinel data",
+  "exported": "2026-11-18T00:55:55+00:00",
+  "script": "scripts/data/-c"
+ }
+}

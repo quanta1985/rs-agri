@@ -15,5 +15,6 @@ const sym = (s: string) => katex.renderToString(s, { throwOnError: true, output:
   {label && <figcaption class="mono-label">{label}</figcaption>}
   <div class="formula-math" set:html={html} />
   {rows.length > 0 && <dl class="formula-where">{rows.map(([s, d]) => <><dt set:html={sym(s)} /><dd>{d}</dd></>)}</dl>}
+  {rows.length === 0 && where.trim() && <p class="formula-where formula-note">{where.trim()}</p>}
   <slot />
 </figure>

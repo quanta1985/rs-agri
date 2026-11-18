@@ -1,0 +1,74 @@
+{
+ "id": "risk-red",
+ "region": "red",
+ "title": {
+  "vi": "Chỉ số hiểm họa trên đất trồng trọt",
+  "en": "Hazard indicators on cropland"
+ },
+ "units": {
+  "vi": "điểm (0–100)",
+  "en": "score (0–100)"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  0,
+  100
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721834.326,
+  2463814.832
+ ],
+ "res": 267.341019,
+ "ground_res_m": 250,
+ "width": 730,
+ "height": 758,
+ "dtype": "uint8",
+ "scale": 1,
+ "offset": 0,
+ "nodata": 255,
+ "times": [
+  "flood",
+  "low"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 105114,
+   "mean": 3.6357,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 46.0,
+   "min": 0.0,
+   "max": 100.0
+  },
+  {
+   "valid": 105095,
+   "mean": 20.9193,
+   "p2": 0.0,
+   "p50": 0.0,
+   "p98": 85.0,
+   "min": 0.0,
+   "max": 100.0
+  }
+ ],
+ "provenance": {
+  "source": "layers dem-dtm, flood-yagi, lc-cropfrac (this repository)",
+  "processing": "cells with >= 50 % WorldCover 2021 cropland; flood = new S1 water 12 Sep minus 31 Aug 2024 (Yagi; no data outside S1 orbit 91, ~4 % of the delta, where the composite uses low land only); low = 100 at DeltaDTM <= 1.0 m, 0 at >= 3.0 m, linear",
+  "attribution": "Contains modified Copernicus Sentinel data; DeltaDTM (Pronk et al. 2024, CC BY 4.0); ESA WorldCover 2021 (CC BY 4.0)",
+  "exported": "2026-11-18T02:56:08+00:00",
+  "script": "scripts/data/export_risk.py"
+ },
+ "indicators": {
+  "flood": {
+   "vi": "Ngập lũ",
+   "en": "Flooding"
+  },
+  "low": {
+   "vi": "Đất thấp",
+   "en": "Low-lying land"
+  }
+ }
+}

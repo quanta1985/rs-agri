@@ -1,0 +1,173 @@
+---
+title: "Khung mẫu & ước lượng diện tích"
+n: 5
+summary: "Bản đồ vệ tinh phủ kín mọi nơi nhưng có lỗi; điều tra thực địa chính xác nhưng chỉ ở vài điểm. Chương này dựng khung mẫu, phân tầng bằng bản đồ lớp phủ, rồi lấy mẫu hàng trăm lần trên bản đồ lúa thật của hai châu thổ để thấy sai số chuẩn giảm thế nào theo cỡ mẫu, theo cách phân tầng và khi dùng ước lượng hồi quy."
+objectives:
+  - Phân biệt khung mẫu danh sách và khung mẫu diện tích, và biết ảnh vệ tinh giúp dựng khung diện tích ra sao.
+  - Phân tầng một vùng bằng bản đồ lớp phủ và giải thích vì sao bản đồ sai không làm ước lượng bị chệch.
+  - Tính ước lượng diện tích, sai số chuẩn và khoảng tin cậy từ mẫu ngẫu nhiên đơn, mẫu phân tầng và ước lượng hồi quy.
+  - Chọn cỡ mẫu cho một hệ số biến động mục tiêu và đánh giá vệ tinh tiết kiệm được bao nhiêu công điều tra.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import SamplingLab from '../../../islands/SamplingLab.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/area-stats.json';
+
+Chương 4 đếm được 1 692 nghìn ha có lúa trên bản đồ ĐBSCL năm 2024, nhiều hơn 14 % so với diện tích gieo trồng vụ Đông Xuân mà Tổng cục Thống kê công bố. Con số nào đúng? Một bản đồ, dù đẹp, không tự cho biết nó sai bao nhiêu. Thống kê chính thức cần một con số kèm **sai số chuẩn**. Muốn vậy phải có một **mẫu xác suất** trên thực địa. Chương này theo hai chương 3 và 5 của sách FAO (2017): ảnh vệ tinh dùng để dựng và phân tầng khung mẫu, rồi làm biến phụ để giảm sai số của ước lượng.
+
+<Stats items={[
+  { v: '8,3', u: '%', l: 'hệ số biến động của diện tích lúa ĐBSCL ước lượng từ 200 ô 250 m chọn ngẫu nhiên (500 lần lặp)' },
+  { v: '2,53', u: '×', l: 'hiệu quả của mẫu phân tầng Neyman theo bản đồ Esri so với mẫu ngẫu nhiên đơn cùng cỡ (mức tốt nhất, xem mục 5.3)' },
+  { v: '2,12', u: '×', l: 'hiệu quả của ước lượng hồi quy dùng diện tích đất trồng trọt của Esri làm biến phụ' },
+  { v: '3 343', u: 'ô', l: 'mẫu ngẫu nhiên đơn cần để đạt hệ số biến động 2 % cho diện tích lúa ĐBSCL' },
+]} caption="Tính bằng scripts/area-stats_numbers.ts trên bản đồ lúa 2024 (Chương 4) và bản đồ Esri 2021; bản đồ lúa đóng vai 'sự thật' để kiểm tra các cách ước lượng." />
+
+## 5.1 Từ bản đồ đến con số thống kê
+
+Có hai cách biến một bản đồ thành diện tích. Cách thứ nhất là **đếm pixel**: số pixel lúa nhân diện tích một pixel. Cách này nhanh, nhưng bị chệch theo lỗi phân loại và pixel hỗn hợp, và không cho biết sai bao nhiêu (Chương 4, mục 4.5). Cách thứ hai lấy **mẫu thực địa** làm số đo chính, và dùng bản đồ để làm mẫu hiệu quả hơn. Sách FAO (2017, mục 5.3) gọi đó là kết hợp "thông tin phủ kín nhưng không chính xác của ảnh vệ tinh với thông tin chính xác trên một mẫu".
+
+<Tiles items={[
+  { t: 'Dựng khung', d: 'Ảnh cho biết ở đâu có đất canh tác, để chia lãnh thổ thành ô hoặc điểm và loại vùng không cần điều tra.' },
+  { t: 'Phân tầng', d: 'Bản đồ lớp phủ chia ô thành nhóm nhiều, vừa, ít đất trồng trọt. Mẫu được rải theo nhóm.' },
+  { t: 'Biến phụ', d: 'Diện tích trên bản đồ ở mọi ô (x) được dùng cùng số đo thực địa ở ô mẫu (y) trong ước lượng hồi quy hay hiệu chỉnh.' },
+  { t: 'Ước lượng vùng nhỏ', d: 'Ở huyện, xã có quá ít ô mẫu, mô hình dựa trên biến vệ tinh mượn thông tin từ các nơi khác.' },
+]} />
+
+<Note kind="key">
+
+Mẫu thực địa xác suất là "sự thật"; bản đồ là **biến phụ**. Bản đồ tốt làm sai số nhỏ đi với cùng số ô điều tra. Bản đồ kém chỉ làm mất lợi thế, không làm ước lượng bị chệch, miễn là bản đồ được dùng **trước** khi chọn mẫu và theo một quy tắc cố định.
+
+</Note>
+
+## 5.2 Khung mẫu danh sách và khung mẫu diện tích
+
+<Term id="list-frame">Khung mẫu danh sách</Term> là danh sách hộ, nông trại từ tổng điều tra hay sổ đăng ký. Nó tiện để hỏi về sản lượng, giá bán, lao động, nhưng chỉ tốt bằng danh sách: thiếu hộ mới, trùng hộ, lỗi thời nhanh. <Term id="area-frame">Khung mẫu diện tích</Term> lấy chính mặt đất làm đơn vị: điểm, đoạn thẳng hay <Term id="segment">ô (segment)</Term>. Nó phủ kín lãnh thổ, không trùng, và không cần biết ai canh tác. Ranh giới giữa hai loại không cứng: nhiều nước dùng địa bàn điều tra làm đơn vị cấp một của khung danh sách, và địa bàn có ranh trên GIS thì lại giống một khung diện tích (FAO 2017, mục 3.1).
+
+| Kiểu khung diện tích | Đơn vị | Ưu điểm | Hạn chế |
+|---|---|---|---|
+| Ô có ranh tự nhiên | mảnh giới hạn bởi đường, kênh | điều tra viên dễ tìm ranh | phải giải đoán ảnh nhiều để vẽ ranh |
+| Ô lưới vuông | ô vuông trên một phép chiếu | rẻ, dựng bằng GIS | ranh ô cắt ngang thửa ruộng |
+| Điểm | một điểm, ghi lớp phủ tại đó | rất rẻ, hợp ruộng nhỏ | mỗi điểm cho ít thông tin |
+| Điểm theo cụm | vài điểm gần nhau | giảm đường đi | các điểm trong cụm giống nhau |
+
+Một quy tắc kinh nghiệm sách FAO dẫn lại: mỗi ô nên có trung bình 10–20 thửa hay mảng lớp phủ, để điều tra viên đi hết trong chưa tới nửa ngày (Taylor và cs., 1997). Ở hai châu thổ, thửa ruộng nhỏ (Chương 2), nên ô 250 m trong mô phỏng dưới đây là cỡ hợp lý: một ô 6,25 ha chứa hàng chục thửa.
+
+<Predict client:visible lang="vi"
+  title="Đổi tầng sau khi điều tra?"
+  q="Một ô được xếp vào tầng 'nhiều đất trồng trọt' theo bản đồ, nhưng điều tra viên thấy ô đó gần như toàn nhà và ao. Có nên chuyển ô sang tầng 'ít đất trồng trọt' trước khi tính không?"
+  options={['Có, để tầng đúng hơn', 'Không: phân tầng phải giữ như lúc chọn mẫu, nếu không ước lượng bị chệch', 'Có, nếu ghi chú lại', 'Chỉ chuyển khi sai nhiều']} answer={1}
+  why="Quy tắc đổi tầng không áp được cho các ô không nằm trong mẫu, nên tầng mới không còn mô tả tổng thể. Bản đồ sai chỉ làm phân tầng kém hiệu quả; muốn sửa thì làm lại phân tầng cho lần điều tra sau, theo cùng một quy tắc cho cả vùng (FAO 2017, mục 3.1.2)." />
+
+## 5.3 Lấy mẫu trên bản đồ lúa thật
+
+Mô phỏng dưới đây coi bản đồ lúa 2024 của Chương 4 là "sự thật": mỗi ô 250 m trong ranh vùng có y = diện tích lúa của ô (cả ô nếu bản đồ ghi có ít nhất một vụ, 0 nếu không). ĐBSCL có 636 121 ô, trong đó 42,7 % có lúa, cộng lại 1 692 nghìn ha. Ta giả vờ không biết con số này, chọn một mẫu ô, "đi thực địa" đọc y ở các ô đó, rồi ước lượng tổng.
+
+Biến phụ x là diện tích đất trồng trọt trong ô theo bản đồ Esri 2021 (Chương 3). Không dùng WorldCover, vì chính WorldCover đã được dùng để khoanh vùng đất trồng trọt khi làm bản đồ lúa: dùng nó làm biến phụ thì tầng 'ít đất trồng trọt' không có lúa theo định nghĩa, và phân tầng trông hiệu quả hơn thực tế. Tầng chia theo tỉ lệ đất trồng trọt của Esri: dưới 25 %, 25–75 %, từ 75 % trở lên. Ở ĐBSCL ba tầng có 228 418 / 112 594 / 295 109 ô, với tỉ lệ ô có lúa lần lượt 2,2 / 30,9 / 78,4 %.
+
+<Formula label="Mẫu ngẫu nhiên đơn" tex="\hat{Y} = N\,\bar{y}, \qquad SE(\hat{Y}) = N\sqrt{\left(1-\tfrac{n}{N}\right)\tfrac{s_y^2}{n}}" where="N: số ô của vùng, n: số ô mẫu, ȳ và s_y²: trung bình và phương sai của y trên mẫu." />
+
+<Formula label="Mẫu phân tầng" tex="\hat{Y}_{st} = \sum_h N_h\,\bar{y}_h, \qquad SE^2 = \sum_h N_h^2\left(1-\tfrac{n_h}{N_h}\right)\tfrac{s_h^2}{n_h}" where="h: tầng. Phân bổ tỉ lệ: n_h ∝ N_h. Phân bổ Neyman: n_h ∝ N_h·S_h, tầng biến động mạnh nhận nhiều ô hơn." />
+
+<Figure
+  title="Hình 5.1 — Lấy mẫu trên bản đồ lúa 2024: một mẫu và 500 mẫu"
+  try="Giữ 'Ngẫu nhiên đơn', cỡ 200, bấm 'Lặp 500 lần': phân bố ước lượng rộng cỡ nào quanh vạch thật? Chuyển sang 'Phân tầng Neyman' rồi 'Hồi quy' và lặp lại: độ lệch chuẩn giảm bao nhiêu? Kéo cỡ mẫu lên 800: sai số giảm một nửa, đúng như căn bậc hai của 4?"
+  source="Tổng thể: các ô ~250 m trong ranh vùng; y = diện tích ô nếu bản đồ số vụ lúa 2024 (MODIS EVI ở ĐBSCL, Sentinel-1 ở ĐBSH, Chương 4) có ít nhất một vụ; x = diện tích đất trồng trọt trong ô theo Esri/Impact Observatory 10 m Annual LULC 2021; tầng theo % đất trồng trọt (< 25, 25–75, ≥ 75). Mẫu không hoàn lại; phân bổ ít nhất 2 ô mỗi tầng; 500 lần lặp với hạt giống cố định 2026 (giống scripts/area-stats_numbers.ts). Mô phỏng: bản đồ thay cho số đo thực địa."
+>
+  <SamplingLab client:visible lang="vi" label="Mô phỏng lấy mẫu trên bản đồ lúa" />
+</Figure>
+
+Với 200 ô ở ĐBSCL, mẫu ngẫu nhiên đơn cho độ lệch chuẩn 141,2 nghìn ha qua 500 lần lặp, tức hệ số biến động 8,3 %. Phân tầng tỉ lệ hạ xuống 97,7, phân tầng Neyman 88,8, ước lượng hồi quy 97,0 nghìn ha. Trung bình của 500 ước lượng ở cả bốn cách đều sát giá trị thật: chúng không chệch, chỉ khác nhau ở độ phân tán. Sai số chuẩn tính từ từng mẫu cũng khớp với độ phân tán thật (trung bình 138,6 so với 141,2 nghìn ha cho mẫu đơn), nên một mẫu duy nhất đã tự cho biết nó chính xác đến đâu. Riêng phân bổ Neyman ở đây dùng độ lệch chuẩn thật của từng tầng, điều mà một cuộc điều tra thật không biết trước; ngoài thực địa S_h lấy từ điều tra thử hay lần điều tra trước, nên 2,53× là mức tốt nhất có thể đạt.
+
+<Predict client:visible lang="vi"
+  title="Gấp đôi số ô"
+  q="Mẫu 200 ô cho sai số chuẩn khoảng S. Muốn sai số chuẩn còn S/2, cần bao nhiêu ô?"
+  options={['400', '800', '300', '2 000']} answer={1}
+  why="Sai số chuẩn tỉ lệ với 1/√n. Muốn giảm một nửa phải tăng n gấp 4, tức 800 ô. Đây là lý do một bản đồ tốt rất có giá: hiệu quả 2× của phân tầng hay hồi quy tương đương nhân đôi số ô điều tra mà không tốn thêm chuyến đi nào." />
+
+<Note kind="tip">
+
+Lúa ở ĐBSH ít và rải rác hơn: 27,9 % số ô có lúa, so với 42,7 % ở ĐBSCL. Cùng 200 ô, hệ số biến động ở ĐBSH là 11,1 %, ở ĐBSCL là 8,3 %. Đối tượng càng nhỏ và càng phân tán thì càng cần nhiều ô mẫu, và vệ tinh càng có giá: phân tầng Neyman ở ĐBSH đạt hiệu quả 2,77×.
+
+</Note>
+
+## 5.4 Ước lượng hồi quy, hiệu chỉnh và vùng nhỏ
+
+<Term id="regression-estimator">Ước lượng hồi quy</Term> dùng đường thẳng y = a + b·x khớp trên các ô mẫu, rồi đặt vào đó trung bình thật của x trên toàn vùng, vốn biết được vì bản đồ phủ kín mọi ô:
+
+<Formula label="Ước lượng hồi quy (FAO 2017, mục 5.3)" tex="\hat{\bar{Y}}_{reg} = \bar{y} + b\,(\bar{X} - \bar{x}), \qquad E \approx \frac{1}{1-r^2}" where="ȳ, x̄: trung bình trên mẫu; X̄: trung bình của x trên toàn bộ N ô; b: hệ số góc của y theo x trên mẫu; r: tương quan giữa y và x; E: hiệu quả so với mẫu ngẫu nhiên đơn." />
+
+Ở ĐBSCL, tương quan giữa diện tích lúa và diện tích đất trồng trọt Esri trên từng ô là r = 0,72, nên lý thuyết hứa hiệu quả khoảng 2,1×; mô phỏng cho 2,12×. Sách FAO dẫn hai ví dụ vận hành thật: ước lượng diện tích lúa ở Afghanistan, R² = 0,96 giữa số pixel lúa và diện tích lúa trong ô mẫu, và dự án CAERSS của Trung Quốc với hệ số biến động 4,2–7,0 % cho ngô, lúa, đậu tương.
+
+<Term id="relative-efficiency">Hiệu quả tương đối</Term> có thể đổi thẳng ra tiền: hiệu quả 2× nghĩa là cùng độ chính xác với một nửa số ô thực địa.
+
+Hai họ phương pháp khác cũng dùng bản đồ làm biến phụ:
+
+- **Ước lượng hiệu chỉnh** dùng ma trận nhầm lẫn từ mẫu kiểm tra để sửa diện tích đếm pixel, theo độ chính xác người dùng (ước lượng trực tiếp) hay người sản xuất (ước lượng ngược). Hình 4.5 của Chương 4 làm đúng việc này theo Olofsson và cs. (2014). Điều kiện bắt buộc: ma trận phải lập từ một mẫu xác suất, và phép ngoại suy phải theo đúng thiết kế mẫu.
+- **<Term id="small-area-estimation">Ước lượng vùng nhỏ</Term>** dùng khi cần số cho huyện, xã mà mỗi nơi chỉ có vài ô mẫu. Một mô hình hồi quy với biến vệ tinh "mượn" thông tin từ các huyện khác (FAO 2017, mục 5.5).
+
+<Depth level="advanced">
+
+**Vì sao hồi quy thắng phân tầng ở đây.** Phân tầng chỉ dùng x để chia nhóm (ba mức), còn hồi quy dùng giá trị x của từng ô. Khi quan hệ giữa x và y gần tuyến tính, hồi quy tận dụng nhiều thông tin hơn. Có thể kết hợp cả hai: hồi quy riêng trong từng tầng (ước lượng hồi quy phân tầng), như công thức của Sud và cs. (2015) mà sách FAO trình bày. Ước lượng hồi quy hơi chệch khi mẫu nhỏ (cỡ 1/n), không đáng kể khi n vài trăm.
+
+</Depth>
+
+<Predict client:visible lang="vi"
+  title="Bản đồ cũ, mẫu mới"
+  q="Bản đồ Esri là năm 2021, còn lúa cần ước lượng là năm 2024. Dùng bản đồ cũ làm biến phụ có làm ước lượng 2024 bị chệch không?"
+  options={['Có, vì bản đồ đã lỗi thời', 'Không: x chỉ cần biết ở mọi ô và đo theo cùng một cách; bản đồ cũ hơn chỉ làm tương quan yếu đi', 'Có, trừ khi bản đồ đúng 100 %', 'Không dùng được bản đồ khác năm']} answer={1}
+  why="Ước lượng hồi quy không chệch (với n đủ lớn) bất kể x tốt hay xấu, vì y vẫn đo trên mẫu xác suất. x càng gần năm điều tra thì r càng cao và lợi càng nhiều. Sách FAO (mục 3.2.4) cũng gợi ý phân tầng bằng số liệu chi tiết của năm trước." />
+
+## 5.5 Cỡ mẫu và chi phí
+
+Muốn diện tích lúa có <Term id="coefficient-of-variation">hệ số biến động</Term> CV cho trước, mẫu ngẫu nhiên đơn cần:
+
+<Formula label="Cỡ mẫu cho một CV mục tiêu" tex="n_0 = \left(\frac{S_y}{CV\cdot\bar{Y}}\right)^2, \qquad n = \frac{n_0}{1 + n_0/N}" where="S_y: độ lệch chuẩn của y giữa các ô, Ȳ: trung bình của y. Phân tầng hay hồi quy chia n cho hiệu quả của chúng." />
+
+Ở ĐBSCL, CV 5 % cần 538 ô và CV 2 % cần 3 343 ô 250 m chọn ngẫu nhiên. ĐBSH có tỉ lệ ô lúa thấp hơn và phân tán hơn, nên cần 1 030 và 6 306 ô. Chia cho hiệu quả của hồi quy, số ô giảm tương ứng. Đây là con số cho cả vùng; muốn có CV đó ở từng tỉnh thì mỗi tỉnh cần cỡ mẫu gần như vậy, và chi phí nhân lên theo số tỉnh. Sách FAO (mục 5.7) nhấn mạnh rằng vệ tinh chỉ đáng tiền khi lợi về hiệu quả lớn hơn chi phí ảnh và xử lý; với ảnh Sentinel và Landsat miễn phí, cán cân đã nghiêng hẳn về phía dùng vệ tinh.
+
+<Note kind="warn">
+
+Mô phỏng ở đây có một điểm dễ dãi: "số đo thực địa" y lấy từ chính một bản đồ, nên không có sai số đo, ô không bị bỏ sót, và mọi ô đều đến được. Ngoài thực địa còn sai số điều tra viên, ô không tiếp cận được, ranh ô khó xác định trên ruộng. Những lỗi này không mất đi khi thêm vệ tinh, và có thể gây chệch thật sự.
+
+</Note>
+
+## 5.6 Các chương trình đang chạy
+
+<Tiles items={[
+  { t: 'Hoa Kỳ: NASS CDL', d: 'Bản đồ cây trồng từ 1997, dùng làm biến phụ trong ước lượng hồi quy diện tích; năm 2009 cho 15 cây trồng ở 27 bang ngay trong vụ.' },
+  { t: 'Ấn Độ: FASAL', d: 'Từ 2007, dự báo sản xuất 11 cây trồng chính. Lúa và đay dùng radar với ô mẫu 5 × 5 km, tỉ lệ mẫu 15 %, 4 tầng theo độ phủ cây trồng.' },
+  { t: 'Liên minh châu Âu: LUCAS', d: 'Khảo sát điểm hai pha: khoảng 270 nghìn điểm giải đoán ảnh, rồi một phần được đi thực địa; lặp vài năm một lần.' },
+  { t: 'Trung Quốc: CropWatch', d: 'Đánh giá toàn cầu đến cấp tỉnh; diện tích = đất canh tác từ vệ tinh × tỉ lệ đất có cây × tỉ lệ loại cây từ điều tra.' },
+]} />
+
+Ở Việt Nam, diện tích gieo trồng lúa vẫn đến từ báo cáo và điều tra của ngành thống kê. Viễn thám lúa có mặt qua hợp phần Asia-RiCE của GEOGLAM, do JAXA dẫn dắt: một chương trình theo dõi lúa bằng radar ALOS-2 và Sentinel-1 ở ĐBSCL với sự tham gia của Trung tâm Vũ trụ Việt Nam (VNSC), Viện Hàn lâm KH&CN Việt Nam và Bộ NN&PTNT (CEOS, 2016). Khoảng cách giữa bản đồ và số liệu chính thức (Chương 4: +14 %) chính là chỗ một khung mẫu diện tích dựa trên vệ tinh có thể thu hẹp.
+
+<Note kind="key">
+
+Vệ tinh không thay điều tra; nó làm điều tra rẻ hơn và cho con số kèm sai số. Ba bước: dựng khung và phân tầng bằng bản đồ, đo y trên một mẫu xác suất, dùng bản đồ làm biến phụ. Sai số chuẩn chỉ giảm theo căn bậc hai của số ô, nên một biến phụ tốt đáng giá bằng hàng trăm chuyến đi thực địa.
+
+</Note>
+
+## 5.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- CEOS (2016). Asia-RiCE: Asian Rice Crop Estimation & Monitoring. Báo cáo tại cuộc họp bên lề SIT-31, 21/4/2016. https://ceos.org/document_management/Ad_Hoc_Teams/GEOGLAM/Meetings/SIT-31%20Side%20Meeting/20160421_CEOS_Asia-RiCE.pdf
+- Cochran, W. G. (1977). *Sampling Techniques*, tái bản lần 3. Wiley, New York.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chương 3 (Gallego, J., Use of remote sensing for the design of sampling frames) và Chương 5 (Crop area estimation with remote sensing).
+- Gallego, F. J. (2004). Remote sensing and land cover area estimation. *International Journal of Remote Sensing*, 25, 3019–3047.
+- Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. *Remote Sensing of Environment*, 148, 42–57. https://doi.org/10.1016/j.rse.2014.02.015
+- Oyoshi, K., Tomiyama, N., Okumura, T., Sobue, S., & Sato, J. (2016). Mapping rice-planted areas using time-series synthetic aperture radar data for the Asia-RiCE activity. *Paddy and Water Environment*, 14, 463–472. https://doi.org/10.1007/s10333-015-0515-x
+- Taylor, J., Sannier, C., Delincé, J., & Gallego, F. J. (1997). *Regional crop inventories in Europe assisted by remote sensing: 1988–1993*. Synthesis Report, EUR 17319 EN. Office for Publications of the EC, Luxembourg.

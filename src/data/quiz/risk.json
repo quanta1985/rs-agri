@@ -1,0 +1,46 @@
+[
+ {
+  "q": { "vi": "Một bản đồ 'rủi ro lũ' được dựng chỉ từ tần suất ngập Sentinel-1. Nên gọi nó là gì cho đúng?", "en": "A 'flood risk' map is built only from Sentinel-1 flood frequency. What should it properly be called?" },
+  "options": [
+   { "vi": "Bản đồ rủi ro lũ", "en": "A flood risk map" },
+   { "vi": "Bản đồ hiểm họa lũ: chưa có phơi nhiễm (cái gì bị ngập) và tính dễ bị tổn thương (có đê bao, có chuẩn bị hay không)", "en": "A flood hazard map: it has no exposure (what gets flooded) and no vulnerability (dykes, preparedness)" },
+   { "vi": "Bản đồ thiệt hại lũ", "en": "A flood damage map" },
+   { "vi": "Bản đồ lớp phủ", "en": "A land cover map" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Rủi ro do hiểm họa, phơi nhiễm và tính dễ bị tổn thương cùng quyết định (FAO 2017, mục 6.2–6.3). Ruộng lúa ba vụ trong đê bao và ruộng lúa hai vụ ngoài đê có thể cùng nằm trong vùng ngập nhưng rủi ro rất khác.", "en": "Risk is set jointly by hazard, exposure and vulnerability (FAO 2017, 6.2–6.3). Triple-crop rice inside a high dyke and double-crop rice outside it can sit in the same flood zone with very different risk." }
+ },
+ {
+  "q": { "vi": "Với trọng số bằng nhau, Hậu Giang đứng đầu ĐBSCL; khi tăng trọng số lũ lên 3, Long An đứng đầu; khi tăng trọng số đất thấp lên 3, Hậu Giang và Cà Mau đứng đầu. Nên báo cáo thế nào?", "en": "With equal weights Hau Giang ranks first in the Mekong Delta; with flood weighted 3, Long An ranks first; with low land weighted 3, Hau Giang and Ca Mau lead. How should this be reported?" },
+  "options": [
+   { "vi": "Chọn bộ trọng số cho kết quả hợp lý nhất rồi chỉ công bố bộ đó", "en": "Pick the weights that give the most plausible result and publish only that" },
+   { "vi": "Công bố bộ trọng số đã dùng, kết quả với vài bộ khác, và chỉ ra tỉnh nào luôn ở nhóm đầu dù trọng số thế nào", "en": "Publish the weights used, the results with a few other sets, and which provinces stay near the top whatever the weights" },
+   { "vi": "Lấy trung bình các thứ hạng", "en": "Average the ranks" },
+   { "vi": "Không dùng trọng số", "en": "Use no weights" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Trọng số là phán đoán, không phải dữ liệu. Phân tích độ nhạy cho người đọc biết kết luận nào vững (đúng với mọi bộ trọng số hợp lý) và kết luận nào phụ thuộc vào một lựa chọn. 'Không dùng trọng số' thật ra là chọn trọng số bằng nhau.", "en": "Weights are a judgement, not data. A sensitivity analysis tells readers which conclusions are robust (true for every reasonable set) and which hinge on one choice. 'No weights' is in fact equal weights." }
+ },
+ {
+  "q": { "vi": "Vì sao chỉ số thiếu mưa (SPI-3 trung bình 2016, 2020, 2024) gần như vô ích để xếp hạng các tỉnh ĐBSCL?", "en": "Why is the rain-deficit indicator (mean SPI-3 of 2016, 2020, 2024) nearly useless for ranking Mekong provinces?" },
+  "options": [
+   { "vi": "Vì CHIRPS sai", "en": "Because CHIRPS is wrong" },
+   { "vi": "Vì cả vùng cùng khô như nhau vào ba năm đó và ô 5 km quá thô: điểm chỉ dao động 52–72, nên nó cộng gần như cùng một lượng vào mọi ô", "en": "Because the whole delta was equally dry in those years and 5 km cells are coarse: scores only range 52–72, so it adds almost the same amount everywhere" },
+   { "vi": "Vì ĐBSCL không bao giờ hạn", "en": "Because the Mekong Delta never has drought" },
+   { "vi": "Vì SPI không có đơn vị", "en": "Because SPI has no unit" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Một chỉ số chỉ giúp xếp hạng khi nó khác nhau giữa các nơi. Hạn khí tượng ở ĐBSCL là hiện tượng cấp vùng; nó quan trọng cho cảnh báo theo năm (Chương 9) nhưng không phân biệt được tỉnh này với tỉnh kia.", "en": "An indicator helps ranking only if it varies between places. Meteorological drought in the Mekong Delta is region-wide: important for year-to-year warning (Chapter 9) but unable to tell one province from another." }
+ },
+ {
+  "q": { "vi": "Nghị quyết 120/NQ-CP coi lũ ở vùng đồng bằng ngập lũ và nước mặn ở ven biển thế nào?", "en": "How does Resolution 120/NQ-CP treat floods in the flood plain and salt water on the coast?" },
+  "options": [
+   { "vi": "Là hiểm họa cần ngăn chặn bằng mọi giá", "en": "As hazards to be stopped at any cost" },
+   { "vi": "Chủ động sống chung: dành không gian thoát lũ, coi nước lợ, nước mặn cũng là tài nguyên, bố trí sản xuất theo tiểu vùng sinh thái", "en": "Living with them proactively: room for floods, brackish and salt water also seen as a resource, farming arranged by ecological sub-region" },
+   { "vi": "Không đề cập", "en": "It does not mention them" },
+   { "vi": "Chỉ là vấn đề của ngành thủy sản", "en": "Only as a fisheries issue" }
+  ],
+  "answer": 1,
+  "why": { "vi": "Nghị quyết chuyển từ 'sống chung với lũ' sang 'chủ động sống chung với lũ, ngập, nước lợ, nước mặn'. Vì vậy một chỉ số 'càng cao càng xấu' cho lũ và mặn chỉ kể một nửa câu chuyện: cùng hiện tượng đó vừa là hiểm họa cho lúa vừa là điều kiện cho phù sa, cá và tôm.", "en": "The resolution moves from 'living with floods' to 'living proactively with floods, inundation, brackish and salt water'. A 'higher is worse' index for floods and salinity tells only half the story: the same phenomenon is a hazard for rice and a condition for silt, fish and shrimp." }
+ }
+]

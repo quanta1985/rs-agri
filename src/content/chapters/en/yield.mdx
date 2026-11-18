@@ -1,0 +1,168 @@
+---
+title: "Yield & early warning"
+n: 6
+summary: "Delta rice yields climb steadily with better varieties and inputs, so the early-warning question is whether this year will fall above or below the trend. This chapter sets 24 years of official winter–spring yields for every province beside MODIS EVI, shows what a simple model can and cannot forecast, and why the timing of the hazard decides which index is useful."
+objectives:
+  - Describe the parts of an agricultural early warning system and the role of remote sensing in it.
+  - Remove the trend from an official yield series and explain why this must come before any model.
+  - Build and evaluate an EVI yield model with leave-one-year-out cross-validation.
+  - Match the index and the observation date to the hazard (late-season salinity, floods, cloud).
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import YieldModel from '../../../islands/YieldModel.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/yield.json';
+
+In 2001, winter–spring rice in the Mekong Delta yielded 5.04 t/ha on average; in 2024 it yielded 7.23 t/ha on 1,487.7 thousand ha sown. Most of that rise came from varieties, fertiliser, irrigation and machines, steadily year after year. Early warning does not ask whether yields are rising, but whether **this year** will be above or below the usual level, and asks early enough to act. This chapter follows chapter 6 of the FAO (2017) handbook, on early warning systems and yield forecasting, and tries it on real data from both deltas.
+
+<Stats items={[
+  { v: '0.74', u: 'R²', l: 'between seasonal peak EVI and Long An winter–spring yield 2001–2024, before removing the trend' },
+  { v: '0.14', u: 'R²', l: 'the same pair after removing the trend from both series: the good-year/bad-year part EVI really explains' },
+  { v: '6/13', u: '', l: 'Mekong provinces where the peak-EVI model forecasts unseen years better than just guessing the mean' },
+  { v: '0.05', u: 't/ha', l: 'Ben Tre winter–spring yield in 2016 (drought and salinity), while the seasonal peak EVI barely changed' },
+]} caption="Yields: National Statistics Office (PX-Web, tables V06.16–V06.18). EVI: MODIS MOD13Q1 + MYD13Q1 over WorldCover cropland. Computed by scripts/yield_numbers.ts." />
+
+## 6.1 What early warning is
+
+In the FAO handbook every <Term id="early-warning">early warning system</Term> has three parts: **data collection**, **analysis and forecasting**, and **dissemination** to the people who must act. There is a built-in tension between them: the longer one waits for data, the surer the forecast, but the less time is left to act. Remote sensing helps with the first part: it watches every field, regularly, without waiting for reports from below.
+
+<Tiles items={[
+  { t: 'GEOGLAM Crop Monitor', d: 'A monthly consensus assessment of wheat, maize, rice and soybean in the main producing countries, more than 40 partners, for AMIS since September 2013.' },
+  { t: 'Asia-RiCE', d: 'GEOGLAM’s rice component, led by JAXA; rice maps from ALOS-2 and Sentinel-1 radar, with a dedicated scheme for the Mekong Delta.' },
+  { t: 'FAO ASIS', d: 'The Agricultural Stress Index: the percentage of cropland with VHI below 35 during the season, per administrative unit.' },
+  { t: 'Official statistics', d: 'Yield and area per province and season. Without them no model can be calibrated.' },
+]} />
+
+<Term id="crop-yield">Yield</Term> in Vietnamese statistics is production divided by **sown area**. A crop that fails completely stays in the area, so that province's yield drops close to zero. That is exactly what early warning wants to see coming.
+
+<Note kind="key">
+
+A useful yield forecast must say: how far this year departs from the trend; how wrong the forecast is on average over years the model has not seen; and how long before harvest it is available. Without all three it is not yet early warning.
+
+</Note>
+
+## 6.2 Official yields: trend and failed seasons
+
+<Figure
+  title="Figure 6.1 — Winter–spring rice yield by province, 2001–2024"
+  try="Look at An Giang, then Kien Giang: how much does the trend line explain? Switch to Ben Tre and Tra Vinh: which two years drop far below the trend? Does the trend still mean anything in Ben Tre?"
+  source="National Statistics Office (formerly General Statistics Office), PX-Web database, table V06.17 'Winter–spring paddy yield by province' (quintals/ha, converted to t/ha), downloaded 18 Nov 2026. Yield per sown area. Ha Noi before 2008 = Ha Noi + Ha Tay (area-weighted); Can Tho before 2004 included Hau Giang and is left out; Ca Mau lacks 2007–2016 and 2018. Trend: least-squares line."
+>
+  <YieldModel client:visible lang="en" view="trend" label="Winter–spring yield by province with its trend" />
+</Figure>
+
+In the inland provinces the trend explains most of the variation: Kien Giang gains 0.102 t/ha a year (R² = 0.72), Long An 0.089 t/ha (R² = 0.80). The FAO handbook makes the same point: where agriculture is intensive, the trend carries most of the yield variation, and what is left after removing it is mostly weather. The coast is different. According to the National Statistics Office, Ben Tre sowed 15.1 thousand ha of winter–spring rice in 2016 and harvested 0.8 thousand tonnes, 0.05 t/ha; in 2020, 0.04 t/ha on 5.3 thousand ha. Tra Vinh fell to 4.04 and 3.54 t/ha, against about 6.6–6.8 t/ha in normal years. These are the two drought and salinity seasons of Chapter 10.
+
+<Predict client:visible lang="en"
+  title="High correlation, poor forecast?"
+  q="Long An's yield and peak EVI both rose for 24 years, R² = 0.74. Why does this not prove that EVI can forecast good and bad years?"
+  options={['Because R² = 0.74 is low', 'Because both series share a rising trend: they correlate even if good and bad years do not match', 'Because EVI cannot see rice', 'Because Long An grows no winter–spring rice']} answer={1}
+  why="With the trend removed from both series, Long An's R² falls to 0.14. Most of the original 'correlation' comes from both rising over time, not from recognising unusual years." />
+
+## 6.3 The season seen through EVI
+
+<Figure
+  title="Figure 6.2 — EVI curve of the main season over cropland, year by year"
+  try="In the Mekong, when in the winter–spring season does EVI peak? Compare 2016 and 2020 with 2015 and 2019: do they differ early or late in the season? Switch to the Red River Delta: is the curve continuous, and why not?"
+  source="MODIS MOD13Q1 + MYD13Q1 v061, EVI × 0.0001, SummaryQA ≤ 1 only; mean over the 250 m cells with ≥ 50 % ESA WorldCover 2021 cropland inside the region outline; each point is a 16-day composite (Terra and Aqua offset by 8 days), placed at mid-period. Mekong: winter–spring 15 Nov of the previous year – 31 Mar; Red River: spring 15 Feb – 31 May. Composites drawn only when ≥ 50 % of the cells have a good value; points more than 20 days apart are not joined."
+>
+  <YieldModel client:visible lang="en" view="curves" label="EVI curve of the main season by year" />
+</Figure>
+
+In the Mekong Delta winter–spring rice is sown after the flood, so mean cropland EVI peaks around day 63 after 15 November, that is mid-January (between day 55 and 103 depending on the year), then drops fast as the crop is harvested in February–March. The dry season is clear: only 14 % of the composites are dropped for having under half of the cells with good data. The Red River Delta is the opposite. Spring rice is transplanted in February, the season of drizzle: 39 % of the composites are dropped, and in February–March on average only 43 % of the cells have good data. EVI peaks around day 75 after 15 February, in late April. The Red River curve is broken, and its peak EVI depends heavily on which images got through the cloud.
+
+<Note kind="tip">
+
+To know whether a season is going well, one must know **which stage** it is at. The same EVI of 0.4 can be rice greening up or rice half harvested. That is why yield models always go with the crop calendar (Chapter 4).
+
+</Note>
+
+## 6.4 A simple yield model
+
+The simplest remote-sensing model in the FAO handbook (section 6.4.2) is a <Term id="yield-forecast">yield function</Term>: regress past official yields on a vegetation index, then plug in this year's index to forecast. Here the index is the <Term id="peak-evi">seasonal peak EVI</Term>, averaged over the province's cropland. Both series are first <Term id="yield-trend">detrended</Term>, and the model is scored with <Term id="loo-cv">leave-one-year-out cross-validation</Term>: each year is forecast with the line fitted to the other years.
+
+<Formula label="Yield function on departures from the trend" tex="\Delta Y_t = a + b\,\Delta EVI_t, \qquad RMSE_{LOO} = \sqrt{\tfrac{1}{T}\sum_t \big(\Delta Y_t - \hat{\Delta Y}_{t,(-t)}\big)^2}" where="ΔY_t, ΔEVI_t: yield and index in year t minus the trend line; Ŷ_(−t): the forecast for year t from the model fitted to the other years. Compare RMSE_LOO with the error of just guessing the mean of the other years." />
+
+<Figure
+  title="Figure 6.3 — EVI and winter–spring yield by province: does the model forecast?"
+  try="For An Giang, switch between 'Raw values' and 'Detrended': how does R² change? Is the leave-one-out error smaller than the error of guessing the mean? Switch to Ben Tre and Tra Vinh, then change the index to 'Feb–Mar EVI'."
+  source="Yield: National Statistics Office, PX-Web table V06.17 (2001–2024, per sown area). Peak EVI: highest good MODIS value (SummaryQA ≤ 1) within the season (Mekong 15 Nov of the previous year – 31 Mar, Red River 15 Feb – 31 May); Feb–Mar EVI (Mekong only): mean of good composites 1 Feb – 31 Mar; both averaged over the 250 m cells with ≥ 50 % WorldCover 2021 cropland inside the province outline (geoBoundaries, pre-2025 boundaries). Only provinces with ≥ 12 years of both values. Trend removed with a straight line over the years."
+>
+  <YieldModel client:visible lang="en" view="scatter" label="EVI yield model by province" />
+</Figure>
+
+The results are modest. With peak EVI, the detrended R² is highest in An Giang (0.29) and Kien Giang (0.22); in An Giang the leave-one-out error is 0.31 t/ha, against 0.35 t/ha for guessing the mean. The model beats the mean in 6 of 13 provinces. Pooling all provinces, R² is only 0.01. Son et al. (2014) used MODIS EVI for the Mekong Delta in 2002–2011 and reported R² of 0.62–0.71 for winter–spring rice; values of that size appear here too **before** the trend is removed (Long An 0.74, Kien Giang 0.75, Soc Trang 0.73), so comparing the two results requires knowing how the trend was handled.
+
+In the Red River Delta the model beats the mean in 8 of 11 provinces, best in Hung Yen (R² = 0.48; error 0.12 against 0.16 t/ha). That sounds better than the Mekong, but spring yields there vary very little around the trend: guessing the mean is already off by only 0.08 t/ha in Nam Dinh and 0.40 t/ha in Vinh Phuc. In Hung Yen the satellite removes only 0.04 t/ha of error.
+
+<Note kind="warn">
+
+Why the simple model is weak here: a 250 m MODIS cell mixes rice with orchards, villages and canals; a province average dilutes the damaged areas; early-season cloud leaves gaps; and the yield statistics have errors of their own. Operational models add weather, 10 m images, seasonal rice maps, and calibration with crop-cut surveys.
+
+</Note>
+
+## 6.5 How early: the timing of the hazard
+
+In Ben Tre and Tra Vinh, peak EVI is almost unrelated to the failed years: R² of 0.01 and 0.00. Winter–spring rice greens up normally in December–January, then salt water moves up the rivers in February–March, just as the crop heads and fills grain. The EVI peak is over before the damage is done. With **mean EVI 1 Feb – 31 Mar** the detrended R² is 0.24 in both provinces, and the leave-one-out error is slightly below that of guessing the mean (Ben Tre 1.40 against 1.51 t/ha; Tra Vinh 0.80 against 0.85). Take this as a hint only: 24 years of data, a result driven mostly by the two failed seasons, and an index chosen after trying two on 13 provinces. Ben Tre's winter–spring rice area has also become very small (12.8–17.2 thousand ha in 2015, 2016 and 2019, but 0.77 thousand ha in 2024), so in recent years the province's cropland EVI mostly does not measure rice. Ben Tre's February–March EVI was 0.30 in 2016 and 0.25 in 2020, against 0.37 in 2015 and 0.39 in 2019. In An Giang, though, the late-season index does not help (R² 0.02). And a low February–March EVI has more than one meaning: rice killed by salt, but also fields harvested early to escape the salt (Chapter 10), or never sown. The index says the crop is less green, not why.
+
+<Figure
+  title="Figure 6.4 — February–April EVI anomaly in the Mekong Delta: 2016, 2020, 2024"
+  try="Turn on Compare: 2020 on the left, 2016 on the right. Where are the negative patches: along the coast or deep inland? Put this next to Figure 6.3: which provinces should have been warned?"
+  source="The same layer as Figure 10.3 (Chapter 10): MODIS MOD13Q1 + MYD13Q1 v061, mean February–April EVI of the year minus the 2010–2024 median, 250 m, all land. Fixed colour scale −0.2…+0.2."
+>
+  <DeltaMap client:visible lang="en" label="Dry-season EVI anomaly, Mekong Delta" compare time={1} compareTime={0} choices={[
+    { key: 'anom', label: { vi: 'Dị thường EVI', en: 'EVI anomaly' }, ids: { mekong: 'sal-evianom-mekong' } },
+  ]} />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="Which index for salinity warnings?"
+  q="To warn early of winter–spring rice losses to salinity in the coastal provinces, what should be watched?"
+  options={['The seasonal peak EVI', 'EVI and radar during heading to ripening (February–March), together with salinity measured at the estuaries and river flow forecasts', 'Land surface temperature alone', "Last year's yield"]} answer={1}
+  why="Salinity damage comes late in the season, after the EVI peak. A late-season index catches it, but by then it is too late to save the crop; truly 'early' warning rests on salinity measurements, upstream flow and the sowing calendar (Chapter 10), while satellites confirm where the damage is and estimate how much." />
+
+<Depth level="advanced">
+
+**Agrometeorological models.** The FAO handbook (section 6.4.1) describes another route: compute crop variables from the weather, such as actual evapotranspiration or the water requirement satisfaction index, then regress yield on them (an <Term id="agromet-model">agrometeorological model</Term>). In Morocco, seasonal rainfall alone explains most of the variation in wheat yield; in Bangladesh, a rice model uses actual evapotranspiration and the August maximum temperature. In our two deltas rice is irrigated, so rainfall explains little; the main hazards are salinity, floods, storms and pests, which a simple water model does not see. The data for this route are in Chapters 7 and 9.
+
+</Depth>
+
+## 6.6 From warning to action
+
+A warning is only worth something if someone acts on it. The FAO handbook devotes section 6.3 to "early warning, early action": separating the stage of livelihood stress from the emergency, and acting already in the first stage. In the Mekong Delta the lesson of 2016 turned into action in the dry seasons that followed: salinity forecasts are issued from the start of the season, and winter–spring sowing is moved earlier so the crop heads before the salt arrives (Chapter 10).
+
+<Steps items={[
+  { t: 'Before the season', d: 'Flow forecasts, ENSO (Chapter 7), salinity forecasts; advice on the sowing calendar and the area to sow.' },
+  { t: 'Early season', d: 'Maps of the area sown and the sowing dates from Sentinel-1 (Chapter 4): how many hectares will head in the risky month.' },
+  { t: 'Mid and late season', d: 'EVI, VHI and radar track crop condition; negative anomalies in salt-, flood- or drought-hit areas are checked against local reports.' },
+  { t: 'After the season', d: 'Estimate the damaged area (Chapter 8), compare with the statistics; recalibrate the model for next year.' },
+]} />
+
+<Note kind="key">
+
+Satellites help early warning most when used to know **where** and **how many hectares** are at risk, on the crop calendar. Yield forecasts from a single index are weak: the index has to be measured when the hazard strikes, and the model has to be scored on years it has not seen.
+
+</Note>
+
+## 6.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Becker-Reshef, I. et al. (2019). The GEOGLAM crop monitor for AMIS: Assessing crop conditions in the context of global markets. *Global Food Security*, 23, 173–181. https://doi.org/10.1016/j.gfs.2019.04.010
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chapter 6: Early Warning Systems and crop yield estimation.
+- National Statistics Office of Viet Nam (2026). PX-Web statistical database, Agriculture, forestry and fishery, tables V06.16–V06.18 (winter–spring paddy by province). https://pxweb.nso.gov.vn/pxweb/vi/ (accessed 18 Nov 2026).
+- Oyoshi, K., Tomiyama, N., Okumura, T., Sobue, S., & Sato, J. (2016). Mapping rice-planted areas using time-series synthetic aperture radar data for the Asia-RiCE activity. *Paddy and Water Environment*, 14, 463–472. https://doi.org/10.1007/s10333-015-0515-x
+- Rojas, O., Vrieling, A., & Rembold, F. (2011). Assessing drought probability for agricultural areas in Africa with coarse resolution remote sensing imagery. *Remote Sensing of Environment*, 115, 343–352. https://doi.org/10.1016/j.rse.2010.09.006
+- Son, N. T., Chen, C. F., Chen, C. R., Minh, V. Q., & Trung, N. H. (2014). A comparative analysis of multitemporal MODIS EVI and NDVI data for large-scale rice yield estimation. *Agricultural and Forest Meteorology*, 197, 52–64. https://doi.org/10.1016/j.agrformet.2014.06.007

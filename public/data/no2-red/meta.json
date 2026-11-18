@@ -1,0 +1,53 @@
+{
+ "id": "no2-red",
+ "region": "red",
+ "title": {
+  "vi": "NO₂ tầng đối lưu, trung bình (Sentinel-5P)",
+  "en": "Tropospheric NO₂, mean (Sentinel-5P)"
+ },
+ "units": {
+  "vi": "µmol/m²",
+  "en": "µmol/m²"
+ },
+ "kind": "continuous",
+ "palette": "ylorrd",
+ "range": [
+  20,
+  120
+ ],
+ "classes": null,
+ "crs": "EPSG:3857",
+ "origin": [
+  11721299.644,
+  2463814.832
+ ],
+ "res": 1069.364077,
+ "ground_res_m": 1000,
+ "width": 183,
+ "height": 190,
+ "dtype": "uint16",
+ "scale": 0.1,
+ "offset": 0.0,
+ "nodata": 65535,
+ "times": [
+  "2019–2025"
+ ],
+ "clipped_to": "region outline (geoBoundaries ADM1 provinces)",
+ "stats": [
+  {
+   "valid": 17158,
+   "mean": 71.5635,
+   "p2": 38.1,
+   "p50": 64.3,
+   "p98": 152.186,
+   "min": 31.7,
+   "max": 185.3
+  }
+ ],
+ "provenance": {
+  "source": "Copernicus Sentinel-5P TROPOMI OFFL L3 (contains modified Copernicus Sentinel data)",
+  "method": "mean of all OFFL L3 NO2 images 2019-2025 (L3 grid ~1.1 km, native footprint 5.5 x 3.5 km), nearest sampling onto the 1 km Mercator grid",
+  "exported": "2026-11-17T15:48:23+00:00",
+  "script": "scripts/data/export_emissions.py"
+ }
+}

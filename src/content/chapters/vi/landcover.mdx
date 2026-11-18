@@ -1,0 +1,187 @@
+---
+title: "Lớp phủ đất & đất nông nghiệp"
+n: 3
+summary: "Ba bản đồ lớp phủ 10 m miễn phí cho cả thế giới, cùng làm từ ảnh Sentinel năm 2021, lại cho ba con số khác nhau về đất trồng trọt và đất xây dựng ở hai châu thổ. Chương này giải thích vì sao: đất trồng trọt là sử dụng đất chứ không hẳn là lớp phủ, mỗi bản đồ định nghĩa nó một kiểu, và vườn cây, làng xóm, ruộng ngập nước là những chỗ chúng bất đồng nhiều nhất."
+objectives:
+  - Phân biệt lớp phủ đất với sử dụng đất, và nêu các định nghĩa đất trồng trọt dùng trong thống kê và viễn thám.
+  - So sánh ESA WorldCover, Dynamic World và Esri LULC về cách làm, chú giải và độ chính xác công bố.
+  - Đọc bản đồ đồng thuận giữa các sản phẩm và giải thích vì sao chúng bất đồng ở vườn cây, làng xóm và ruộng ngập.
+  - Giải thích vì sao không được trừ hai bản đồ lớp phủ để tính thay đổi.
+updated: "2026-11-18"
+---
+import Term from '../../../components/Term.astro';
+import Figure from '../../../components/Figure.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Depth from '../../../components/Depth.astro';
+import DeltaMap from '../../../islands/DeltaMap.tsx';
+import LandcoverChart from '../../../islands/LandcoverChart.tsx';
+import Predict from '../../../islands/Predict.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/landcover.json';
+
+Muốn đếm lúa, muốn chia tầng một khung mẫu (Chương 5), muốn biết đất ruộng mất đi bao nhiêu cho nhà cửa, đều phải bắt đầu từ một bản đồ <Term id="land-cover">lớp phủ đất</Term>. Từ năm 2021, ai cũng có ba bản đồ 10 m miễn phí cho cả thế giới: **ESA WorldCover**, **Google Dynamic World** và **Esri / Impact Observatory LULC**. Cả ba làm từ ảnh Sentinel, cùng năm, cùng độ phân giải. Vậy mà trên hai châu thổ chúng không đồng ý với nhau về những thứ quan trọng nhất cho nông nghiệp. Chương này theo chương 2 của sách FAO (2017): khái niệm lớp phủ, nông nghiệp trong chú giải, và các sản phẩm hiện có.
+
+<Stats items={[
+  { v: '1 409–2 160', u: 'nghìn ha', l: 'đất trồng trọt ĐBSCL năm 2021 theo ba bản đồ (WorldCover / Dynamic World / Esri)' },
+  { v: '245–537', u: 'nghìn ha', l: 'đất xây dựng ĐBSH năm 2021 theo ba bản đồ: chênh nhau hơn gấp đôi' },
+  { v: '32,4', u: '%', l: 'diện tích ĐBSCL được so sánh mà cả ba bản đồ cùng gọi là đất trồng trọt' },
+  { v: '82,1', u: '%', l: 'độ chính xác tổng thể của WorldCover 2021 ở châu Á, theo báo cáo kiểm định của ESA' },
+]} caption="Diện tích tính bằng scripts/landcover_numbers.ts từ ba bản đồ 10 m, trên phần ranh vùng nằm trong khung bản đồ; độ chính xác theo Tsendbazar và cs. (2022)." />
+
+## 3.1 Lớp phủ và sử dụng đất
+
+Lớp phủ là thứ **nhìn thấy** trên mặt đất: cỏ, cây, nước, mái nhà. <Term id="land-use">Sử dụng đất</Term> là việc con người **làm** ở đó: trồng lúa, nuôi tôm, ở. Sách FAO nhấn mạnh rằng "đất canh tác" thật ra là một lớp sử dụng đất: về lớp phủ, một ruộng lúa là thảm cỏ dày, và vài tuần trong năm là mặt nước. Vậy mà mọi bản đồ lớp phủ đều có lớp nông nghiệp, vì người dùng cần nó. Đó là gốc của rất nhiều bất đồng.
+
+Để hai bản đồ "nói cùng một ngôn ngữ", FAO xây dựng <Term id="lccs">LCCS</Term>, rồi LCML (chuẩn ISO 19144-2): định nghĩa mỗi lớp bằng các tiêu chí độc lập như dạng sống, độ che phủ, chiều cao, ngập nước, thay vì chỉ bằng một cái tên. Thống kê nông nghiệp (Chương trình Tổng điều tra Nông nghiệp thế giới 2020) dùng các định nghĩa sau:
+
+| Khái niệm | Gồm |
+|---|---|
+| Đất cây hằng năm (arable land) | đất trồng cây ngắn ngày trong năm, kể cả đất bỏ hóa tạm thời |
+| Đất trồng trọt (cropland) | đất cây hằng năm + đất cây lâu năm (cây ăn trái, cà phê, cao su…) |
+| Đất nông nghiệp | đất trồng trọt + đồng cỏ chăn nuôi lâu dài |
+
+Viễn thám thì làm việc với một định nghĩa hẹp hơn, của mạng lưới JECAM: <Term id="annual-cropland">đất cây hằng năm</Term> là mảnh đất ít nhất 0,25 ha, được gieo và thu hoạch ít nhất một lần trong 12 tháng. Cây lâu năm thân gỗ không nằm trong đó. Ở ĐBSCL, nơi vườn cây ăn trái và dừa phủ cả một vùng, khác biệt này không nhỏ. Bảng dưới tóm tắt định nghĩa của ba sản phẩm, theo tài liệu của nhà sản xuất và so sánh của Venter và cs. (2022).
+
+| Trường hợp | WorldCover | Dynamic World | Esri |
+|---|---|---|---|
+| Vườn cây ăn trái, dừa | Cây gỗ | Cây gỗ ("plantations… citrus") | Định nghĩa: cây gỗ ("plantations"); thực tế ở Bến Tre: phần lớn là xây dựng hoặc cây trồng (mục 3.4) |
+| Ruộng lúa đang ngập | Đất trồng trọt | Cây trồng hoặc thực vật ngập nước | Định nghĩa: thực vật ngập nước ("rice paddies"); thực tế ở ĐBSCL: phần lớn là cây trồng |
+| Ruộng bỏ hóa | Cỏ | Cây trồng ("fallow plots") | Cây trồng ("fallow plots") |
+| Nhà kính | Xây dựng | — | — |
+
+<Note kind="key">
+
+Trước khi lấy con số "đất trồng trọt" của bất kỳ bản đồ nào, hãy đọc định nghĩa lớp. Vườn cây lâu năm, ruộng ngập và đất bỏ hóa được xếp khác nhau ở mỗi sản phẩm, và ở hai châu thổ chúng chiếm hàng trăm nghìn ha.
+
+</Note>
+
+## 3.2 Ba bản đồ 10 m toàn cầu
+
+<Tiles items={[
+  { t: 'ESA WorldCover', d: 'Sentinel-1 + Sentinel-2, bản 2020 và 2021, 11 lớp theo LCCS. Độ chính xác tổng thể bản 2021: 76,7 % toàn cầu, 82,1 % châu Á; đất trồng trọt ở châu Á: độ chính xác người dùng 80,6 %, người sản xuất 82,7 %.' },
+  { t: 'Google Dynamic World', d: 'Sentinel-2, một nhãn cho mỗi ảnh (gần thời gian thực), 9 lớp; ở đây lấy nhãn thường gặp nhất trong năm. Đồng thuận 73,8 % với nhãn chuyên gia; lớp cây trồng: 88,9 % người dùng, 60,0 % người sản xuất.' },
+  { t: 'Esri / Impact Observatory', d: 'Sentinel-2, học sâu, một bản đồ mỗi năm từ 2017, 9 lớp. Nhà sản xuất công bố độ chính xác trung bình trên 75 %.' },
+]} />
+
+Ba bản đồ được đưa về một chú giải chung bảy lớp (<Term id="legend-harmonisation">hài hòa chú giải</Term>): rừng ngập mặn của WorldCover gộp vào cây gỗ; cỏ, cây bụi và "rangeland" gộp làm một. Bản đồ dưới đây chỉ hỏi một câu: ô này có được gọi là đất trồng trọt không, và bởi những bản đồ nào?
+
+<Figure
+  title="Hình 3.1 — Sản phẩm nào gọi là đất trồng trọt, 2021"
+  try="Ở ĐBSCL, vùng xanh 'Cả ba' nằm ở đâu? Tìm các mảng 'WorldCover + Esri' và 'Chỉ Esri' dọc các sông lớn và ven biển: đó là vùng gì? Chuyển sang ĐBSH: màu nào bao quanh các làng?"
+  source="ESA WorldCover 10 m 2021 v200 (lớp 40), Dynamic World V1 (nhãn thường gặp nhất năm 2021, lớp 4 crops), Esri / Impact Observatory 10 m Annual LULC 2021 (lớp 5 crops); mã = WorldCover ×1 + Dynamic World ×2 + Esri ×4 ở 10 m, rồi lấy mã thường gặp nhất trong mỗi ô ~250 m (mảng nhỏ biến mất); cắt theo ranh vùng (geoBoundaries). Cả ba CC BY 4.0."
+>
+  <DeltaMap client:visible lang="vi" label="Mức đồng thuận về đất trồng trọt giữa ba bản đồ" choices={[
+    { key: 'agree', label: { vi: 'Đồng thuận đất trồng trọt', en: 'Cropland agreement' }, ids: { mekong: 'lc-agree-mekong', red: 'lc-agree-red' } },
+    { key: 'frac', label: { vi: 'Tỉ lệ đất trồng trọt', en: 'Cropland share' }, ids: { mekong: 'lc-cropfrac-mekong', red: 'lc-cropfrac-red' } },
+  ]} />
+</Figure>
+
+Ở ĐBSCL, cả ba bản đồ cùng gọi là đất trồng trọt trên 32,4 % diện tích được so sánh. Trong 2 414 nghìn ha mà ít nhất một bản đồ gọi là đất trồng trọt, cả ba chỉ đồng ý trên 52,8 %. Kiểu bất đồng hay gặp nhất là 'WorldCover + Esri' (11,1 % diện tích), rồi 'chỉ Esri' (8,9 %) và 'chỉ WorldCover' (5,6 %); Dynamic World gần như không bao giờ một mình gọi một ô là đất trồng trọt (0,4 %). Ở ĐBSH, cả ba cùng đồng ý trên 28,3 % diện tích, tức 58,2 % của phần ít nhất một bản đồ gọi là đất trồng trọt. Xét cả bảy lớp, từng cặp bản đồ đồng ý với nhau trên 58,6–70,0 % diện tích ĐBSCL và 66,7–84,7 % diện tích ĐBSH; cặp giống nhau nhất ở cả hai vùng là Dynamic World và Esri.
+
+<Note kind="tip">
+
+Đồng thuận cao không có nghĩa là đúng: hai bản đồ có thể cùng sai một chỗ. Nhưng đồng thuận thấp thì chắc chắn ít nhất một bản đồ sai. Vùng 'Cả ba' là nơi an toàn để lấy mẫu huấn luyện; vùng bất đồng là nơi cần đi kiểm tra (<Term id="map-agreement">mức đồng thuận</Term>).
+
+</Note>
+
+## 3.3 Bao nhiêu đất trồng trọt?
+
+<Figure
+  title="Hình 3.2 — Diện tích mỗi lớp theo ba bản đồ, 2021"
+  try="Ở ĐBSCL, lớp nào chênh nhiều nhất giữa ba bản đồ? Cộng 'Cây trồng' với 'Thực vật ngập nước': khoảng cách giữa Esri và WorldCover có thu hẹp không? Chuyển sang ĐBSH và so lớp 'Xây dựng'."
+  source="Diện tích các ô 10 m trong ranh vùng thống kê (geoBoundaries), phần nằm trong khung bản đồ, theo chú giải chung bảy lớp; ô không có dữ liệu ở bất kỳ bản đồ nào bị bỏ khỏi so sánh đồng thuận. Tính trong Earth Engine (scripts/data/export_landcover.py)."
+>
+  <LandcoverChart client:visible lang="vi" view="classes" />
+</Figure>
+
+Ở ĐBSCL, đất trồng trọt là 1 949 nghìn ha theo WorldCover, 1 409 theo Dynamic World và 2 160 theo Esri. Lớp cây gỗ còn chênh hơn: 1 081, 523 và chỉ 150 nghìn ha. Xây dựng thì ngược lại: 175 nghìn ha theo WorldCover, 772 theo Dynamic World và 800 theo Esri, gấp hơn bốn lần. Dynamic World xếp 297 nghìn ha vào thực vật ngập nước, phần lớn có lẽ là ruộng lúa đang ngập; cộng vào, đất trồng trọt của nó lên 1 706 nghìn ha. Esri, dù định nghĩa ghi ruộng lúa thuộc thực vật ngập nước, thực tế chỉ có 17 nghìn ha lớp này ở ĐBSCL: ruộng lúa nằm trong lớp cây trồng của nó. Ở ĐBSH, đất trồng trọt gần nhau hơn (658, 573 và 677 nghìn ha), nhưng xây dựng vẫn chênh hơn gấp đôi (245, 511 và 537 nghìn ha) và cây gỗ cũng vậy (512, 280 và 219 nghìn ha).
+
+So sánh ở đây tính trên phần ranh vùng nằm trong khung bản đồ: 3 926 nghìn ha ở ĐBSCL, 1 659 nghìn ha ở ĐBSH (khung bỏ phần lớn Quảng Ninh và các đảo, Chương 1).
+
+<Predict client:visible lang="vi"
+  title="Con số thống kê"
+  q="Niên giám thống kê 2023 ghi diện tích đất sản xuất nông nghiệp ĐBSCL là 2 569,1 nghìn ha. Bản đồ nào gần con số này nhất, và vì sao không bản đồ nào trùng?"
+  options={['WorldCover, vì nó chính xác nhất', 'Không bản đồ nào trùng: đất sản xuất nông nghiệp gồm cả cây lâu năm, còn lớp "đất trồng trọt" của cả ba bản đồ không gồm vườn cây', 'Esri, vì nó mới nhất', 'Cả ba trùng nhau']} answer={1}
+  why="Đất sản xuất nông nghiệp trong thống kê đất đai gồm đất cây hằng năm và đất cây lâu năm, theo ranh thửa đăng ký. Bản đồ lớp phủ xếp vườn cây vào lớp cây gỗ, và nhìn thấy mặt đất chứ không thấy ranh thửa. So sánh hai con số chỉ có nghĩa khi định nghĩa đã được quy về một." />
+
+## 3.4 Bất đồng ở đâu, vì sao
+
+<Figure
+  title="Hình 3.3 — Ba bản đồ ở 10 m: Giồng Trôm – Ba Tri (Bến Tre) và Giao Thủy – Hải Hậu (Nam Định)"
+  try="Ở Bến Tre, bật So sánh: WorldCover bên trái, Esri bên phải. Cùng một xóm vườn, mỗi bản đồ gọi là gì? Ở Nam Định, các ao nuôi ven biển và làng ven đê thuộc lớp nào?"
+  source="Cùng ba sản phẩm năm 2021, đưa về chú giải chung bảy lớp; khung 10,24 × 10,24 km, 10 m, lưới Web Mercator. Bậc thời gian = sản phẩm (WorldCover, Dynamic World, Esri)."
+>
+  <DeltaMap client:visible lang="vi" label="Ba bản đồ lớp phủ ở hai điểm 10 m" compare time={2} compareTime={0} boundaries={false} choices={[
+    { key: 'lc3', label: { vi: 'Lớp phủ 2021', en: 'Land cover 2021' }, ids: { bentre: 'lc3-bentre', namdinh: 'lc3-namdinh' } },
+  ]} />
+</Figure>
+
+Khung Bến Tre là xóm vườn dừa, cây ăn trái xen nhà và mương. WorldCover gọi 75,3 % là cây gỗ và chỉ 3,3 % là xây dựng; Dynamic World 53,1 % cây gỗ, 29,3 % xây dựng; Esri 25,4 % cây gỗ, 43,3 % xây dựng và 28,7 % cây trồng. Cùng một vùng đất, ba câu trả lời. Khung Nam Định gồm ruộng lúa, làng ven đê, ao nuôi và biển: ba bản đồ đồng ý hơn về mặt nước (38,7–47,6 % kể cả biển), nhưng đất trồng trọt vẫn từ 22,4 % (Dynamic World) đến 32,9 % (WorldCover), và xây dựng từ 15,2 % đến 27,4 %. Làng ở ĐBSH là những khối nhà, vườn, ao xen kẽ: bản đồ gộp cả khối thành 'xây dựng' hay tách ra từng phần tùy mô hình.
+
+<Predict client:visible lang="vi"
+  title="Cùng một điểm, ba câu trả lời"
+  q="Ở khung Bến Tre, cây gỗ chiếm 75 / 53 / 25 % theo ba bản đồ. Điều gì giải thích tốt nhất khoảng chênh này?"
+  options={['Ảnh của ba bản đồ chụp khác ngày', 'Xóm vườn là cảnh quan hỗn hợp nhà, cây ăn trái, kênh nhỏ dưới 10 m: mỗi mô hình phân xử phần hỗn hợp theo một kiểu', 'Một trong ba bản đồ bị lỗi kỹ thuật', 'Bến Tre thay đổi rất nhanh trong năm 2021']} answer={1}
+  why="Nhà nằm dưới tán vườn, mương xen giữa các liếp. Ở 10 m, nhiều ô là hỗn hợp. Kết quả cho thấy WorldCover nghiêng về tán cây, Esri nghiêng về vùng có người ở, Dynamic World ở giữa. Không bản đồ nào 'sai' hoàn toàn: chúng trả lời những câu hỏi hơi khác nhau." />
+
+## 3.5 Đừng trừ hai bản đồ để tính thay đổi
+
+Esri cho một bản đồ mỗi năm từ 2017, nên rất dễ lấy hai năm trừ nhau. Sách FAO (mục 2.4.3) cảnh báo: với độ chính xác 70–85 %, thay đổi thật mỗi năm nhỏ hơn nhiều so với tỉ lệ lỗi của từng bản đồ, nên hiệu hai bản đồ chủ yếu là lỗi. Chuỗi đất trồng trọt Esri của hai châu thổ cho thấy điều đó.
+
+<Figure
+  title="Hình 3.4 — Đất trồng trọt, cây gỗ, xây dựng và thực vật ngập nước theo bản đồ Esri từng năm, 2017–2025"
+  try="Đất trồng trọt ĐBSH giảm bao nhiêu từ 2017 đến 2024? Năm nào nhảy bất thường? Ở ĐBSCL, khi đất trồng trọt giảm thì lớp nào tăng tương ứng?"
+  source="Esri / Impact Observatory 10 m Annual LULC (sat-io trên Earth Engine), mỗi năm một bản đồ; diện tích tính ở 30 m trong toàn bộ ranh vùng (kể cả phần ngoài khung bản đồ, nên số năm 2021 hơi khác Hình 3.2); chú giải chung (cây trồng = lớp 5, thực vật ngập nước = lớp 4)."
+>
+  <LandcoverChart client:visible lang="vi" view="series" />
+</Figure>
+
+Theo Esri, đất trồng trọt ĐBSCL giảm từ 2 289 nghìn ha năm 2017 xuống 2 024 nghìn ha năm 2024 (−11,6 %), còn xây dựng tăng từ 612 lên 900 nghìn ha. Ở ĐBSH, đất trồng trọt giảm từ 779 xuống 656 nghìn ha (−15,7 %), xây dựng từ 472 lên 611 nghìn ha. Một phần là thật: đô thị, khu công nghiệp và đường sá lấn ruộng ở cả hai châu thổ. Nhưng hãy nhìn từng bước: ĐBSCL tăng 89 nghìn ha năm 2018, mất 135 nghìn ha năm 2019 và 116 nghìn ha năm 2020, rồi lại tăng 81 nghìn ha năm 2025. Đất trồng trọt của cả một châu thổ không lên xuống cả trăm nghìn ha mỗi năm như vậy. Và 900 nghìn ha xây dựng là gần một phần tư diện tích ĐBSCL, trong khi WorldCover chỉ thấy 175 nghìn ha năm 2021.
+
+<Predict client:visible lang="vi"
+  title="Một năm mất 135 nghìn ha?"
+  q="Bản đồ Esri cho thấy đất trồng trọt ĐBSCL giảm 135 nghìn ha từ 2018 sang 2019, rồi tăng 81 nghìn ha từ 2024 sang 2025. Nên hiểu thế nào?"
+  options={['ĐBSCL mất 135 nghìn ha ruộng trong một năm rồi khai hoang lại', 'Phần lớn là khác biệt giữa các lần chạy mô hình và điều kiện ảnh từng năm; thay đổi thật phải đo bằng phương pháp phát hiện thay đổi và mẫu kiểm tra', 'Năm 2019 có lũ lớn', 'Esri chỉ đúng vào năm 2025']} answer={1}
+  why="Sách FAO (mục 2.4.3) ghi nhận ngay cả nơi đất canh tác mở rộng nhanh nhất thế giới (Brazil, Argentina) cũng chưa tới 4 % mỗi năm, trong khi bản đồ toàn cầu có độ chính xác 70–85 %. Sai số của từng bản đồ năm lớn hơn nhiều so với thay đổi thật, nên sách khuyên tách việc lập bản đồ khỏi việc phát hiện thay đổi." />
+
+<Note kind="warn">
+
+Thay đổi trên một bản đồ hằng năm có thể là thay đổi thật, là mô hình đổi phiên bản, hoặc là năm đó mây nhiều hơn. Muốn đo diện tích đất lúa mất đi, phải phát hiện thay đổi trực tiếp trên chuỗi ảnh (như Chương 4 đếm vụ lúa từ radar) rồi ước lượng diện tích bằng mẫu kiểm tra (Chương 5), không phải lấy hai bản đồ trừ nhau.
+
+</Note>
+
+## 3.6 Chọn bản đồ nào cho nông nghiệp
+
+<Steps items={[
+  { t: 'Đọc định nghĩa lớp', d: 'Đất trồng trọt có gồm vườn cây, ruộng ngập, đất bỏ hóa không? Có khớp với khái niệm thống kê cần đo không?' },
+  { t: 'Nhìn tận nơi', d: 'Mở ba bản đồ ở vài điểm quen thuộc (như Hình 3.3), so với ảnh độ phân giải cao. Bất đồng nằm ở đâu?' },
+  { t: 'Dùng làm tầng, không làm số', d: 'Bản đồ toàn cầu tốt để phân tầng khung mẫu và làm biến phụ (Chương 5), không thay được con số thống kê.' },
+  { t: 'Bản đồ riêng cho cây trồng', d: 'Lúa có dấu hiệu theo thời gian rất rõ: bản đồ lúa từ chuỗi radar (Chương 4) tốt hơn mọi lớp "đất trồng trọt" chung.' },
+]} />
+
+Sách FAO (mục 2.5) giới thiệu những nỗ lực làm bản đồ chuyên cho nông nghiệp: bản đồ đất canh tác toàn cầu 30 m GFSAD30 của USGS, hệ thống Sen2-Agri làm mặt nạ đất canh tác và bản đồ loại cây trồng 10 m trong mùa vụ, và các chương trình theo dõi lúa bằng radar như Asia-RiCE. Với lúa, sách nhận xét, việc lập bản đồ bằng radar đã thành thục: lúa có dấu hiệu theo thời gian đặc trưng đến mức người ta thường không coi nó là bài toán lớp phủ mà là bài toán theo dõi mùa vụ.
+
+<Note kind="key">
+
+Ba bản đồ cùng nguồn ảnh, cùng năm, vẫn cho ba con số khác nhau, vì chúng định nghĩa khác nhau và phân xử cảnh quan hỗn hợp khác nhau. Ở hai châu thổ, vườn cây, xóm làng và ruộng ngập là ba chỗ khó. Hãy dùng bản đồ toàn cầu như biến phụ và bức tranh chung, còn con số thì phải ước lượng.
+
+</Note>
+
+## 3.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Brown, C. F. và cs. (2022). Dynamic World, Near real-time global 10 m land use land cover mapping. *Scientific Data*, 9, 251. https://doi.org/10.1038/s41597-022-01307-4
+- Di Gregorio, A. (2005). *Land Cover Classification System: Classification concepts and user manual, Software version 2*. FAO Environment and Natural Resources Series 8, Rome.
+- FAO (2017). *Handbook on Remote Sensing for Agricultural Statistics*. GSARS, Rome. Chương 2: Land cover mapping and monitoring.
+- ISO (2023). ISO 19144-2:2023 Geographic information — Classification systems — Part 2: Land Cover Meta Language (LCML).
+- Karra, K., Kontgis, C., Statman-Weil, Z., Mazzariello, J. C., Mathis, M., & Brumby, S. P. (2021). Global land use / land cover with Sentinel 2 and deep learning. *2021 IEEE International Geoscience and Remote Sensing Symposium (IGARSS)*, 4704–4707. https://doi.org/10.1109/IGARSS47720.2021.9553499
+- Tổng cục Thống kê (2024). *Niên giám thống kê 2023*, Biểu 3: Hiện trạng sử dụng đất phân theo địa phương (tính đến 31/12/2023). NXB Thống kê.
+- Tsendbazar, N.-E., Xu, P., Herold, M. và cs. (2022). *ESA WorldCover 10 m 2021 v200: Product Validation Report v2.0*. ESA WorldCover consortium.
+- Venter, Z. S., Barton, D. N., Chakraborty, T., Simensen, T., & Singh, G. (2022). Global 10 m Land Use Land Cover Datasets: A Comparison of Dynamic World, World Cover and Esri Land Cover. *Remote Sensing*, 14(16), 4101. https://doi.org/10.3390/rs14164101
+- Zanaga, D. và cs. (2022). ESA WorldCover 10 m 2021 v200. Zenodo. https://doi.org/10.5281/zenodo.7254221

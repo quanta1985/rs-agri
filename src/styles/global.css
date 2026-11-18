@@ -219,6 +219,7 @@ tbody tr:hover td { background: color-mix(in srgb, var(--surface-2) 45%, transpa
 .formula-where { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: var(--s2) 0 0; padding-top: var(--s3); border-top: 1px dashed var(--border); font-size: 0.92rem; color: var(--fg-muted); }
 .formula-where dt { text-align: right; color: var(--fg); }
 .formula-where dd { margin: 0; }
+.formula-where.formula-note { display: block; }
 .stats { margin: var(--s5) 0; max-width: var(--wide); }
 .stats-row { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .stat { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: var(--radius); padding: var(--s3) var(--s4); }
