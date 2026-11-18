@@ -12,6 +12,7 @@ updated: "2026-11-17"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
@@ -105,7 +106,7 @@ Mọi mô hình độ cao toàn cầu miễn phí đều đo từ vệ tinh, và
 <Figure
   title="Hình 11.2 — Độ cao mặt đất (DeltaDTM), độ cao bề mặt (Copernicus DEM) và hiệu của chúng"
   try="Chọn lớp Hiệu và nhìn ĐBSCL: những dải vàng đỏ chạy dài theo hướng nào? So với bản đồ lớp phủ ở Chương 1."
-  source="DeltaDTM v1.0 (Pronk và cs., 2024, Deltares), CC BY 4.0, cắt ở 10 m; Copernicus DEM GLO-30 bản 2024_1. Cả hai: mét trên geoid EGM2008, trung bình các ô ~30 m trong mỗi ô ~250 m. Được tạo từ Copernicus WorldDEM-30 © DLR e.V. 2010–2014 và © Airbus Defence and Space GmbH 2014–2018, do EU và ESA cung cấp trong chương trình COPERNICUS; các tổ chức phụ trách chương trình Copernicus không chịu trách nhiệm về bất kỳ việc sử dụng nào của Copernicus WorldDEM-30. Hiệu bỏ trống nơi DeltaDTM ≥ 10 m."
+  source="DeltaDTM v1.0 (Pronk và cs., 2024, Deltares), CC BY 4.0, cắt ở 10 m; Copernicus DEM GLO-30 bản 2024_1. Cả hai: mét trên geoid EGM2008, trung bình các ô ~30 m trong mỗi ô ~250 m. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. Các tổ chức phụ trách chương trình Copernicus không chịu trách nhiệm về bất kỳ việc sử dụng nào của Copernicus WorldDEM-30. Hiệu bỏ trống nơi DeltaDTM ≥ 10 m."
 >
   <DeltaMap client:visible lang="vi" label="Độ cao" region="mekong" choices={[
     { key: 'dtm', label: { vi: 'DeltaDTM (mặt đất)', en: 'DeltaDTM (ground)' }, ids: { red: 'dem-dtm-red', mekong: 'dem-dtm-mekong' }, range: [0, 6] },
@@ -129,7 +130,7 @@ Cộng diện tích các ô thấp hơn mỗi mức độ cao sẽ được mộ
 <Figure
   title="Hình 11.3 — Tỉ lệ diện tích hai châu thổ thấp hơn mỗi mức độ cao, theo hai mô hình"
   try="Rê chuột đến 1 m rồi 2 m. Ở ĐBSCL, hai mô hình chênh nhau bao nhiêu điểm phần trăm? Vì sao đường Copernicus nằm bên phải?"
-  source="Diện tích ô 30 m cộng theo từng nấc 0,1 m trong ranh giới vùng (geoBoundaries ADM1), trên các ô DeltaDTM có dữ liệu (mặt nước lớn bị bỏ) cho cả hai mô hình. Mét trên geoid EGM2008. Diện tích tính: ĐBSCL 3,48 triệu ha, ĐBSH 1,90 triệu ha."
+  source="Diện tích ô 30 m cộng theo từng nấc 0,1 m trong ranh giới vùng (geoBoundaries ADM1), trên các ô DeltaDTM có dữ liệu (mặt nước lớn bị bỏ) cho cả hai mô hình. Mét trên geoid EGM2008. Diện tích tính: ĐBSCL 3,48 triệu ha, ĐBSH 1,90 triệu ha. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
 >
   <TerrainCurve client:visible lang="vi" view="curve" />
 </Figure>
@@ -165,7 +166,7 @@ t :: số năm tính từ năm gốc
 <Figure
   title="Hình 11.4 — Diện tích thấp hơn mực nước biển tương đối theo năm (minh họa)"
   try="Giữ nước biển dâng 50 cm đến 2100, kéo sụt lún từ 0 lên 1,1 rồi 2,5 cm/năm. Năm nào thì một nửa ĐBSCL nằm dưới mực nước biển tương đối theo DeltaDTM?"
-  source="Minh họa: mực nước tương đối = nước biển dâng tăng đều từ 2025 đến giá trị chọn năm 2100, cộng sụt lún đều khắp vùng; đọc trên đường cong DeltaDTM và Copernicus DEM của Hình 11.3 (geoid EGM2008). Không tính đê, thủy triều, sai số và mốc độ cao của DEM; DEM đo đạc của Minderhoud và cs. (2019) cho đất thấp hơn, nên diện tích thật có thể lớn hơn nhiều."
+  source="Minh họa: mực nước tương đối = nước biển dâng tăng đều từ 2025 đến giá trị chọn năm 2100, cộng sụt lún đều khắp vùng; đọc trên đường cong DeltaDTM và Copernicus DEM của Hình 11.3 (geoid EGM2008). Không tính đê, thủy triều, sai số và mốc độ cao của DEM; DEM đo đạc của Minderhoud và cs. (2019) cho đất thấp hơn, nên diện tích thật có thể lớn hơn nhiều. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
 >
   <TerrainCurve client:visible lang="vi" view="future" />
 </Figure>
@@ -177,6 +178,10 @@ Minderhoud và cs. (2020) chạy hai nhóm kịch bản khai thác nước ngầ
 InSAR cần **pha** của tín hiệu radar. Sentinel-1 trên Google Earth Engine là sản phẩm GRD, chỉ còn cường độ, đã mất pha. Muốn đo lún phải tải ảnh SLC (hàng chục GB mỗi cảnh) và xử lý bằng phần mềm như SNAP, ISCE hay MintPy, hoặc dùng sản phẩm đã xử lý sẵn của các dự án như LiCSAR. Ruộng lúa còn gây thêm khó khăn: mặt ruộng đổi theo mùa vụ nên pha mất tương quan nhanh; người ta phải dựa vào các điểm phản xạ ổn định như nhà, đường, đê (kỹ thuật tán xạ điểm ổn định, PS-InSAR).
 
 </Depth>
+
+**Thực hành.** Bài thực hành 11 so DeltaDTM với Copernicus DEM (tỉ lệ đất dưới 1, 2, 3 m, đường cong độ cao), xem chênh lệch DSM – DTM ở Bến Tre, mốc độ cao và pH SoilGrids.
+
+<LabLinks notebook="labs/soil_dem.ipynb" gee="labs/soil_dem.js" />
 
 ## 11.6 Ôn tập
 

@@ -6,7 +6,7 @@ objectives:
   - Register and configure a Google Cloud project for Earth Engine.
   - Run a Python notebook on Colab and a JavaScript script in the Code Editor.
   - Fix the errors most beginners meet.
-updated: "2026-11-17"
+updated: "2026-11-18"
 ---
 import Depth from '../../../components/Depth.astro';
 import Note from '../../../components/Note.astro';
@@ -14,7 +14,7 @@ import LabIndex from '../../../components/LabIndex.astro';
 
 ## 15.1 List of labs
 
-Labs exist so far for Chapters 4, 8 and 10; the other chapters get theirs when they are written. Each lab comes in two forms: a **Python notebook** that runs on Google Colab and a **JavaScript script** to paste into the Earth Engine Code Editor. A lab repeats the chapter's calculations on real data, fetched live from Earth Engine, so you can change the place, the year or the threshold yourself. The list below is built from the `labs/` folder every time the site is built.
+There are 12 labs for Chapters 2–14 (Chapter 1 shares the Chapter 3 lab, Chapter 7 shares the Chapter 9 lab). Each lab comes in two forms: a **Python notebook** that runs on Google Colab and a **JavaScript script** to paste into the Earth Engine Code Editor. A lab repeats the chapter's calculations on real data, fetched live from Earth Engine, so you can change the place, the year or the threshold yourself. Lab 5 (sampling) and the first part of Lab 14 (risk overlay) read the handbook's exported data instead, so that their results match the chapter exactly. The list below is built from the `labs/` folder every time the site is built.
 
 <LabIndex />
 
@@ -65,6 +65,7 @@ Then open the notebook in Jupyter and set `PROJECT` as on Colab.
 | Earth Engine API has not been used in project … | The Earth Engine API is not enabled | Enable it in the project's Google Cloud Console |
 | User memory limit exceeded / Computation timed out | The request is too big for `getInfo()` | Shrink the area, raise `scale`, or use `Export` |
 | Collection query aborted after accumulating over 5000 elements | Printing a huge collection | Filter harder; print `size()` instead of the collection |
+| Filtering provinces by name (`shapeName`) returns nothing | The geoBoundaries copy in Earth Engine stores Vietnamese letters as `?` (e.g. `??ng Tháp`) | Select the province with a point and `filterBounds`, as the notebooks do |
 | Dictionary does not contain key | A band was renamed by an operation (`ee.Image(10).pow(…)` is called `constant`) | Rename it with `rename()` |
 
 </div>

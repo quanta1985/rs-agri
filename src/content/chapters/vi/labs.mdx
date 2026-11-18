@@ -6,7 +6,7 @@ objectives:
   - Đăng ký và cấu hình một dự án Google Cloud để dùng Earth Engine.
   - Chạy notebook Python trên Colab và script JavaScript trong Code Editor.
   - Biết cách xử lý các lỗi hay gặp khi bắt đầu.
-updated: "2026-11-17"
+updated: "2026-11-18"
 ---
 import Depth from '../../../components/Depth.astro';
 import Note from '../../../components/Note.astro';
@@ -14,7 +14,7 @@ import LabIndex from '../../../components/LabIndex.astro';
 
 ## 15.1 Danh sách bài thực hành
 
-Hiện có bài thực hành cho Chương 4, 8 và 10; các chương khác sẽ có khi được viết. Mỗi bài có hai dạng: **notebook Python** chạy trên Google Colab và **script JavaScript** dán vào Earth Engine Code Editor. Bài thực hành lặp lại các bước tính của chương trên dữ liệu thật, tải trực tiếp từ Earth Engine, để bạn tự đổi vùng, đổi năm, đổi ngưỡng. Danh sách dưới đây được tạo tự động từ thư mục `labs/` mỗi lần xây dựng trang.
+Có 12 bài thực hành cho các Chương 2–14 (Chương 1 dùng chung bài của Chương 3, Chương 7 dùng chung bài của Chương 9). Mỗi bài có hai dạng: **notebook Python** chạy trên Google Colab và **script JavaScript** dán vào Earth Engine Code Editor. Bài thực hành lặp lại các bước tính của chương trên dữ liệu thật, tải trực tiếp từ Earth Engine, để bạn tự đổi vùng, đổi năm, đổi ngưỡng. Riêng bài 5 (lấy mẫu) và phần đầu bài 14 (chồng lớp rủi ro) đọc dữ liệu đã xuất của sổ tay, để kết quả khớp đúng với chương. Danh sách dưới đây được tạo tự động từ thư mục `labs/` mỗi lần xây dựng trang.
 
 <LabIndex />
 
@@ -65,6 +65,7 @@ Sau đó mở notebook bằng Jupyter và sửa `PROJECT` như khi chạy trên 
 | Earth Engine API has not been used in project … | Chưa bật Earth Engine API | Bật API trong Google Cloud Console của dự án |
 | User memory limit exceeded / Computation timed out | Yêu cầu quá lớn so với `getInfo()` | Thu nhỏ vùng, tăng `scale`, hoặc dùng `Export` |
 | Collection query aborted after accumulating over 5000 elements | In ra một collection quá lớn | Lọc chặt hơn; in `size()` thay vì in cả collection |
+| Lọc tỉnh theo tên (`shapeName`) không ra gì | Bản geoBoundaries trên Earth Engine lưu chữ có dấu tiếng Việt thành `?` (ví dụ `??ng Tháp`) | Chọn tỉnh bằng một điểm và `filterBounds`, như trong các notebook |
 | Dictionary does not contain key | Tên band đổi sau một phép tính (ví dụ `ee.Image(10).pow(…)` có tên `constant`) | Đặt lại tên bằng `rename()` |
 
 </div>

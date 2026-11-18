@@ -11,6 +11,7 @@ updated: "2026-11-18"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
@@ -157,6 +158,10 @@ Mô phỏng ở đây có một điểm dễ dãi: "số đo thực địa" y l�
 Vệ tinh không thay điều tra; nó làm điều tra rẻ hơn và cho con số kèm sai số. Ba bước: dựng khung và phân tầng bằng bản đồ, đo y trên một mẫu xác suất, dùng bản đồ làm biến phụ. Sai số chuẩn chỉ giảm theo căn bậc hai của số ô, nên một biến phụ tốt đáng giá bằng hàng trăm chuyến đi thực địa.
 
 </Note>
+
+**Thực hành.** Bài thực hành 5 làm lại mô phỏng lấy mẫu của chương (notebook Python) trên cùng bản đồ lúa 2024: ngẫu nhiên đơn, phân tầng tỉ lệ và Neyman, ước lượng hồi quy, 500 lần lặp và cỡ mẫu theo CV.
+
+<LabLinks notebook="labs/area_sampling.ipynb" gee="labs/area_sampling.js" />
 
 ## 5.7 Ôn tập
 

@@ -12,6 +12,7 @@ updated: "2026-11-17"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
@@ -153,6 +154,10 @@ The book stresses two tensions. First, **early and sure do not go together**: th
 ASIS works in three steps: (1) average VHI over time within the crop cycle at each pixel; (2) count the percentage of farmland pixels with VHI below 35; (3) rank each administrative unit by that percentage. A lab can redo step 2 for each Mekong province in Earth Engine. Fixes needed for a delta: (a) replace the generic "crop cycle" with the real local crop calendar (Chapter 4), since newly transplanted fields have low NDVI without drought; (b) drop months with too few cloud-free images; (c) read it together with salinity data.
 
 </Depth>
+
+**Lab.** Lab 9 computes rainfall normals, dry-season rain anomalies, Feb–Apr SPI-3 and VHI on Mekong cropland.
+
+<LabLinks notebook="labs/drought_spi_vhi.ipynb" gee="labs/drought_spi_vhi.js" />
 
 ## 9.7 Review
 

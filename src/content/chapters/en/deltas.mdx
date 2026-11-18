@@ -11,6 +11,7 @@ updated: "2026-11-17"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Tiles from '../../../components/Tiles.astro';
@@ -126,6 +127,10 @@ The FAO book focuses on crop area and yield. This handbook keeps that part (Part
 - **Interactive figures.** Each figure has a *Try* line suggesting what to do and a *Source* line with the data, image dates and processing. Every number in the text can be recomputed with the scripts in `scripts/`.
 - **Labs.** Chapter 15 has Python notebooks (run on Google Colab) and Earth Engine scripts that run on real data.
 - **Background.** Spectral principles, vegetation indices, radar and image classification are not rewritten here. To revise them, see the <a href="https://quanta1985.github.io/rs-knowledge/en/">Remote Sensing & GIS</a> handbook.
+
+**Lab.** Lab 3 (shared with Chapter 3) computes the WorldCover class areas of the 13 Mekong provinces and compares three land cover maps on two 10 km frames.
+
+<LabLinks notebook="labs/landcover_compare.ipynb" gee="labs/landcover_compare.js" />
 
 ## 1.6 Review
 

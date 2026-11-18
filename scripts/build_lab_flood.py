@@ -192,7 +192,7 @@ makes the radar **brighter** (section 8.6)."""),
 
 1. Ở mục 2, thay ngày 26/10 bằng 14/10/2024 (chỉ radar). Ngưỡng Otsu và diện tích nước thay đổi bao nhiêu? Chương cho −16,5 dB và 6 045 ha.
    / In section 2, use 14 Oct 2024 (radar only). How do the Otsu threshold and the water area change? The chapter gives −16.5 dB and 6,045 ha.
-2. Ở mục 3, đổi tỉnh sang `'Đồng Tháp'` và thêm năm 2017, 2021. Năm nào lũ lớn nhất, nhỏ nhất? / Switch to Dong Thap and add 2017 and 2021: which year floods most and least?
+2. Ở mục 3, đổi tỉnh sang `'Long An'` và thêm năm 2017, 2021. Năm nào lũ lớn nhất, nhỏ nhất? (Bản geoBoundaries trên Earth Engine lưu chữ có dấu tiếng Việt thành '?', ví dụ 'Đồng Tháp' thành '??ng Tháp': tỉnh có tên như vậy phải lọc theo tên đã hỏng hoặc chọn bằng một điểm `filterBounds`.) / Switch to Long An and add 2017 and 2021: which year floods most and least? (The geoBoundaries copy in Earth Engine stores Vietnamese letters as '?', e.g. 'Đồng Tháp' becomes '??ng Tháp': select such provinces by the corrupted name or with a point and `filterBounds`.)
 3. Ở mục 4, thay ngưỡng −18 dB bằng phát hiện thay đổi (`post − pre < −3 dB`). Nước mới trên đất canh tác khác bao nhiêu? Vì sao lúa đang trổ bông có thể làm radar sáng lên chứ không tối đi?
    / In section 4, replace the −18 dB threshold with change detection (`post − pre < −3 dB`). How much does new water on cropland change? Why can heading rice make the radar brighter rather than darker?
 

@@ -12,6 +12,7 @@ updated: "2026-11-17"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Depth from '../../../components/Depth.astro';
@@ -179,6 +180,10 @@ Imagery alone is not enough for statistics. The FAO book (section 1.4) lists the
 
 - **Administrative boundaries change.** In 2025 the 63 provinces were merged into 34 units. Earlier statistics refer to the old boundaries, so this handbook uses the 63-province boundaries (geoBoundaries, 2008) for historical data. The popular GADM boundaries are not used because their licence forbids redistribution.
 - **Field reference points.** Every classified map needs a sample of correctly labelled points to measure its accuracy and correct its area (Chapter 4 section 4.5). Points can come from field visits, interpretation of very detailed imagery, or UAV photos.
+
+**Lab.** Lab 2 counts usable Sentinel-2 days per month (Cloud Score+) and Sentinel-1 days per year at Nam Dinh and An Giang, then computes the share of pure cells by cell size from WorldCover 10 m.
+
+<LabLinks notebook="labs/data_clearsky.ipynb" gee="labs/data_clearsky.js" />
 
 ## 2.8 Review
 

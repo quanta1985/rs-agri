@@ -12,6 +12,7 @@ updated: "2026-11-17"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Depth from '../../../components/Depth.astro';
@@ -179,6 +180,10 @@ Với khối lượng ấy, tải về máy và xử lý cục bộ không còn 
 
 - **Ranh giới hành chính thay đổi.** Năm 2025, 63 tỉnh được sáp nhập thành 34 đơn vị. Số liệu thống kê trước đó gắn với ranh cũ, nên sổ tay dùng ranh 63 tỉnh (geoBoundaries, năm 2008) cho số liệu lịch sử. Bộ ranh GADM phổ biến không được dùng vì giấy phép cấm phân phối lại.
 - **Điểm kiểm tra thực địa.** Mọi bản đồ phân loại cần một mẫu điểm có nhãn đúng để đo độ chính xác và hiệu chỉnh diện tích (Chương 4 mục 4.5). Điểm có thể lấy bằng đi thực địa, giải đoán ảnh rất chi tiết, hoặc ảnh UAV.
+
+**Thực hành.** Bài thực hành 2 đếm số ngày Sentinel-2 dùng được mỗi tháng (Cloud Score+) và số ngày Sentinel-1 mỗi năm ở Nam Định và An Giang, rồi tính tỉ lệ ô thuần theo kích thước ô từ WorldCover 10 m.
+
+<LabLinks notebook="labs/data_clearsky.ipynb" gee="labs/data_clearsky.js" />
 
 ## 2.8 Ôn tập
 

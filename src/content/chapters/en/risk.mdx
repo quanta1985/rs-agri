@@ -11,6 +11,7 @@ updated: "2026-11-18"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
@@ -90,7 +91,7 @@ In each cell, the hazard with the largest <M tex="w_k s_k" /> is the cell's **do
 <Figure
   title="Figure 14.1 — Composite hazard index on cropland: set your own weights"
   try="Keep equal weights and read the province table. Raise 'Flooding' to 3: Long An and Dong Thap climb to the top, Ben Tre drops to 0 %. Put it back to 1 and raise 'Low-lying land' to 3: Hau Giang, Ca Mau and Bac Lieu lead. Set 'Dry-season rain deficit' to 0: how much does the map change? Switch to the Red River: why does almost nothing pass 50?"
-  source="Scores 0–100 on ~250 m cells with ≥ 50 % WorldCover 2021 cropland: flooding from Sentinel-1 (Mekong: largest monthly water share Jul–Dec 2018; Red River: new water 31 Aug → 12 Sep 2024), rain deficit from Feb–Apr CHIRPS SPI-3 (2016, 2020, 2024; 5 km cells), crop decline from the Feb–Apr MODIS EVI anomaly (≤ −0.05), low land from DeltaDTM (Pronk et al., 2024; CC BY 4.0); provinces with pre-2025 boundaries (geoBoundaries). Weights set by the reader; scripts/data/export_risk.py, scripts/risk_numbers.ts."
+  source="Scores 0–100 on ~250 m cells with ≥ 50 % WorldCover 2021 cropland: flooding from Sentinel-1 (Mekong: largest monthly water share Jul–Dec 2018; Red River: new water 31 Aug → 12 Sep 2024), rain deficit from Feb–Apr CHIRPS SPI-3 (2016, 2020, 2024; 5 km cells), crop decline from the Feb–Apr MODIS EVI anomaly (≤ −0.05), low land from DeltaDTM (Pronk et al., 2024; CC BY 4.0); provinces with pre-2025 boundaries (geoBoundaries). Weights set by the reader; scripts/data/export_risk.py, scripts/risk_numbers.ts. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
 >
   <RiskLab client:visible lang="en" label="Composite hazard index map with adjustable weights" />
 </Figure>
@@ -164,6 +165,10 @@ A multi-criteria map is most useful for **discussion**, not for **verdicts**. Pu
 On 657 thousand ha of Red River cropland, the composite with two equal weights passes 50 on only 1.1 % of the area, most in Nam Dinh (5.3 %) and Ninh Binh (3.0 %). With low land weighted 3, Nam Dinh has 30.6 % of its area high and Thai Binh 16.2 %: the low coastal strip of the delta. A small result does not mean the Red River Delta is safe. Its main risks (typhoons, heavy rain, waterlogging inside the dykes, low river flow in the dry season) either cannot be seen through cloud by optical images or appear only once in the data.
 
 </Depth>
+
+**Lab.** Lab 14 redoes the chapter's weighted overlay on the same data (results match the chapter) and builds the low-land indicator from DeltaDTM on Earth Engine.
+
+<LabLinks notebook="labs/risk_overlay.ipynb" gee="labs/risk_overlay.js" />
 
 ## 14.7 Review
 

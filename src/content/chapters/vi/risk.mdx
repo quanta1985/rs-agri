@@ -11,6 +11,7 @@ updated: "2026-11-18"
 ---
 import Term from '../../../components/Term.astro';
 import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
 import Note from '../../../components/Note.astro';
 import Stats from '../../../components/Stats.astro';
 import Steps from '../../../components/Steps.astro';
@@ -90,7 +91,7 @@ R :: chỉ số tổng hợp, cùng thang 0–100
 <Figure
   title="Hình 14.1 — Chỉ số hiểm họa tổng hợp trên đất trồng trọt: tự chỉnh trọng số"
   try="Để trọng số bằng nhau rồi xem bảng tỉnh. Kéo 'Ngập lũ' lên 3: Long An và Đồng Tháp leo lên đầu, Bến Tre rơi về 0 %. Trả lại 1 rồi kéo 'Đất thấp' lên 3: Hậu Giang, Cà Mau, Bạc Liêu dẫn đầu. Đặt 'Thiếu mưa' bằng 0: bản đồ đổi bao nhiêu? Chuyển sang ĐBSH: vì sao gần như không có gì vượt 50?"
-  source="Điểm 0–100 trên các ô ~250 m có ≥ 50 % đất trồng trọt WorldCover 2021: ngập lũ từ Sentinel-1 (ĐBSCL: tỉ lệ mặt nước tháng lớn nhất 7–12/2018; ĐBSH: mặt nước mới 31/8 → 12/9/2024), thiếu mưa từ SPI-3 tháng 2–4 CHIRPS (2016, 2020, 2024; ô 5 km), cây trồng suy giảm từ dị thường EVI MODIS tháng 2–4 (≤ −0,05), đất thấp từ DeltaDTM (Pronk và cs., 2024; CC BY 4.0); tỉnh theo ranh trước 2025 (geoBoundaries). Trọng số do người dùng đặt; scripts/data/export_risk.py, scripts/risk_numbers.ts."
+  source="Điểm 0–100 trên các ô ~250 m có ≥ 50 % đất trồng trọt WorldCover 2021: ngập lũ từ Sentinel-1 (ĐBSCL: tỉ lệ mặt nước tháng lớn nhất 7–12/2018; ĐBSH: mặt nước mới 31/8 → 12/9/2024), thiếu mưa từ SPI-3 tháng 2–4 CHIRPS (2016, 2020, 2024; ô 5 km), cây trồng suy giảm từ dị thường EVI MODIS tháng 2–4 (≤ −0,05), đất thấp từ DeltaDTM (Pronk và cs., 2024; CC BY 4.0); tỉnh theo ranh trước 2025 (geoBoundaries). Trọng số do người dùng đặt; scripts/data/export_risk.py, scripts/risk_numbers.ts. Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
 >
   <RiskLab client:visible lang="vi" label="Bản đồ chỉ số hiểm họa tổng hợp với trọng số tự chỉnh" />
 </Figure>
@@ -164,6 +165,10 @@ Bản đồ đa tiêu chí có ích nhất khi dùng để **thảo luận**, kh
 Trên 657 nghìn ha đất trồng trọt ĐBSH, chỉ số tổng hợp với hai trọng số bằng nhau chỉ vượt 50 trên 1,1 % diện tích, nhiều nhất ở Nam Định (5,3 %) và Ninh Bình (3,0 %). Đặt trọng số đất thấp lên 3, Nam Định có 30,6 % diện tích ở mức cao và Thái Bình 16,2 %: dải ven biển thấp của châu thổ sông Hồng. Kết quả nhỏ không có nghĩa ĐBSH an toàn. Rủi ro chính của vùng này (bão, mưa lớn, ngập úng nội đồng, hạn do thiếu nước sông mùa kiệt) hoặc không đo được qua mây bằng ảnh quang học, hoặc chỉ có một sự kiện trong dữ liệu.
 
 </Depth>
+
+**Thực hành.** Bài thực hành 14 làm lại phép chồng lớp có trọng số của chương trên cùng dữ liệu (kết quả khớp chương) và dựng chỉ số đất thấp từ DeltaDTM trên Earth Engine.
+
+<LabLinks notebook="labs/risk_overlay.ipynb" gee="labs/risk_overlay.js" />
 
 ## 14.7 Ôn tập
 

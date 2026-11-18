@@ -1,0 +1,225 @@
+"""Generate labs/drought_spi_vhi.ipynb (Colab) for Chapter 9 (drought), also linked from Chapter 7 (climate).
+
+    cd scripts && python build_lab_drought.py           # write the notebook
+    cd scripts && python build_lab_drought.py --run     # also execute the code cells locally (needs EE auth)
+
+The GEE Code Editor version of the same steps is labs/drought_spi_vhi.js (kept by hand).
+"""
+from labkit import MD, PY, main
+
+CELLS = [
+    (MD, """# Lab 9 — Mưa, SPI và VHI / Rainfall, SPI and VHI
+
+**Viễn thám Nông nghiệp & Môi trường — Chương 9** (và Chương 7) · [Mở chương 9 / Open chapter 9](https://quanta1985.github.io/rs-agri/vi/drought/) · [Chương 7 / Chapter 7](https://quanta1985.github.io/rs-agri/vi/climate/)
+
+1. Lượng mưa trung bình tháng 1991–2020 của hai châu thổ (CHIRPS) / Mean monthly rainfall 1991–2020 of both deltas (CHIRPS).
+2. Mưa mùa khô (tháng 12–4) của 2015–16, 2019–20, 2023–24 so với trung bình / Dry-season rainfall (Dec–Apr) of 2015–16, 2019–20, 2023–24 against the mean.
+3. Chỉ số mưa chuẩn hóa SPI-3 tháng 2–4 / The standardised precipitation index SPI-3 for Feb–Apr.
+4. Chỉ số sức khỏe thực vật VHI trên đất trồng trọt ĐBSCL, tháng 2–4 / The Vegetation Health Index VHI on Mekong Delta cropland, Feb–Apr.
+
+> SPI đo **thiếu mưa**. VHI đo **cây có bị căng thẳng không**, nhưng cây còn phản ứng với lịch thời vụ, tưới, mặn và mây. Hai chỉ số trả lời hai câu hỏi khác nhau.
+> SPI measures **missing rain**. VHI measures **whether plants are stressed**, but plants also respond to the cropping calendar, irrigation, salinity and cloud. The two indices answer different questions.
+
+Để chạy nhanh (khoảng 2–3 phút), notebook tính trên **trung bình vùng**, không tính từng pixel như bản đồ của chương. / To run fast (about 2–3 minutes), the notebook works on **region means**, not pixel by pixel like the chapter's maps."""),
+    (PY, """import ee
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+PROJECT = 'YOUR-CLOUD-PROJECT-ID'  # <-- sửa / edit
+try:
+    ee.Initialize(project=PROJECT)
+except Exception:
+    ee.Authenticate()
+    ee.Initialize(project=PROJECT)
+
+def pixels(img, crs, x0, y1, n_x, n_y, res):
+    \"\"\"Tải ảnh về numpy trên một lưới cố định / fetch an image as numpy on a fixed grid (upper-left x0, y1).\"\"\"
+    arr = ee.data.computePixels({'expression': img, 'fileFormat': 'NUMPY_NDARRAY',
+        'grid': {'dimensions': {'width': n_x, 'height': n_y}, 'crsCode': crs,
+                 'affineTransform': {'scaleX': res, 'shearX': 0, 'translateX': x0, 'shearY': 0, 'scaleY': -res, 'translateY': y1}}})
+    return {b: arr[b] for b in arr.dtype.names}
+
+# Bản geoBoundaries trong Earth Engine mất các chữ ngoài bảng Latin-1 ('Hậu Giang' -> 'H?u Giang'): đổi tên theo cùng cách.
+# The Earth Engine copy of geoBoundaries lost the letters outside Latin-1 ('Hậu Giang' -> 'H?u Giang'): convert names the same way.
+def gb_name(s):
+    return s.encode('latin-1', 'replace').decode('latin-1')
+
+GB = ee.FeatureCollection('WM/geoLab/geoBoundaries/600/ADM1').filter(ee.Filter.eq('shapeGroup', 'VNM'))
+
+def provinces(names):
+    \"\"\"Tỉnh theo tên, khớp cả tên đúng lẫn tên bị lỗi / provinces by name, matching the correct and the corrupted spelling.\"\"\"
+    fc = GB.filter(ee.Filter.inList('shapeName', list(names) + [gb_name(n) for n in names]))
+    n = fc.size().getInfo()
+    assert n == len(names), f'tìm thấy / found {n} of {len(names)} provinces'
+    return fc
+
+PROVINCES = {
+    'mekong': ['Long An', 'Tiền Giang', 'Bến Tre', 'Trà Vinh', 'Vĩnh Long', 'Đồng Tháp', 'An Giang', 'Kiên Giang',
+               'Cần Thơ', 'Hậu Giang', 'Sóc Trăng', 'Bạc Liêu', 'Cà Mau'],
+    'red': ['Hà Nội', 'Vĩnh Phúc', 'Bắc Ninh', 'Quảng Ninh', 'Hải Dương', 'Hải Phòng', 'Hưng Yên', 'Thái Bình',
+            'Hà Nam', 'Nam Định', 'Ninh Bình'],
+}
+# Khung đất nông nghiệp của chương (src/data/regions.json): bỏ Phú Quốc và phần lớn vùng đồi Quảng Ninh.
+# The chapter's farmland boxes (src/data/regions.json): Phu Quoc and most of the Quang Ninh hills are left out.
+BBOX = {'mekong': [104.4, 8.5, 106.85, 11.05], 'red': [105.3, 19.9, 107.05, 21.6]}
+NAME = {'mekong': 'ĐBSCL / Mekong', 'red': 'ĐBSH / Red River'}
+REGION = {k: provinces(v).geometry()
+          .intersection(ee.Geometry.Rectangle(BBOX[k]), 100) for k, v in PROVINCES.items()}"""),
+    (MD, """## 1. Mưa trung bình tháng 1991–2020 / Mean monthly rainfall 1991–2020
+
+CHIRPS v2.0 (5 ngày, ~5 km) cộng thành tổng tháng, 1/1981–12/2025, rồi lấy trung bình trên vùng (lưới 5 km). Một lần gọi Earth Engine cho cả 540 tháng × 2 vùng, khoảng một phút.
+
+CHIRPS v2.0 (pentads, ~5 km) summed to monthly totals, Jan 1981 – Dec 2025, then averaged over each region (5 km grid). One Earth Engine call for all 540 months × 2 regions, about a minute."""),
+    (PY, """Y0, NY = 1981, 45                    # 1981 ... 2025
+CH = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD')
+
+def month_total(i):
+    d = ee.Date('1981-01-01').advance(i, 'month')
+    return CH.filterDate(d, d.advance(1, 'month')).sum().rename('rain').set('i', i)
+
+months = ee.ImageCollection(ee.List.sequence(0, NY * 12 - 1).map(month_total))
+regions_fc = ee.FeatureCollection([ee.Feature(g, {'region': k}) for k, g in REGION.items()])
+res = months.map(lambda im: im.reduceRegions(regions_fc, ee.Reducer.mean(), scale=5000, crs='EPSG:3857')
+                 .map(lambda f: f.set('i', im.get('i')))).flatten().getInfo()
+RAIN = {k: np.full(NY * 12, np.nan) for k in REGION}
+for f in res['features']:
+    p = f['properties']
+    RAIN[p['region']][int(p['i'])] = p.get('mean', np.nan)
+RAIN = {k: v.reshape(NY, 12) for k, v in RAIN.items()}     # [năm / year, tháng / month] mm
+YRS = np.arange(Y0, Y0 + NY)
+REF = (YRS >= 1991) & (YRS <= 2020)
+
+fig, ax = plt.subplots(figsize=(9, 3.8))
+for j, k in enumerate(REGION):
+    normal = RAIN[k][REF].mean(0)
+    dry = normal[[11, 0, 1, 2, 3]].sum()
+    print(f'{NAME[k]}: {normal.sum():.0f} mm/năm / yr; tháng 12–4 / Dec–Apr {dry:.0f} mm ({100 * dry / normal.sum():.0f} %); '
+          f'tháng mưa nhiều nhất / wettest month {normal.argmax() + 1} ({normal.max():.0f} mm)')
+    ax.bar(np.arange(1, 13) + (j - 0.5) * 0.4, normal, width=0.4, label=NAME[k], hatch='' if j else '//')
+ax.set_xticks(range(1, 13)); ax.set_xlabel('Tháng / month'); ax.set_ylabel('mm/tháng / month'); ax.legend()
+ax.set_title('Mưa trung bình tháng 1991–2020 (CHIRPS) / mean monthly rainfall')
+plt.show()"""),
+    (MD, """Chương 7: ĐBSH 1 698 mm/năm (tháng 12–4: 189 mm, 11 %), ĐBSCL 1 705 mm/năm (160 mm, 9 %). Chương tính trên lưới 5 km Web Mercator, mỗi ô có trọng số theo diện tích thật và ranh tỉnh bản đơn giản hóa; ở đây Earth Engine lấy trung bình trên ranh đầy đủ. Lần chạy kiểm tra cho ĐBSCL 1 711 mm và ĐBSH 1 703 mm/năm, chỉ lệch chương khoảng 5 mm. Nếu bỏ phép cắt theo khung (`BBOX`), tổng của ĐBSH tăng rõ vì vùng đồi Quảng Ninh mưa nhiều hơn đồng bằng.
+
+Chapter 7: Red River 1,698 mm/yr (Dec–Apr: 189 mm, 11 %), Mekong 1,705 mm/yr (160 mm, 9 %). The chapter works on a 5 km Web Mercator grid with true-area weights and the simplified province lines; here Earth Engine averages over the full lines. The test run gave 1,711 mm (Mekong) and 1,703 mm/yr (Red River), about 5 mm from the chapter. Without the box cut (`BBOX`), the Red River total rises clearly because the Quang Ninh hills are wetter than the plain."""),
+    (MD, """## 2. Mưa mùa khô so với trung bình / Dry-season rain against the mean
+
+Tổng tháng 12 năm trước đến tháng 4, so với trung bình của cùng các tháng trong 1991–2020.
+
+Total from December of the previous year to April, against the 1991–2020 mean of the same months."""),
+    (PY, """def dry_total(r, y):
+    return r[y - 1 - Y0, 11] + r[y - Y0, :4].sum()
+
+DRY_YEARS = [2016, 2020, 2024]
+for k in REGION:
+    base = np.mean([dry_total(RAIN[k], y) for y in range(1991, 2021)])
+    print(NAME[k] + ':', ', '.join(f'{y - 1}–{y % 100:02d} {100 * dry_total(RAIN[k], y) / base - 100:+.0f} %' for y in DRY_YEARS))"""),
+    (MD, """Chương 7: ĐBSCL −34 %, −38 %, −60 %; ĐBSH +48 %, +33 %, +7 %. Lần chạy kiểm tra cho đúng các số đó (ĐBSH 2015–16: +49 %). Ba mùa khô El Niño hoặc gần El Niño làm **ĐBSCL** khô, còn mùa đông ĐBSH lại ẩm hơn bình thường.
+
+Chapter 7: Mekong −34 %, −38 %, −60 %; Red River +48 %, +33 %, +7 %. The test run gave the same numbers (Red River 2015–16: +49 %). Three dry seasons during or near El Niño dried the **Mekong**, while the Red River winter was wetter than usual."""),
+    (MD, """## 3. SPI-3 tháng 2–4 / SPI-3 for Feb–Apr
+
+SPI-3 của tháng 4 = tổng mưa tháng 2–4, đổi sang thang chuẩn. Khớp phân bố gamma cho 30 tổng tháng 2–4 của 1991–2020, tính xác suất tích lũy của mỗi năm, rồi đổi sang giá trị của phân bố chuẩn (McKee và cs. 1993). SPI ≤ −1: hạn vừa; ≤ −1,5: hạn nặng; ≤ −2: hạn rất nặng. Trung bình vùng không bao giờ bằng 0 mm, nên không cần phần xác suất "không mưa" như khi tính từng pixel.
+
+SPI-3 of April = the Feb–Apr rainfall total, put on a standard scale. Fit a gamma distribution to the 30 Feb–Apr totals of 1991–2020, take each year's cumulative probability, and convert it to a standard normal value (McKee et al. 1993). SPI ≤ −1: moderately dry; ≤ −1.5: severely dry; ≤ −2: extremely dry. A region mean is never 0 mm, so the "no rain" probability needed pixel by pixel is not needed here."""),
+    (PY, """SPI = {}
+for k in REGION:
+    acc = RAIN[k][:, 1:4].sum(1)                         # tổng tháng 2–4 / Feb–Apr total, mỗi năm / each year
+    a, _, scale = stats.gamma.fit(acc[REF], floc=0)
+    SPI[k] = stats.norm.ppf(stats.gamma.cdf(acc, a, scale=scale))
+    print(f'{NAME[k]}: gamma shape {a:.2f}, scale {scale:.0f} mm; SPI-3 (tháng 4 / April):',
+          ', '.join(f'{y} {SPI[k][y - Y0]:+.2f}' for y in DRY_YEARS))
+
+fig, ax = plt.subplots(2, 1, figsize=(10, 6), sharex=True, layout='constrained')
+for i, k in enumerate(REGION):
+    s = SPI[k]
+    ax[i].bar(YRS, s, color=np.where(s < 0, '#a6611a', '#018571'))
+    for lvl in (-1, -1.5, -2):
+        ax[i].axhline(lvl, color='grey', lw=0.8, ls=':')
+    ax[i].set_ylabel('SPI-3'); ax[i].set_title(f'{NAME[k]}: SPI-3 tháng 2–4 / Feb–Apr'); ax[i].set_ylim(-3, 3)
+plt.show()"""),
+    (MD, """Chương 9 (cũng từ trung bình vùng CHIRPS): ĐBSCL 2016 −1,89, 2020 −0,14, 2024 −1,85; ĐBSH 2016 +1,51, 2020 +1,42, 2024 +0,43. Lần chạy kiểm tra: −1,88, −0,14, −1,84 và +1,51, +1,40, +0,44. Năm 2020 SPI-3 gần 0 dù mùa khô hụt 38 % mưa: phần thiếu nằm chủ yếu ở tháng 12–1, ngoài cửa sổ 3 tháng. Chọn cửa sổ nào là một quyết định, không phải chi tiết kỹ thuật.
+
+Chapter 9 (also from the CHIRPS region mean): Mekong 2016 −1.89, 2020 −0.14, 2024 −1.85; Red River 2016 +1.51, 2020 +1.42, 2024 +0.43. Test run: −1.88, −0.14, −1.84 and +1.51, +1.40, +0.44. In 2020 SPI-3 is near 0 although the dry season lost 38 % of its rain: most of the deficit fell in Dec–Jan, outside the 3-month window. Choosing the window is a decision, not a technical detail."""),
+    (MD, """## 4. VHI trên đất trồng trọt ĐBSCL / VHI on Mekong Delta cropland
+
+- NDVI: MODIS Terra MOD13Q1, chỉ SummaryQA ≤ 1, giá trị lớn nhất mỗi tháng. / monthly maximum of MOD13Q1 NDVI, SummaryQA ≤ 1 only.
+- LST: MODIS MOD11A2 ban ngày, chỉ pixel chất lượng tốt (QC bit 0–1 = 0), trung bình tháng. / monthly mean of good-quality MOD11A2 day LST.
+- VCI = 100 (NDVI − NDVI_min) / (NDVI_max − NDVI_min); TCI = 100 (LST_max − LST) / (LST_max − LST_min), min và max của **cùng tháng** trong 2001–2025, bỏ pixel có < 10 năm không mây. / min and max of the **same calendar month** in 2001–2025, cells with < 10 cloud-free years left out.
+- VHI = 0,5 VCI + 0,5 TCI (Kogan 1995). Trung bình trên các ô 1 km có ≥ 50 % đất trồng trọt WorldCover 2021; bỏ tháng có < 30 % số ô không mây; ASI = % số ô có VHI < 35 (ngưỡng của FAO ASIS). / Mean over 1 km cells with ≥ 50 % WorldCover 2021 cropland; months with < 30 % cloud-free cells dropped; ASI = % of cells with VHI < 35 (FAO ASIS threshold).
+
+Khoảng một phút. / About a minute."""),
+    (PY, """NDVI_C, LST_C = ee.ImageCollection('MODIS/061/MOD13Q1'), ee.ImageCollection('MODIS/061/MOD11A2')
+proj = LST_C.first().select('LST_Day_1km').projection()         # lưới 1 km MODIS / MODIS 1 km grid
+crop = (ee.ImageCollection('ESA/WorldCover/v200').first().eq(40)
+        .reduceResolution(ee.Reducer.mean(), maxPixels=65535).gte(0.5))   # ≥ 50 % đất trồng trọt / cropland, ở 1 km khi tính
+
+def ndvi_m(y, m):
+    d = ee.Date.fromYMD(y, m, 1)
+    good = NDVI_C.filterDate(d, d.advance(1, 'month')).map(lambda i: i.select('NDVI').updateMask(i.select('SummaryQA').lte(1)))
+    return good.max().multiply(0.0001).rename('v')
+
+def lst_m(y, m):
+    d = ee.Date.fromYMD(y, m, 1)
+    good = LST_C.filterDate(d, d.advance(1, 'month')).map(
+        lambda i: i.select('LST_Day_1km').updateMask(i.select('QC_Day').bitwiseAnd(3).eq(0)))
+    return good.mean().multiply(0.02).subtract(273.15).rename('v')
+
+def vhi_img(y, m):
+    nd = ee.ImageCollection([ndvi_m(yy, m) for yy in range(2001, 2026)])
+    ls = ee.ImageCollection([lst_m(yy, m) for yy in range(2001, 2026)])
+    nlo, nhi = nd.min().updateMask(nd.count().gte(10)), nd.max()
+    llo, lhi = ls.min().updateMask(ls.count().gte(10)), ls.max()
+    vci = ndvi_m(y, m).subtract(nlo).divide(nhi.subtract(nlo)).multiply(100)
+    tci = lhi.subtract(lst_m(y, m)).divide(lhi.subtract(llo)).multiply(100)
+    return vci.add(tci).multiply(0.5).rename('vhi')
+
+VHI_YEARS = [2016, 2018, 2020, 2024]
+feats = []
+for y in VHI_YEARS:
+    for m in (2, 3, 4):
+        v = vhi_img(y, m).updateMask(crop)
+        img = ee.Image.cat([v, v.mask().gt(0).unmask(0).updateMask(crop).rename('ok'),
+                            v.lt(35).updateMask(v.mask()).rename('asi')])
+        r = img.reduceRegion(ee.Reducer.mean(), REGION['mekong'], crs=proj, scale=1000, maxPixels=1e10, tileScale=16)
+        feats.append(ee.Feature(None, r).set({'y': y, 'm': m}))
+rows = [f['properties'] for f in ee.FeatureCollection(feats).getInfo()['features']]
+for y in VHI_YEARS:
+    ok = [r for r in rows if r['y'] == y and r['ok'] >= 0.3 and r.get('vhi') is not None]
+    detail = ', '.join(f"{r['m']}: {r['vhi']:.0f} ({100 * r['ok']:.0f} % ô / cells)" for r in rows if r['y'] == y)
+    print(f"{y}: VHI tháng 2–4 / Feb–Apr {np.mean([r['vhi'] for r in ok]):.0f}, "
+          f"ASI {100 * np.mean([r['asi'] for r in ok]):.0f} % ô VHI < 35 / of cells  [{detail}]")"""),
+    (MD, """Chương 9: VHI tháng 2–4 trên đất trồng trọt ĐBSCL 2016 51, 2018 70, 2020 44, 2024 55; tỷ lệ ô VHI < 35 là 30 %, 9 %, 41 %, 19 %. Chương tính từng pixel trên lưới 1 km Web Mercator rồi lấy trung bình; ở đây Earth Engine tính trên lưới 1 km của MODIS, nên số có thể lệch khoảng 1 đơn vị.
+
+Lần chạy kiểm tra cho 51, 70, 44, 56 và 30 %, 9 %, 41 %, 19 %. Hãy xem tháng 4: chỉ 14–60 % số ô không bị mây; năm 2018 dưới 30 % nên tháng 4 bị bỏ. Năm 2018 là năm bình thường, VHI cao. Năm 2020 SPI-3 gần 0 mà VHI thấp nhất; năm 2024 mưa ít nhất mà VHI khá tốt. Lúa mùa khô ở ĐBSCL sống nhờ nước sông, nên VHI theo nước tưới và mặn nhiều hơn theo mưa tại chỗ (mục 9.3).
+
+Chapter 9: Feb–Apr VHI on Mekong cropland 2016 51, 2018 70, 2020 44, 2024 55; share of cells with VHI < 35: 30 %, 9 %, 41 %, 19 %. The chapter works pixel by pixel on a 1 km Web Mercator grid, then averages; here Earth Engine works on the MODIS 1 km grid, so the values may differ by about 1 unit.
+
+The test run gave 51, 70, 44, 56 and 30 %, 9 %, 41 %, 19 %. Look at April: only 14–60 % of the cells are cloud-free; in 2018 it is under 30 %, so April is dropped. 2018 is a normal year with high VHI. In 2020 SPI-3 is near 0 yet VHI is the lowest; in 2024 rain was the scarcest yet VHI is fairly good. Dry-season rice in the Mekong Delta lives on river water, so VHI follows irrigation and salinity more than local rain (section 9.3)."""),
+    (MD, """### Bản đồ VHI tháng 3/2020 / VHI map, March 2020
+
+Lưới 0,01° (~1,1 km), mọi loại đất (chỉ tô đậm đất trồng trọt). / 0.01° grid (~1.1 km), every land cover (cropland drawn solid)."""),
+    (PY, """STEP = 0.01
+x0, y0, x1, y1 = BBOX['mekong']
+nx, ny = round((x1 - x0) / STEP), round((y1 - y0) / STEP)
+mp = pixels(ee.Image.cat([vhi_img(2020, 3).clip(REGION['mekong']).unmask(-999),
+                          crop.rename('crop').unmask(0)]), 'EPSG:4326', x0, y1, nx, ny, STEP)
+v = np.where(mp['vhi'] > -998, mp['vhi'], np.nan)
+plt.figure(figsize=(7, 7))
+plt.imshow(np.where(mp['crop'] == 1, v, np.nan), cmap='BrBG', vmin=0, vmax=100, extent=[x0, x1, y0, y1])
+plt.colorbar(label='VHI', shrink=0.7)
+plt.imshow(np.where(mp['crop'] == 1, np.nan, v), cmap='BrBG', vmin=0, vmax=100, alpha=0.35, extent=[x0, x1, y0, y1])
+plt.title('VHI 3/2020: nâu = căng thẳng, xanh = tốt / brown = stressed, green = healthy')
+plt.show()"""),
+    (MD, """## Bài tập / Exercises
+
+1. Ở mục 3, đổi cửa sổ thành tháng 12–2 (`RAIN[k][:, :2]` cộng tháng 12 năm trước). SPI của 2020 thay đổi thế nào? / In section 3, use a Dec–Feb window (`RAIN[k][:, :2]` plus December of the previous year). How does the 2020 SPI change?
+2. Ở mục 4, thêm năm 2023 (chương: VHI 65, ASI 11 %). / In section 4, add 2023 (chapter: VHI 65, ASI 11 %).
+3. Tính VHI cho ĐBSH (`REGION['red']`) năm 2020. Chương 9: 33, với 60 % số ô dưới 35, dù SPI-3 là +1,42. Vì sao vụ Xuân mới cấy và mây làm VHI thấp mà không phải hạn? / Compute VHI for the Red River Delta in 2020. Chapter 9: 33, with 60 % of cells below 35, although SPI-3 is +1.42. Why do freshly transplanted spring rice and cloud make VHI low without any drought?
+
+*CHIRPS v2.0 (Funk et al. 2015), UCSB Climate Hazards Center. MODIS MOD13Q1 / MOD11A2 v061, NASA LP DAAC. ESA WorldCover 10 m 2021 v200, CC BY 4.0. geoBoundaries (Runfola et al. 2020), CC BY 4.0.*"""),
+]
+
+if __name__ == "__main__":
+    main(CELLS, "drought_spi_vhi")

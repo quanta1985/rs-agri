@@ -1,0 +1,224 @@
+"""Generate labs/emissions_fire.ipynb (Colab) for Chapter 13 (emissions).
+
+    cd scripts && python build_lab_emissions.py           # write the notebook
+    cd scripts && python build_lab_emissions.py --run     # also execute the code cells locally (needs EE auth)
+
+The GEE Code Editor version of the same steps is labs/emissions_fire.js (kept by hand).
+"""
+from labkit import MD, PY, main
+
+CELLS = [
+    (MD, """# Lab 13 — Đốt rơm, NO₂ và CH₄ ruộng lúa / Straw burning, NO₂ and rice CH₄
+
+**Viễn thám Nông nghiệp & Môi trường — Chương 13** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-agri/vi/emissions/)
+
+1. Số ngày có điểm cháy MODIS (FIRMS) trên đất trồng trọt ĐBSCL theo tháng, 2003–2025 / MODIS fire-days (FIRMS) on Mekong Delta cropland by month, 2003–2025.
+2. Tổng tháng 2–4 mỗi năm và mưa mùa khô tháng 12–4 (CHIRPS) / Feb–Apr totals per year against Dec–Apr rain (CHIRPS).
+3. Ô cháy nhiều ngày nhất: nguồn cố định? / The cells that burn most often: fixed sources?
+4. NO₂ tầng đối lưu (Sentinel-5P) ĐBSH và ĐBSCL, 2019–2025 / Tropospheric NO₂ (Sentinel-5P), Red River vs Mekong, 2019–2025.
+5. CH₄ ruộng lúa theo IPCC Tier 1 (2019), tính tay bằng Python / Rice CH₄ by IPCC Tier 1 (2019), plain Python.
+
+> Điểm cháy là **số ngày có cháy**, không phải diện tích đốt hay lượng khí thải. Mây che thì vệ tinh không thấy.
+> A fire detection is a **day with fire**, not burnt area or emissions. Under cloud the satellite sees nothing."""),
+    (PY, """import ee
+import numpy as np
+import matplotlib.pyplot as plt
+from concurrent.futures import ThreadPoolExecutor
+
+PROJECT = 'YOUR-CLOUD-PROJECT-ID'  # <-- sửa / edit
+try:
+    ee.Initialize(project=PROJECT)
+except Exception:
+    ee.Authenticate()
+    ee.Initialize(project=PROJECT)
+
+# Ranh tỉnh geoBoundaries v6 (gbOpen ADM1). Trong EE, tên shapeName bị hỏng dấu ('H?u Giang'), nên chọn tỉnh bằng
+# một điểm nằm trong mỗi tỉnh (lon, lat). / In EE the shapeName values have broken diacritics ('H?u Giang'), so each
+# province is picked by a point inside it.
+MEKONG = {'Long An': (106.41, 10.54), 'Tiền Giang': (106.36, 10.36), 'Bến Tre': (106.38, 10.24), 'Trà Vinh': (106.34, 9.93),
+          'Vĩnh Long': (105.97, 10.25), 'Đồng Tháp': (105.63, 10.46), 'An Giang': (105.43, 10.38), 'Kiên Giang': (105.10, 9.85),
+          'Cần Thơ': (105.77, 10.03), 'Hậu Giang': (105.47, 9.78), 'Sóc Trăng': (105.97, 9.60), 'Bạc Liêu': (105.72, 9.29),
+          'Cà Mau': (105.15, 9.18)}
+RED = {'Hà Nội': (105.85, 21.03), 'Vĩnh Phúc': (105.60, 21.31), 'Bắc Ninh': (106.07, 21.18), 'Quảng Ninh': (107.30, 21.10),
+       'Hải Dương': (106.33, 20.94), 'Hải Phòng': (106.63, 20.81), 'Hưng Yên': (106.05, 20.75), 'Thái Bình': (106.34, 20.45),
+       'Hà Nam': (105.92, 20.54), 'Nam Định': (106.17, 20.42), 'Ninh Bình': (105.97, 20.25)}
+GB = ee.FeatureCollection('WM/geoLab/geoBoundaries/600/ADM1').filter(ee.Filter.eq('shapeGroup', 'VNM'))
+
+def provinces(points):
+    \"\"\"Một tỉnh mỗi điểm; dừng nếu điểm rơi vào 0 hoặc 2 tỉnh / one province per point; stop if a point hits 0 or 2.\"\"\"
+    hits = [GB.filterBounds(ee.Geometry.Point(p)) for p in points.values()]
+    ids = ee.List([h.aggregate_array('shapeID') for h in hits]).getInfo()
+    bad = [n for n, i in zip(points, ids) if len(i) != 1]
+    assert not bad and len({i[0] for i in ids}) == len(points), f'kiểm tra điểm / check the points: {bad}'
+    return GB.filter(ee.Filter.inList('shapeID', [i[0] for i in ids]))
+
+mk, rd = provinces(MEKONG), provinces(RED)
+print('số tỉnh / provinces:', mk.size().getInfo(), 'ĐBSCL,', rd.size().getInfo(), 'ĐBSH')
+MK, RD = mk.geometry(), rd.geometry()"""),
+    (MD, """## 1. Lịch đốt theo tháng / The burning calendar
+
+FIRMS là ảnh raster 1 km mỗi ngày, gộp điểm cháy MODIS Terra và Aqua (Aqua từ 7/2002, nên so từ 2003). Một **ngày cháy** = ngày có ít nhất một điểm cháy trong ô. Ô 1 km là **đất trồng trọt** khi ≥ 50 % diện tích là cropland theo WorldCover 2021 (10 m → 100 m → 1 km: đi thẳng 10 m → 1 km thì EE báo "Reprojection output too large").
+
+FIRMS is a daily 1 km raster of MODIS Terra and Aqua fire detections (Aqua from Jul 2002, so compare from 2003). A **fire-day** = a day with at least one detection in the cell. A 1 km cell is **cropland** when ≥ 50 % of it is WorldCover 2021 cropland (10 m → 100 m → 1 km: going straight from 10 m to 1 km fails with "Reprojection output too large")."""),
+    (PY, """FIRMS = ee.ImageCollection('FIRMS').select('T21')
+PROJ = FIRMS.first().projection()                       # MODIS sin, ~1 km
+wc = ee.Image('ESA/WorldCover/v200/2021')
+crop = (wc.eq(40).reproject('EPSG:4326', None, 100).reduceResolution(ee.Reducer.mean(), maxPixels=65535)
+        .reproject(PROJ).gte(0.5))
+
+def fire_days(start, end):
+    return FIRMS.filterDate(start, end).map(lambda i: i.gt(0).selfMask()).count().unmask(0)
+
+def year_months(y):
+    \"\"\"Tổng số ngày cháy trên ô đất trồng trọt, 12 tháng / cropland fire-days summed over cells, 12 months.\"\"\"
+    img = ee.Image.cat([fire_days(f'{y}-{m:02d}-01', ee.Date(f'{y}-{m:02d}-01').advance(1, 'month')).rename(f'm{m:02d}')
+                        for m in range(1, 13)]).updateMask(crop)
+    r = img.reduceRegion(ee.Reducer.sum().unweighted(), MK, crs=PROJ, maxPixels=1e10).getInfo()
+    return [r[f'm{m:02d}'] for m in range(1, 13)]
+
+YEARS = list(range(2003, 2026))
+CELLS = crop.selfMask().reduceRegion(ee.Reducer.count(), MK, crs=PROJ, maxPixels=1e10).values().get(0).getInfo()
+with ThreadPoolExecutor(8) as ex:                       # mỗi năm một yêu cầu, chạy song song / one request per year, in parallel
+    FD = np.array(list(ex.map(year_months, YEARS)))     # (năm / years, 12)
+
+per1000 = FD.mean(0) * 1000 / CELLS
+print(f'ô 1 km đất trồng trọt / cropland 1 km cells: {CELLS}')
+print(f'ngày cháy {YEARS[0]}–{YEARS[-1]} / fire-days: {FD.sum()}, trong tháng 2–4 / in Feb–Apr {100 * FD[:, 1:4].sum() / FD.sum():.0f} %')
+print('mỗi 1 000 ô mỗi tháng / per 1,000 cells per month:', ' '.join(f'{m + 1}:{v:.1f}' for m, v in enumerate(per1000)))
+
+fig, ax = plt.subplots(figsize=(8, 3.5), layout='constrained')
+ax.bar(range(1, 13), per1000, color='#D55E00')
+ax.set_xticks(range(1, 13)); ax.set_xlabel('tháng / month')
+ax.set_ylabel('ngày cháy / 1 000 ô / fire-days per 1,000 cells')
+ax.set_title(f'Đất trồng trọt ĐBSCL, trung bình {YEARS[0]}–{YEARS[-1]} / Mekong cropland, mean')
+plt.show()"""),
+    (MD, """Chương 13: đất trồng trọt chiếm 75 % số ngày cháy ở ĐBSCL, 78 % rơi vào tháng 2–4; tháng 3 có 146 ngày cháy trên 1 000 ô. Đó là lúc gặt lúa Đông Xuân.
+Chương dùng 23 707 ô đất trồng trọt trong ranh vùng của trang (file geoBoundaries gbOpen đã đơn giản hóa); bản đầy đủ của cùng bộ ranh trong EE hơi khác nên số ô và tổng ngày cháy ở đây lệch vài phần trăm.
+
+Chapter 13: cropland holds 75 % of the Mekong fire-days, 78 % of them in Feb–Apr; March has 146 fire-days per 1,000 cells. That is the winter–spring rice harvest.
+The chapter uses 23,707 cropland cells inside the site's region outline (the simplified geoBoundaries gbOpen file); the full-resolution file of the same set in EE differs slightly, so the cell count and fire-day totals here are off by a few percent."""),
+    (MD, """## 2. Năm khô đốt nhiều hơn? / Do dry years burn more?
+
+Tổng ngày cháy tháng 2–4 trên đất trồng trọt mỗi năm, so với tổng mưa CHIRPS tháng 12 năm trước đến tháng 4 (trung bình vùng, ô ~5,5 km).
+
+Feb–Apr cropland fire-days of each year against CHIRPS rain from the previous December to April (region mean, ~5.5 km cells)."""),
+    (PY, """chirps = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+rain_img = ee.Image.cat([chirps.filterDate(f'{y - 1}-12-01', f'{y}-05-01').sum().rename(f'y{y}') for y in YEARS])
+r = rain_img.reduceRegion(ee.Reducer.mean(), MK, 5566, maxPixels=1e10).getInfo()
+rain = np.array([r[f'y{y}'] for y in YEARS])
+feb_apr = FD[:, 1:4].sum(1)
+rr = np.corrcoef(rain, feb_apr)[0, 1]
+lo, hi = int(np.argmin(feb_apr)), int(np.argmax(feb_apr))
+print(f'tháng 2–4 thấp nhất / lowest {YEARS[lo]}: {feb_apr[lo]}, cao nhất / highest {YEARS[hi]}: {feb_apr[hi]}')
+print(f'r(mưa 12–4 / Dec–Apr rain, ngày cháy 2–4 / Feb–Apr fire-days) = {rr:.2f} (n = {len(YEARS)})')
+
+fig, ax = plt.subplots(figsize=(6.5, 5), layout='constrained')
+ax.scatter(rain, feb_apr, color='#D55E00')
+for y, x, v in zip(YEARS, rain, feb_apr):
+    ax.annotate(str(y), (x, v), fontsize=7, xytext=(3, 3), textcoords='offset points')
+ax.set_xlabel('mưa tháng 12–4 / Dec–Apr rain (mm, CHIRPS)'); ax.set_ylabel('ngày cháy tháng 2–4 / Feb–Apr fire-days')
+ax.set_title(f'ĐBSCL, đất trồng trọt / Mekong cropland: r = {rr:.2f}')
+plt.show()"""),
+    (MD, """Chương 13: thấp nhất 2006 với 1 902 ngày cháy, cao nhất 2020 với 11 003 (ở đây thấp hơn khoảng 0,5 %, xem mục 1); r = −0,68 qua 23 năm. Rơm khô thì dễ đốt; trời quang thì vệ tinh cũng dễ thấy lửa hơn. Hai tác động này cộng vào nhau, và số liệu ở đây không tách được chúng.
+
+Chapter 13: lowest 2006 with 1,902 fire-days, highest 2020 with 11,003 (about 0.5 % lower here, see section 1); r = −0.68 over 23 years. Dry straw burns easily; clear skies also let the satellite see more fires. The two effects add up, and these data cannot separate them."""),
+    (MD, """## 3. Ô cháy nhiều ngày nhất / The most frequently burning cells
+
+Số ngày cháy mỗi năm, trung bình 2021–2025, lấy mẫu gần nhất lên lưới 0,01° (~1,1 km). Đốt rơm chỉ vài ngày một năm; một ô cháy hơn 10 ngày mỗi năm nhiều khả năng là nguồn cố định (nhà máy, lò gạch), không phải ruộng.
+
+Fire-days per year, mean of 2021–2025, sampled (nearest) on a 0.01° grid (~1.1 km). Straw burning lasts a few days a year; a cell burning more than 10 days a year is most likely a fixed source (factory, brick kiln), not a field."""),
+    (PY, """X0, Y1, STEP, NX, NY = 104.4, 11.05, 0.01, 245, 255     # khung ĐBSCL / Mekong frame 104.4–106.85 E, 8.5–11.05 N
+fd5 = fire_days('2021-01-01', '2026-01-01').divide(5).rename('fd').clipToCollection(mk).unmask(-1)
+arr = ee.data.computePixels({'expression': fd5, 'fileFormat': 'NUMPY_NDARRAY',
+    'grid': {'dimensions': {'width': NX, 'height': NY}, 'crsCode': 'EPSG:4326',
+             'affineTransform': {'scaleX': STEP, 'shearX': 0, 'translateX': X0, 'shearY': 0, 'scaleY': -STEP, 'translateY': Y1}}})
+fmap = np.where(arr['fd'] < 0, np.nan, arr['fd'])
+order = np.argsort(np.nan_to_num(fmap, nan=-1).ravel())[::-1]
+seen = []
+for i in order:
+    r_, c_ = divmod(int(i), NX)
+    lon, lat = X0 + (c_ + 0.5) * STEP, Y1 - (r_ + 0.5) * STEP
+    if all(abs(lon - a) > 0.03 or abs(lat - b) > 0.03 for a, b, _ in seen):   # bỏ ô kề nhau / skip neighbours
+        seen.append((lon, lat, fmap[r_, c_]))
+    if len(seen) == 3:
+        break
+for lon, lat, v in seen:
+    print(f'{lon:.2f} E {lat:.2f} N: {v:.1f} ngày/năm / days per year')
+print(f'ô > 10 ngày/năm / cells > 10 days per year: {(fmap > 10).sum()}')
+
+plt.figure(figsize=(7, 7))
+plt.imshow(fmap, cmap='YlOrRd', vmin=0, vmax=4, extent=[X0, X0 + NX * STEP, Y1 - NY * STEP, Y1], interpolation='nearest')
+plt.colorbar(label='ngày cháy/năm / fire-days per year (2021–2025)', shrink=0.7)
+plt.title('FIRMS, ĐBSCL / Mekong Delta')
+plt.show()"""),
+    (MD, """Chương 13 (lưới Mercator 1 km): ô nóng nhất của ĐBSCL trong 2021–2025 ở khoảng 106,32° E, 10,47° N với 14,2 ngày cháy mỗi năm. Lưới ở đây khác nên tọa độ và giá trị có thể lệch một ô. Mở tọa độ đó trên ảnh vệ tinh để xem có phải khu công nghiệp không: dữ liệu FIRMS dạng raster không có cờ "nguồn cố định" (chỉ bản MCD14ML dạng điểm mới có).
+
+Chapter 13 (1 km Mercator grid): the hottest Mekong cell in 2021–2025 is near 106.32° E, 10.47° N with 14.2 fire-days per year. The grid here differs, so the coordinates and value may shift by one cell. Look that place up on satellite imagery: is it an industrial site? The FIRMS raster has no "static source" flag (only the MCD14ML point product has one)."""),
+    (MD, """## 4. NO₂ tầng đối lưu / Tropospheric NO₂
+
+Sentinel-5P TROPOMI OFFL L3 (lưới ~1,1 km, vết đo gốc 5,5 × 3,5 km). Lấy trung bình từng năm 2019–2025 trên mỗi vùng (mẫu 7 km, gần vết đo), rồi trung bình bảy năm. Mỗi năm một yêu cầu chạy song song; gộp cả bảy năm trong một yêu cầu thì chậm hơn nhiều.
+
+Sentinel-5P TROPOMI OFFL L3 (~1.1 km grid, native footprint 5.5 × 3.5 km). Mean of each year 2019–2025 over each region (sampled at 7 km, close to the footprint), then the mean of the seven years. One request per year, in parallel; all seven years in one request is much slower."""),
+    (PY, """NO2 = ee.ImageCollection('COPERNICUS/S5P/OFFL/L3_NO2').select('tropospheric_NO2_column_number_density')
+
+def no2_year(job):
+    geom, y = job
+    img = NO2.filterDate(f'{y}-01-01', f'{y + 1}-01-01').mean().multiply(1e6)      # mol/m² -> µmol/m²
+    return img.reduceRegion(ee.Reducer.mean(), geom, 7000, maxPixels=1e10).values().get(0).getInfo()
+
+S_YEARS = list(range(2019, 2026))
+with ThreadPoolExecutor(14) as ex:
+    v = np.array(list(ex.map(no2_year, [(g, y) for g in (RD, MK) for y in S_YEARS]))).reshape(2, -1)
+for name, row in zip(('ĐBSH / Red River', 'ĐBSCL / Mekong'), v):
+    print(f'{name:18s} ' + ' '.join(f'{y}:{x:.1f}' for y, x in zip(S_YEARS, row)) + f'  -> trung bình / mean {row.mean():.1f} µmol/m²')
+print(f'tỉ số / ratio Red / Mekong = {v[0].mean() / v[1].mean():.1f}')"""),
+    (MD, """Chương 13: trung bình 2019–2025 ĐBSH 64,8 và ĐBSCL 20,2 µmol/m² (trung bình các tháng của chuỗi tháng, ranh vùng của trang). Ở đây là trung bình các năm và bản ranh đầy đủ trong EE, nên lệch vài phần mười. NO₂ sinh ra chủ yếu khi đốt nhiên liệu (xe cộ, nhà máy điện, công nghiệp): ĐBSH cao hơn ba lần ĐBSCL, ô cao nhất (185 µmol/m²) ở phía bắc nội thành Hải Phòng, không phải trên đồng lúa.
+
+Chapter 13: 2019–2025 mean 64.8 (Red River) and 20.2 µmol/m² (Mekong), as the mean of the monthly series on the site's region outlines. Here it is the mean of yearly means on the full-resolution outlines in EE, so the values differ by a few tenths. NO₂ comes mostly from burning fuel (traffic, power plants, industry): the Red River Delta has more than three times the Mekong value, with its highest cell (185 µmol/m²) north of central Hai Phong, not over rice land."""),
+    (MD, """## 5. CH₄ ruộng lúa theo IPCC Tier 1 / Rice CH₄ by IPCC Tier 1
+
+Hướng dẫn IPCC 2019 (Refinement, Tập 4, Chương 5.5): $EF_i = EF_c \\times SF_w \\times SF_p \\times SF_o$, $SF_o = (1 + \\sum ROA_i \\times CFOA_i)^{0,59}$, $CH_4 = EF_i \\times t \\times A$. Giá trị mặc định cho Đông Nam Á: $EF_c$ = 1,22 kg CH₄/ha/ngày, mùa vụ 102 ngày (Bảng 5.11, 5.11A); ngập liên tục $SF_w$ = 1, tưới ướt khô xen kẽ (AWD, nhiều lần rút nước) 0,55 (Bảng 5.12); trước vụ khô < 180 ngày $SF_p$ = 1, ngập > 30 ngày 2,41 (Bảng 5.13); rơm vùi < 30 ngày trước cấy CFOA = 1, > 30 ngày 0,19 (Bảng 5.14). GWP-100 của CH₄ không hóa thạch = 27 (IPCC AR6).
+
+IPCC 2019 Refinement, Vol. 4, Ch. 5.5 defaults for South-East Asia, as above (Tables 5.11–5.14); GWP-100 of non-fossil CH₄ = 27 (AR6). Same values as the calculator in Chapter 13 (`src/lib/methane.ts`)."""),
+    (PY, """EFC, DAYS = 1.22, 102                       # kg CH4/ha/ngày, ngày / kg CH4/ha/day, days (Đông Nam Á / SE Asia)
+SFW = {'liên tục / continuous': 1.0, 'rút 1 lần / single drainage': 0.71, 'AWD (nhiều lần / multiple)': 0.55}
+SFP = {'khô < 180 ngày / dry < 180 d': 1.0, 'khô > 180 ngày / dry > 180 d': 0.89, 'ngập > 30 ngày / flooded > 30 d': 2.41}
+CFOA_SHORT, CFOA_LONG = 1.0, 0.19              # rơm vùi < 30 / > 30 ngày trước cấy / straw incorporated < 30 / > 30 d before
+GWP = 27.0
+
+def season_ch4(sfw=1.0, sfp=1.0, straw_t=0.0, cfoa=CFOA_SHORT):
+    \"\"\"kg CH4/ha/vụ / per ha per season.\"\"\"
+    sfo = (1 + straw_t * cfoa) ** 0.59
+    return EFC * sfw * sfp * sfo * DAYS
+
+base = season_ch4()
+awd = season_ch4(sfw=SFW['AWD (nhiều lần / multiple)'])
+print(f'ngập liên tục / continuous: {base:.1f} kg CH4/ha/vụ = {base * GWP / 1000:.2f} t CO2e/ha')
+print(f'AWD: {awd:.1f} kg ({100 * (awd / base - 1):.0f} %)')
+for t in (3, 5):
+    print(f'rơm {t} t/ha vùi < 30 ngày / straw {t} t/ha < 30 d: x{season_ch4(straw_t=t) / base:.2f};  > 30 ngày / d: x{season_ch4(straw_t=t, cfoa=CFOA_LONG) / base:.2f}')
+print(f'1 triệu ha, một vụ / 1 Mha, one season: {base * 1e6 / 1e6:.0f} kt CH4 = {base * 1e6 * GWP / 1e9:.2f} Mt CO2e; '
+      f'AWD tiết kiệm / saves {(base - awd) * 1e6 * GWP / 1e9:.2f} Mt CO2e')
+
+labels = list(SFW)
+vals = [season_ch4(sfw=SFW[k]) for k in labels]
+plt.figure(figsize=(7, 3), layout='constrained')
+plt.barh(labels, vals, color=['#D55E00', '#E69F00', '#009E73'])
+plt.xlabel('kg CH4/ha/vụ / per season (IPCC Tier 1, Đông Nam Á / SE Asia)')
+plt.gca().invert_yaxis()
+plt.show()"""),
+    (MD, """Chương 13: 124,4 kg CH₄/ha/vụ khi ngập liên tục, tức 3,36 t CO₂e; AWD giảm 45 %; 1 triệu ha AWD trong một vụ bớt 1,51 Mt CO₂e. Đây là **hệ số mặc định**, không phải số đo ở ĐBSCL: Vo và cs. (2020) tổng hợp các phép đo buồng kín ở Việt Nam và có hệ số nền 1,72–3,89 kg CH₄/ha/ngày, đều cao hơn 1,22 (Chương 13.5). Vệ tinh (Sentinel-5P XCH₄) chỉ thấy cột khí tổng, có ít lần đo ở ĐBSCL mùa mưa, nên chưa thay được cách tính từ dưới lên này.
+
+Chapter 13: 124.4 kg CH₄/ha/season under continuous flooding, i.e. 3.36 t CO₂e; AWD −45 %; 1 Mha under AWD for one season saves 1.51 Mt CO₂e. These are **default factors**, not measurements in the Mekong Delta: Vo et al. (2020) pooled closed-chamber measurements in Viet Nam and found baseline factors of 1.72–3.89 kg CH₄/ha/day, all above 1.22 (Chapter 13.5). The satellite (Sentinel-5P XCH₄) sees only the total column and has few looks over the Mekong in the rainy season, so it cannot yet replace this bottom-up calculation.
+
+## Bài tập / Exercises
+
+1. Đổi `MK` thành `RD` ở mục 1. Lịch đốt ĐBSH khác gì (chương: chỉ 11 % ngày cháy đất trồng trọt rơi vào tháng 2–4, 81 % vào tháng 5–9)? Vì sao tháng 1–3 gần như không có điểm cháy (gợi ý: mây)? / Replace `MK` with `RD` in section 1. How does the Red River calendar differ (chapter: only 11 % of cropland fire-days in Feb–Apr, 81 % in May–Sep)? Why are there almost no detections in Jan–Mar (hint: cloud)?
+2. Tính tương quan riêng cho giai đoạn 2003–2013 và 2014–2025. r có ổn định không? / Compute r for 2003–2013 and 2014–2025 separately. Is it stable?
+3. Diện tích lúa Đông Xuân 2024 ĐBSCL là 1 487,7 nghìn ha (NSO). Tính CH₄ Tier 1 của vụ đó khi ngập liên tục và khi 30 % diện tích áp dụng AWD. / The 2024 winter–spring rice area of the Mekong Delta was 1,487.7 thousand ha (NSO). Compute Tier 1 CH₄ for that season under continuous flooding and with 30 % of the area under AWD.
+
+*NASA FIRMS, MODIS Collection 6.1 active fire (Giglio et al. 2016). ESA WorldCover 10 m 2021 v200, CC BY 4.0. CHIRPS (Funk et al. 2015, UCSB CHC). Contains modified Copernicus Sentinel data (Sentinel-5P TROPOMI). IPCC (2019) Refinement, Vol. 4 Ch. 5; IPCC AR6 WG1 Table 7.15. Ranh tỉnh / province boundaries: geoBoundaries v6 (gbOpen ADM1).*"""),
+]
+
+if __name__ == "__main__":
+    main(CELLS, "emissions_fire")
